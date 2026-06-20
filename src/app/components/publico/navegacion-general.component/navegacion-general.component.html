@@ -1,0 +1,48 @@
+<nav class="glass-navbar">
+
+    <a routerLink="/">
+        <div class="nav-logo">
+            <img src="/logo.png" alt="Logo Nova Salud">
+            <span class="logo-texto">Nova Salud</span>
+        </div>
+    </a>
+
+    <div class="nav-right">
+        <ul class="nav-list">
+            
+            <li class="nav-item">
+                <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+                    <i class="pi pi-home"></i>
+                    <span>Inicio</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a routerLink="/personal-medico" routerLinkActive="active" class="nav-link">
+                    <i class="pi pi-users"></i>
+                    <span>Médicos</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a routerLink="/conocenos" routerLinkActive="active" class="nav-link">
+                    <i class="pi pi-building"></i>
+                    <span>Conócenos</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a routerLink="/contacto" routerLinkActive="active" class="nav-link">
+                    <i class="pi pi-phone"></i>
+                    <span>Contacto</span>
+                </a>
+            </li>
+
+        </ul>
+
+        <div class="nav-actions">
+            <app-btn-loguin></app-btn-loguin>
+        </div>
+    </div>
+
+</nav>

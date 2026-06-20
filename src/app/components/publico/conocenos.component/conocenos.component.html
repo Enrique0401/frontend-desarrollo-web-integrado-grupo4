@@ -1,0 +1,69 @@
+<div class="conocenos-layout">
+    <app-navegacion-general></app-navegacion-general>
+
+    <main class="contenido-principal">
+        
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1>Conoce <span>Nova Salud</span></h1>
+                <p>Comprometidos con tu bienestar desde el primer día. Descubre quiénes somos y por qué somos tu mejor opción en salud.</p>
+            </div>
+        </section>
+
+        <section class="historia-section container">
+            <div class="texto-historia">
+                <h2>Nuestra Historia</h2>
+                <p>Nova Salud nació con un propósito claro: transformar la atención médica acercando la tecnología de vanguardia a un trato cálido y humano. Desde nuestra fundación, hemos crecido de ser una pequeña clínica de especialidades a un centro médico integral de referencia, atendiendo a miles de familias con la dedicación que merecen y siempre buscando la innovación para la preservación de la vida.</p>
+            </div>
+            <div class="img-historia">
+                <img src="https://img.freepik.com/foto-gratis/equipo-medicos-hospital_1303-22839.jpg" alt="Historia Nova Salud">
+            </div>
+        </section>
+
+        <section class="mision-vision-section bg-light">
+            <div class="container grid-2">
+                <div class="mv-card">
+                    <i class="pi pi-flag"></i>
+                    <h3>Nuestra Misión</h3>
+                    <p>Brindar servicios de salud integrales y de alta calidad, enfocados en la prevención, diagnóstico y tratamiento, priorizando siempre la seguridad, el bienestar y la dignidad de cada uno de nuestros pacientes para mejorar su calidad de vida.</p>
+                </div>
+                <div class="mv-card">
+                    <i class="pi pi-eye"></i>
+                    <h3>Nuestra Visión</h3>
+                    <p>Ser reconocidos como la red de salud líder a nivel nacional, destacando por nuestra innovación médica constante, la excelencia de nuestros profesionales y nuestro compromiso inquebrantable con el cuidado de la vida humana.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="valores-section container">
+            <h2 class="text-center">Nuestros Valores</h2>
+            <div class="valores-grid">
+                @for (valor of valores; track valor.titulo) {
+                    <div class="valor-card">
+                        <i [class]="valor.icono"></i>
+                        <h4>{{ valor.titulo }}</h4>
+                        <p>{{ valor.descripcion }}</p>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="infraestructura-section bg-light">
+            <div class="container">
+                <h2 class="text-center">Nuestra Infraestructura</h2>
+                <p class="text-center subtitle">Instalaciones modernas, equipadas y seguras, diseñadas para tu comodidad y recuperación.</p>
+                
+                <div class="galeria-grid">
+                    @for (img of infraestructura; track $index) {
+                        <div class="galeria-item">
+                            <img [src]="img" alt="Infraestructura Nova Salud">
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+        
+    </main>
+
+    <app-flecha></app-flecha>
+</div>

@@ -1,0 +1,84 @@
+.medicos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(260px, 300px));
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem 3rem 1.5rem; 
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+@media (max-width: 992px) {
+  .medicos-grid {
+    grid-template-columns: repeat(2, minmax(260px, 300px));
+  }
+}
+
+@media (max-width: 650px) {
+  .medicos-grid {
+    grid-template-columns: minmax(260px, 1fr);
+  }
+}
+
+.custom-card {
+  width: 100%;
+  overflow: hidden;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  font-family: 'Montserrat', sans-serif;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+}
+
+.card-header {
+  width: 100%;
+  height: 250px;
+  display: block;
+
+  img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center top;
+  }
+}
+
+.card-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 0.25rem;
+}
+
+.card-subtitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #718096;
+  margin-top: 0.75rem;
+}
+
+.card-content {
+  font-size: 1rem;
+  color: #26B8B5;
+  font-weight: 600;
+  line-height: 1.5;
+
+  p {
+    margin: 0;
+  }
+}

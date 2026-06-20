@@ -1,0 +1,215 @@
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.contacto-layout {
+    min-height: 100vh;
+    background-color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Montserrat', sans-serif;
+    color: #334155;
+}
+
+.contenido-principal {
+    flex: 1;
+    padding-bottom: 4rem;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+}
+
+.hero-section {
+    background: linear-gradient(rgba(30, 41, 59, 0.8), rgba(38, 184, 181, 0.8)),
+        url('https://img.freepik.com/foto-gratis/recepcion-hospital-moderno_1048-5815.jpg') center/cover no-repeat;
+    padding: 7rem 2rem;
+    text-align: center;
+    color: white;
+
+    .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+        animation: fadeInUp 1s ease-out both;
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+
+            span {
+                color: #a5f3fc;
+            }
+        }
+
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+    }
+}
+
+.contacto-section {
+    .contacto-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: stretch;
+    }
+}
+
+.contacto-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: fadeInLeft 1s ease-out 0.3s both;
+
+    .info-card {
+        background: #ffffff;
+        padding: 2rem;
+        border-radius: 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+        &:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(38, 184, 181, 0.15);
+        }
+
+        .icon-wrapper {
+            background: rgba(38, 184, 181, 0.1);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+
+            i {
+                font-size: 1.8rem;
+                color: #26B8B5;
+            }
+
+            &.wpp-icon {
+                background: rgba(37, 211, 102, 0.1);
+                i {
+                    color: #25D366;
+                }
+            }
+        }
+
+        .info-content {
+            h3 {
+                font-size: 1.3rem;
+                color: #1a202c;
+                margin-bottom: 0.8rem;
+                font-weight: 700;
+            }
+
+            p {
+                font-size: 1rem;
+                color: #475569;
+                line-height: 1.6;
+                margin-bottom: 0.3rem;
+
+                &.highlight {
+                    color: #e11d48;
+                }
+            }
+        }
+    }
+
+    .whatsapp-card {
+        border-left: 4px solid #25D366;
+    }
+}
+
+.btn-whatsapp {
+    display: inline-block;
+    margin-top: 1rem;
+    background-color: #25D366;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+        background-color: #1ea952;
+    }
+}
+
+.contacto-mapa {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    animation: fadeInRight 1s ease-out 0.5s both;
+    min-height: 400px;
+}
+
+@media (max-width: 992px) {
+    .contacto-section .contacto-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .contacto-mapa {
+        min-height: 500px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section .hero-content h1 {
+        font-size: 2.2rem;
+    }
+
+    .contacto-info .info-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .contacto-mapa {
+        min-height: 350px;
+    }
+
+    .container {
+        padding: 3rem 1.5rem;
+    }
+}

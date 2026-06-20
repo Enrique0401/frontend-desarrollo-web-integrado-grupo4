@@ -1,0 +1,9 @@
+export type Rol = 'SUPER_ADMIN' | 'ADMIN_CLINICA' | 'RECEPCIONISTA' | 'MEDICO' | 'ENFERMERA' | 'PACIENTE';
+export type TipoDocumento = 'DNI' | 'PASAPORTE' | 'CARNET_EXTRANJERIA' | 'OTRO';
+export type Genero = 'MASCULINO' | 'FEMENINO' | 'OTRO';
+export type GrupoSanguineo = 'A_POSITIVO' | 'A_NEGATIVO' | 'B_POSITIVO' | 'B_NEGATIVO' | 'AB_POSITIVO' | 'AB_NEGATIVO' | 'O_POSITIVO' | 'O_NEGATIVO';
+export type SeguroMedico = 'ESSALUD' | 'SIS' | 'EPS' | 'PRIVADO' | 'NINGUNO';
+export type ClinicaEstado = 'ACTIVA' | 'INACTIVA' | 'SUSPENDIDA';
+export type CitaEstado = 'PROGRAMADA' | 'CONFIRMADA' | 'COMPLETADA' | 'CANCELADA' | 'NO_ASISTIO';
+export type FacturaEstado = 'PENDIENTE' | 'PAGADA' | 'ANULADA';
+export type MetodoPago = 'EFECTIVO' | 'TARJETA_CREDITO' | 'TARJETA_DEBITO' | 'TRANSFERENCIA' | 'YAPE' | 'PLIN';

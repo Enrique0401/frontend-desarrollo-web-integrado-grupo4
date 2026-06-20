@@ -1,0 +1,17 @@
+<div class="medicos-grid">
+  @for (medico of medicos; track medico.id) {
+    <div class="custom-card">
+      <div class="card-header">
+        <img [src]="medico.imagen" [alt]="'Foto de Dr. ' + medico.nombre">
+      </div>
+
+      <div class="card-body">
+        <div class="card-title">Dr. {{ medico.nombre }} {{ medico.apellido }}</div>
+        <div class="card-content">
+          <p>{{ medico.especialidad }}</p>
+        </div>
+        <div class="card-subtitle">Colegiatura: {{ medico.numeroColegiatura }}</div>
+      </div>
+    </div>
+  }
+</div>
