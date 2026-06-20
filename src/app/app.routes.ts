@@ -36,7 +36,7 @@ export const routes: Routes = [
     path: 'panel',
     canActivate: [authGuard],
     children: [
-      
+
       // --- ZONA: SUPER_ADMIN ---
       {
         path: 'super-admin',

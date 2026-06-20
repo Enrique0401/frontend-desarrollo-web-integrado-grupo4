@@ -25,7 +25,7 @@ export class IniciarSesionComponent {
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   togglePassword(): void {
     this.mostrarPassword.update((v) => !v);
@@ -48,39 +48,39 @@ export class IniciarSesionComponent {
     this.authService.login(credenciales).subscribe({
       next: (respuesta: any) => {
         this.cargando.set(false);
-        
+
         const token = respuesta.token;
-        localStorage.setItem('token', token); 
+        localStorage.setItem('token', token);
         console.log('¡Conexión exitosa a la BD! Token:', token);
 
         // Extraemos los datos ocultos dentro del Token JWT
         const payloadDecodificado = JSON.parse(atob(token.split('.')[1]));
         const rolUsuario = payloadDecodificado.rol;
-        
+
         console.log('El rol detectado es:', rolUsuario);
 
-        // Redirigimos a la pantalla correspondiente según el rol
+        // Redirigimos a la pantalla correspondiente (AHORA SÍ INCLUYEN /panel)
         switch (rolUsuario) {
           case 'SUPER_ADMIN':
-            this.router.navigate(['/super-admin']);
+            this.router.navigate(['/panel/super-admin']);
             break;
           case 'ADMIN_CLINICA':
-            this.router.navigate(['/admin-clinica']);
+            this.router.navigate(['/panel/admin-clinica']);
             break;
           case 'RECEPCIONISTA':
-            this.router.navigate(['/recepcion']);
+            this.router.navigate(['/panel/recepcion']);
             break;
           case 'MEDICO':
-            this.router.navigate(['/medico']);
+            this.router.navigate(['/panel/medico']);
             break;
           case 'ENFERMERA':
-            this.router.navigate(['/enfermeria']);
+            this.router.navigate(['/panel/enfermeria']);
             break;
           case 'PACIENTE':
-            this.router.navigate(['/paciente']);
+            this.router.navigate(['/panel/paciente']);
             break;
           default:
-            this.router.navigate(['/']); // Ruta de seguridad por si hay algún error
+            this.router.navigate(['/']);
         }
       },
       error: (err: any) => {
