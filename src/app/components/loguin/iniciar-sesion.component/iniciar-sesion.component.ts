@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { UsuarioService } from '../../../services/usuario/usuario';
+import { AuthService } from '../../../services/auth';
 
 @Component({
   selector: 'app-iniciar-sesion',
@@ -23,7 +23,7 @@ export class IniciarSesionComponent {
   });
 
   constructor(
-    private usuarioService: UsuarioService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
@@ -40,27 +40,35 @@ export class IniciarSesionComponent {
     this.errorMensaje.set(null);
     this.cargando.set(true);
 
-    const { username, password } = this.form.value;
+    const credenciales = {
+      username: this.form.value.username,
+      password: this.form.value.password
+    };
 
-    this.usuarioService.login(username!, password!).subscribe({
-      next: () => {
+    this.authService.login(credenciales).subscribe({
+      next: (respuesta: any) => {
         this.cargando.set(false);
+        
+        localStorage.setItem('token', respuesta.token); 
+        console.log('¡Conexión exitosa a la BD! Token:', respuesta.token);
+
         this.router.navigate(['/']);
       },
-      error: (err: Error) => {
+      error: (err: any) => {
         this.cargando.set(false);
-        this.errorMensaje.set(err.message);
+        this.errorMensaje.set('Credenciales incorrectas o el usuario no existe.');
+        console.error('Error del backend:', err);
       },
     });
   }
 
   get usernameInvalido(): boolean {
     const c = this.form.controls.username;
-    return c.invalid && c.touched;
+    return c!.invalid && c!.touched;
   }
 
   get passwordInvalido(): boolean {
     const c = this.form.controls.password;
-    return c.invalid && c.touched;
+    return c!.invalid && c!.touched;
   }
 }
