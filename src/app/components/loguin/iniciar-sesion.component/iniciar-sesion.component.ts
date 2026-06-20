@@ -49,10 +49,39 @@ export class IniciarSesionComponent {
       next: (respuesta: any) => {
         this.cargando.set(false);
         
-        localStorage.setItem('token', respuesta.token); 
-        console.log('¡Conexión exitosa a la BD! Token:', respuesta.token);
+        const token = respuesta.token;
+        localStorage.setItem('token', token); 
+        console.log('¡Conexión exitosa a la BD! Token:', token);
 
-        this.router.navigate(['/']);
+        // Extraemos los datos ocultos dentro del Token JWT
+        const payloadDecodificado = JSON.parse(atob(token.split('.')[1]));
+        const rolUsuario = payloadDecodificado.rol;
+        
+        console.log('El rol detectado es:', rolUsuario);
+
+        // Redirigimos a la pantalla correspondiente según el rol
+        switch (rolUsuario) {
+          case 'SUPER_ADMIN':
+            this.router.navigate(['/super-admin']);
+            break;
+          case 'ADMIN_CLINICA':
+            this.router.navigate(['/admin-clinica']);
+            break;
+          case 'RECEPCIONISTA':
+            this.router.navigate(['/recepcion']);
+            break;
+          case 'MEDICO':
+            this.router.navigate(['/medico']);
+            break;
+          case 'ENFERMERA':
+            this.router.navigate(['/enfermeria']);
+            break;
+          case 'PACIENTE':
+            this.router.navigate(['/paciente']);
+            break;
+          default:
+            this.router.navigate(['/']); // Ruta de seguridad por si hay algún error
+        }
       },
       error: (err: any) => {
         this.cargando.set(false);
