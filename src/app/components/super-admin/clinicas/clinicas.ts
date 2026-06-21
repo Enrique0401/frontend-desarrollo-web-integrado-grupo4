@@ -1,25 +1,26 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { ClinicaService } from '../../../services/clinica/clinica'; // Ajusta la ruta si es necesario
+import { Router, RouterLink } from '@angular/router';
+import { ClinicaService } from '../../../services/clinica/clinica';
 
 @Component({
   selector: 'app-clinicas',
   standalone: true,
-  imports: [RouterLink], // Importamos RouterLink para el botón de "Nueva Sede"
+  imports: [RouterLink],
   templateUrl: './clinicas.html',
   styleUrl: './clinicas.scss'
 })
 export class Clinicas implements OnInit {
-  // Solo necesitamos la variable para guardar los datos
   clinicas = signal<any[]>([]);
 
-  constructor(private clinicaService: ClinicaService) {}
+  constructor(
+    private clinicaService: ClinicaService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.cargarSedes();
   }
 
-  // GET: Llama al servicio y llena la tabla
   cargarSedes(): void {
     this.clinicaService.obtenerClinicas().subscribe({
       next: (datosBD) => {
@@ -31,6 +32,30 @@ export class Clinicas implements OnInit {
       },
       error: (err) => {
         console.error('Error al traer clínicas del backend:', err);
+      }
+    });
+  }
+
+  // Función para ir a la pantalla de edición
+  editarClinica(clinica: any): void {
+    this.router.navigate(['../editar-clinica', clinica.id]);
+  }
+
+  // Función para cambiar el estado entre ACTIVA e INACTIVA
+  toggleEstado(clinica: any): void {
+    const nuevoEstado = clinica.estado === 'ACTIVA' ? 'INACTIVA' : 'ACTIVA';
+    
+    // Armamos el objeto con el estado invertido
+    const clinicaActualizada = { ...clinica, estado: nuevoEstado };
+
+    // Enviamos el PUT al backend
+    this.clinicaService.actualizar(clinica.id, clinicaActualizada).subscribe({
+      next: () => {
+        // Refrescamos la tabla para ver los cambios impactados
+        this.cargarSedes();
+      },
+      error: (err) => {
+        console.error('Error al cambiar el estado de la clínica:', err);
       }
     });
   }

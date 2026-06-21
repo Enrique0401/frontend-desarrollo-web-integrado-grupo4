@@ -1,1 +1,85 @@
-<p>administradores works!</p>
+<div class="dashboard-header">
+    <h2>Prueba de Seguridad: Datos de la BD</h2>
+    <p>Verificando el volcado de datos con token JWT.</p>
+  </div>
+  
+  <div class="status-panel" 
+       [class.success]="estado() === 'exito'" 
+       [class.error]="estado() === 'error'"
+       [class.loading]="estado() === 'cargando'">
+    
+    <span class="pi" 
+          [class.pi-spin]="estado() === 'cargando'"
+          [class.pi-spinner]="estado() === 'cargando'"
+          [class.pi-check-circle]="estado() === 'exito'"
+          [class.pi-times-circle]="estado() === 'error'">
+    </span>
+    <strong>{{ mensaje() }}</strong>
+  </div>
+  
+  @if (estado() === 'exito') {
+    <div class="card table-card">
+      <div class="table-header">
+        <h3 class="card-title mb-0">Registros Obtenidos</h3>
+      </div>
+  
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Usuario / Credencial</th>
+              <th>Contacto</th>
+              <th>Rol / Sede</th>
+              <th>Estado</th>
+              <th>Fecha Creación</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (usr of usuarios(); track usr.id_usuario) {
+              <tr>
+                <td><strong>#{{ usr.id_usuario }}</strong></td>
+                
+                <td>
+                  <div class="info-cell">
+                    <strong>{{ usr.nombre }} {{ usr.apellido }}</strong>
+                    <span><i class="pi pi-user me-1"></i> @{{ usr.username }}</span>
+                  </div>
+                </td>
+                
+                <td>
+                  <div class="info-cell">
+                    <span><i class="pi pi-envelope me-1"></i> {{ usr.correo }}</span>
+                    <span><i class="pi pi-phone me-1"></i> {{ usr.telefono }}</span>
+                  </div>
+                </td>
+                
+                <td>
+                  <div class="info-cell">
+                    <span class="badge-rol">{{ usr.rol }}</span>
+                    <span class="text-muted mt-1"><i class="pi pi-building me-1"></i> Sede {{ usr.clinica_id }}</span>
+                  </div>
+                </td>
+                
+                <td>
+                  <span class="badge-status" 
+                        [class.active]="usr.activo === 1 || usr.activo === true" 
+                        [class.inactive]="usr.activo === 0 || usr.activo === false">
+                    {{ (usr.activo === 1 || usr.activo === true) ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                
+                <td>
+                  <span class="date-cell"><i class="pi pi-calendar me-1"></i> {{ usr.fecha_creacion | date:'dd/MM/yyyy' }}</span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted">La conexión fue exitosa, pero no hay registros para mostrar.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
