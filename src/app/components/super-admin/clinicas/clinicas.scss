@@ -174,15 +174,24 @@ $success-text: #166534;
   border: 1px solid rgba(3, 105, 161, 0.1);
 }
 
-.badge-status.active {
+.badge-status {
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.5px;
-  background: $success-bg;
-  color: $success-text;
-  border: 1px solid rgba(22, 101, 52, 0.1);
+
+  &.active {
+    background: $success-bg;
+    color: $success-text;
+    border: 1px solid rgba(22, 101, 52, 0.1);
+  }
+
+  &.inactive {
+    background: #fee2e2;
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.1);
+  }
 }
 
 .actions-cell {
@@ -202,6 +211,7 @@ $success-text: #166534;
   &:hover { background: #e2e8f0; }
   &.text-primary { color: $primary; }
   &.text-danger { color: #ef4444; }
+  &.text-success { color: #10b981; }
 }
 
 .text-center { text-align: center; }

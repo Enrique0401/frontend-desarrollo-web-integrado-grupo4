@@ -45,11 +45,28 @@
                         </div>
                     </td>
                     <td><span class="badge-plan">{{ clinica.planSuscripcion }}</span></td>
-                    <td><span class="badge-status active">{{ clinica.estado }}</span></td>
+
+                    <td>
+                        <span class="badge-status" [class.active]="clinica.estado === 'ACTIVA'"
+                            [class.inactive]="clinica.estado !== 'ACTIVA'">
+                            {{ clinica.estado }}
+                        </span>
+                    </td>
+
                     <td class="text-center actions-cell">
-                        <button class="btn-icon text-primary" title="Editar"><span class="pi pi-pencil"></span></button>
-                        <button class="btn-icon text-danger" title="Desactivar"><span
-                                class="pi pi-power-off"></span></button>
+                        <button class="btn-icon text-primary" title="Editar" (click)="editarClinica(clinica)">
+                            <span class="pi pi-pencil"></span>
+                        </button>
+
+                        @if (clinica.estado === 'ACTIVA') {
+                        <button class="btn-icon text-danger" title="Desactivar clínica" (click)="toggleEstado(clinica)">
+                            <span class="pi pi-power-off"></span>
+                        </button>
+                        } @else {
+                        <button class="btn-icon text-success" title="Activar clínica" (click)="toggleEstado(clinica)">
+                            <span class="pi pi-check-circle"></span>
+                        </button>
+                        }
                     </td>
                 </tr>
                 } @empty {

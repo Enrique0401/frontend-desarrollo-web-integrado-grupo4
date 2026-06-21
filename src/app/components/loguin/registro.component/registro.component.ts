@@ -46,13 +46,18 @@ export class RegistroComponent {
   }
 
   onSubmit(): void {
+    // 🛡️ BLOQUEO DE DOBLE CLIC: Si ya está cargando, aborta la segunda petición al instante
+    if (this.cargando()) {
+      return; 
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
     this.errorMensaje.set(null);
-    this.cargando.set(true);
+    this.cargando.set(true); // Ponemos el candado para futuras peticiones
 
     const { nombre, apellido, correo, telefono, username, password } = this.form.value;
 
@@ -73,7 +78,7 @@ export class RegistroComponent {
         setTimeout(() => this.router.navigate(['/iniciar-sesion']), 1500);
       },
       error: (err: any) => {
-        this.cargando.set(false);
+        this.cargando.set(false); // Quitamos el candado si falla
         
         const mensajeError = err.error?.message || err.error?.mensaje || '';
         const errorString = JSON.stringify(err).toLowerCase();
@@ -84,16 +89,13 @@ export class RegistroComponent {
           this.form.controls.username.setErrors({ ocupado: true });
 
           // --- LÓGICA DE SUGERENCIAS DE USUARIO ---
-          // Limpiamos los espacios y los pasamos a minúsculas
           const nom = nombre?.toLowerCase().replace(/\s+/g, '') || 'usuario';
           const ape = apellido?.toLowerCase().replace(/\s+/g, '') || 'nuevo';
           
-          // Generamos números aleatorios para darle variedad
           const rnd1 = Math.floor(Math.random() * 100);
           const rnd2 = Math.floor(Math.random() * 1000);
           const rnd3 = Math.floor(Math.random() * 99) + 10;
 
-          // Creamos el array con 5 opciones creativas
           const sugerencias = [
             `${nom}${ape}${rnd1}`,
             `${nom}.${ape}`,
@@ -102,7 +104,6 @@ export class RegistroComponent {
             `${nom}${rnd3}`
           ];
 
-          // Unimos el array en un string separado por comas
           this.errorMensaje.set(`Prueba con estos nombres: ${sugerencias.join(', ')}`);
           
         } else {
