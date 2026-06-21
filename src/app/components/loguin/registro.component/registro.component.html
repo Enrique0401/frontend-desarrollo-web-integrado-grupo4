@@ -54,13 +54,27 @@
           </div>
 
           <div class="mb-3">
+            <label class="form-label">Teléfono</label>
+            <div class="input-icon-group" [class.is-invalid]="campoInvalido('telefono')">
+              <span class="pi pi-phone"></span>
+              <input type="tel" class="form-control" formControlName="telefono" placeholder="Ej: 987654321" />
+            </div>
+            @if (campoInvalido('telefono')) {
+              <div class="error-text">El número debe tener 9 dígitos y empezar por 9.</div>
+            }
+          </div>
+
+          <div class="mb-3">
             <label class="form-label">Usuario</label>
-            <div class="input-icon-group" [class.is-invalid]="campoInvalido('username')">
+            <div class="input-icon-group" [class.is-invalid]="campoInvalido('username') || form.controls.username.hasError('ocupado')">
               <span class="pi pi-user"></span>
               <input type="text" class="form-control" formControlName="username" placeholder="Elige un nombre de usuario" autocomplete="username" />
             </div>
-            @if (campoInvalido('username')) {
+            @if (form.controls.username.hasError('required') && form.controls.username.touched) {
               <div class="error-text">Obligatorio (mín. 3 caracteres)</div>
+            }
+            @if (form.controls.username.hasError('ocupado')) {
+              <div class="error-text">¡Hey, ese usuario ya tiene dueño! Intenta con otro nombre de ususario</div>
             }
           </div>
 

@@ -81,8 +81,8 @@ $dark: #1a202c;
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 
-  .pi-user,
-  .pi-lock {
+  // Selecciona automáticamente todos los íconos PrimeNG del formulario y les da estilo
+  span[class^="pi pi-"] {
     color: $teal;
     margin-right: 0.6rem;
   }
@@ -102,6 +102,7 @@ $dark: #1a202c;
     color: #9ca3af;
     cursor: pointer;
     padding-left: 0.5rem;
+    margin-right: 0; // Remueve el margen derecho heredado para el ojo del password
 
     &:hover {
       color: $teal;
