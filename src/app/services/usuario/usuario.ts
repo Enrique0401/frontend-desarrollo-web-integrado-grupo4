@@ -12,6 +12,7 @@ interface DatosRegistro {
   correo: string;
   username: string;
   password: string;
+  rol?: string;
 }
 
 const STORAGE_KEY = 'nova_salud_usuarios';
