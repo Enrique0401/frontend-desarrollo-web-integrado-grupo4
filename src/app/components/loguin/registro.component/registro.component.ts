@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../services/auth'; // Asegúrate de que esta ruta apunte a tu AuthService real
+import { AuthService } from '../../../services/auth';
 
 function passwordsIgualesValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -28,7 +28,7 @@ export class RegistroComponent {
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       apellido: ['', [Validators.required, Validators.minLength(2)]],
       correo: ['', [Validators.required, Validators.email]],
-      telefono: ['', [Validators.required, Validators.minLength(7), Validators.pattern('^[0-9]+$')]],
+      telefono: ['', [Validators.required, Validators.pattern('^9[0-9]{8}$')]],
       username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(4)]],
       confirmarPassword: ['', [Validators.required]],
@@ -74,7 +74,41 @@ export class RegistroComponent {
       },
       error: (err: any) => {
         this.cargando.set(false);
-        this.errorMensaje.set(err.error?.message || err.error?.mensaje || 'Error al registrar en la base de datos.');
+        
+        const mensajeError = err.error?.message || err.error?.mensaje || '';
+        const errorString = JSON.stringify(err).toLowerCase();
+
+        // 🛡️ DETECTOR DE ERROR FATAL: Usuario duplicado
+        if (errorString.includes('duplicate') || errorString.includes('unique') || errorString.includes('usuario') || err.status === 500) {
+          
+          this.form.controls.username.setErrors({ ocupado: true });
+
+          // --- LÓGICA DE SUGERENCIAS DE USUARIO ---
+          // Limpiamos los espacios y los pasamos a minúsculas
+          const nom = nombre?.toLowerCase().replace(/\s+/g, '') || 'usuario';
+          const ape = apellido?.toLowerCase().replace(/\s+/g, '') || 'nuevo';
+          
+          // Generamos números aleatorios para darle variedad
+          const rnd1 = Math.floor(Math.random() * 100);
+          const rnd2 = Math.floor(Math.random() * 1000);
+          const rnd3 = Math.floor(Math.random() * 99) + 10;
+
+          // Creamos el array con 5 opciones creativas
+          const sugerencias = [
+            `${nom}${ape}${rnd1}`,
+            `${nom}.${ape}`,
+            `${ape}${nom}${rnd2}`,
+            `${nom}_${ape}`,
+            `${nom}${rnd3}`
+          ];
+
+          // Unimos el array en un string separado por comas
+          this.errorMensaje.set(`Prueba con estos nombres: ${sugerencias.join(', ')}`);
+          
+        } else {
+          this.errorMensaje.set(mensajeError || 'Error al registrar en la base de datos.');
+        }
+        
         console.error('Error del backend:', err);
       },
     });
