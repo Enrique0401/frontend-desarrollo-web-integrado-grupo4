@@ -54,6 +54,17 @@
           </div>
 
           <div class="mb-3">
+            <label class="form-label">Teléfono</label>
+            <div class="input-icon-group" [class.is-invalid]="campoInvalido('telefono')">
+              <span class="pi pi-phone"></span>
+              <input type="tel" class="form-control" formControlName="telefono" placeholder="Ej: 999111222" />
+            </div>
+            @if (campoInvalido('telefono')) {
+              <div class="error-text">Obligatorio (mínimo 7 dígitos numéricos)</div>
+            }
+          </div>
+
+          <div class="mb-3">
             <label class="form-label">Usuario</label>
             <div class="input-icon-group" [class.is-invalid]="campoInvalido('username')">
               <span class="pi pi-user"></span>
