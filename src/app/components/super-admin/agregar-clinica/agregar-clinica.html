@@ -1,0 +1,102 @@
+<div class="dashboard-header d-flex justify-content-between align-items-center">
+    <div>
+      <h2>Registrar Sede</h2>
+      <p>Completa los datos para dar de alta una nueva clínica en el sistema.</p>
+    </div>
+  
+    <button class="btn-outline" routerLink="../clinicas">
+      <span class="pi pi-arrow-left"></span> Volver a la lista
+    </button>
+  </div>
+  
+  <div class="form-container">
+    <div class="card form-card">
+      <h3 class="card-title">Datos de la Nueva Clínica</h3>
+      
+      @if (exito()) {
+        <div class="alert alert-success">
+          <span class="pi pi-check-circle"></span> ¡Clínica registrada correctamente! Redirigiendo a la tabla...
+        </div>
+      }
+  
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <div class="form-group">
+          <label>Nombre de la Clínica</label>
+          <div class="input-icon-group" [class.is-invalid]="campoInvalido('nombre')">
+            <span class="pi pi-building"></span>
+            <input type="text" class="form-control" formControlName="nombre" placeholder="Ej: Sede Principal">
+          </div>
+          @if (campoInvalido('nombre')) {
+            <div class="error-text">El nombre es obligatorio (mínimo 3 letras).</div>
+          }
+        </div>
+  
+        <div class="row">
+          <div class="col-6 form-group">
+            <label>RUC</label>
+            <div class="input-icon-group" [class.is-invalid]="campoInvalido('ruc')">
+              <span class="pi pi-id-card"></span>
+              <input type="text" class="form-control" formControlName="ruc" placeholder="11 dígitos obligatorios" maxlength="11">
+            </div>
+            @if (campoInvalido('ruc')) {
+              <div class="error-text">Debe contener exactamente 11 dígitos numéricos.</div>
+            }
+          </div>
+  
+          <div class="col-6 form-group">
+            <label>Teléfono</label>
+            <div class="input-icon-group" [class.is-invalid]="campoInvalido('telefono')">
+              <span class="pi pi-phone"></span>
+              <input type="tel" class="form-control" formControlName="telefono" placeholder="Ej: 987654321" maxlength="9">
+            </div>
+            @if (campoInvalido('telefono')) {
+              <div class="error-text">Debe empezar con 9 y tener 9 dígitos en total.</div>
+            }
+          </div>
+        </div>
+  
+        <div class="row">
+          <div class="col-6 form-group">
+            <label>Correo de la Sede</label>
+            <div class="input-icon-group" [class.is-invalid]="campoInvalido('correo')">
+              <span class="pi pi-envelope"></span>
+              <input type="email" class="form-control" formControlName="correo" placeholder="contacto@clinica.com">
+            </div>
+            @if (campoInvalido('correo')) {
+              <div class="error-text">Ingrese un correo válido.</div>
+            }
+          </div>
+  
+          <div class="col-6 form-group">
+            <label>Plan de Suscripción</label>
+            <select class="form-control custom-select" formControlName="planSuscripcion">
+              <option value="BASICO">Básico</option>
+              <option value="ESTANDAR">Estándar</option>
+              <option value="PREMIUM">Premium</option>
+            </select>
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label>Dirección Completa</label>
+          <div class="input-icon-group" [class.is-invalid]="campoInvalido('direccion')">
+            <span class="pi pi-map-marker"></span>
+            <input type="text" class="form-control" formControlName="direccion" placeholder="Ej: Av. América Sur 456">
+          </div>
+          @if (campoInvalido('direccion')) {
+            <div class="error-text">La dirección es obligatoria.</div>
+          }
+        </div>
+  
+        <div class="form-actions mt-4">
+          <button type="submit" class="btn-primary" [disabled]="cargando() || exito()">
+            @if (cargando()) {
+              <span class="pi pi-spin pi-spinner"></span> Guardando en Base de Datos...
+            } @else {
+              <span class="pi pi-save"></span> Registrar Clínica
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>

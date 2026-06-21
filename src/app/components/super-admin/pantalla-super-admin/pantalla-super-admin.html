@@ -1,1 +1,50 @@
-<p>pantalla-super-admin works!</p>
+<div class="admin-layout">
+  
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <img src="/logo.png" alt="Nova Salud" class="sidebar__logo" />
+        <h2 class="sidebar__title">Nova Salud</h2>
+        <span class="badge-role">Super Admin</span>
+      </div>
+  
+      <nav class="sidebar__nav">
+        <ul>
+          <li>
+            <a routerLink="./dashboard" routerLinkActive="active-link">
+              <span class="pi pi-chart-bar"></span> Dashboard
+            </a>
+          </li>
+          <li>
+            <a routerLink="./clinicas" routerLinkActive="active-link">
+              <span class="pi pi-building"></span> Gestión de Clínicas
+            </a>
+          </li>
+          <li>
+            <a routerLink="./administradores" routerLinkActive="active-link">
+              <span class="pi pi-users"></span> Administradores
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+  
+    <div class="main-wrapper">
+      
+      <header class="topbar">
+        <div class="topbar__greeting">
+          <h3>Panel de Control Principal</h3>
+        </div>
+        
+        <div class="topbar__actions">
+          <button class="btn-logout" (click)="cerrarSesion()">
+            <span class="pi pi-sign-out"></span> Salir
+          </button>
+        </div>
+      </header>
+  
+      <main class="content-area">
+        <router-outlet></router-outlet> 
+      </main>
+  
+    </div>
+  </div>

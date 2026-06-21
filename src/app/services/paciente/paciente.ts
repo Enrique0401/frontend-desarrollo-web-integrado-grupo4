@@ -1,24 +1,40 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { Observable, of, delay, tap } from 'rxjs';
-import { Paciente } from '../../models/paciente.model';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class PacienteService {
-  private _pacientes = signal<Paciente[]>([]);
-  public pacientes = computed(() => this._pacientes());
+  private apiUrl = 'https://backend-desarrollo-web-integrado-grupo4.onrender.com/api/pacientes';
 
-  constructor() {
-    this._pacientes.set([{ idPaciente: 1, nombre: 'Juan', apellido: 'Pérez', tipoDocumento: 'DNI', numeroDocumento: '12345678', correo: 'juan@email.com', telefono: '987654321', fechaNacimiento: '1990-05-15', genero: 'MASCULINO', clinicaId: 1 }]);
+  constructor(private http: HttpClient) {}
+
+  // Función privada para armar la cabecera con el Token
+  private obtenerCabeceras(): HttpHeaders {
+    // Sacamos el token que guardaste cuando hiciste Login
+    const token = localStorage.getItem('token'); 
+    
+    // Si hay token, lo mandamos en el formato "Bearer [token]"
+    if (token) {
+      return new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+      });
+    }
+    
+    // Si por alguna razón no hay token, mandamos cabeceras vacías
+    return new HttpHeaders();
   }
 
-  obtenerPacientes(): Observable<Paciente[]> {
-    return of(this._pacientes()).pipe(delay(600));
+  // GET: Traer pacientes (¡Ahora con seguridad!)
+  obtenerPacientes(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl, { 
+      headers: this.obtenerCabeceras() // <--- ¡Aquí enviamos el fotocheck al backend!
+    });
   }
 
-  guardarPaciente(paciente: Paciente): Observable<Paciente> {
-    return of(paciente).pipe(
-      delay(600),
-      tap(nuevo => this._pacientes.update(actuales => [...actuales, { ...nuevo, idPaciente: Math.random() }]))
-    );
+  // POST: Crear paciente (También requiere seguridad)
+  registrarPaciente(paciente: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, paciente, { 
+      headers: this.obtenerCabeceras() 
+    });
   }
 }
