@@ -68,6 +68,14 @@ export const routes: Routes = [
         loadComponent: () => import('./components/medico/pantalla-medico/pantalla-medico').then(m => m.PantallaMedico)
       },
 
+      // --- ZONA: ENFERMERA---
+      {
+        path: 'enfermeria',
+        canActivate: [roleGuard],
+        data: { roles: ['ENFERMERA'] as Rol[] },
+        loadComponent: () => import('./components/enfermera/pantalla-enfermera/pantalla-enfermera').then(m => m.PantallaEnfermera)
+      },
+
       // --- ZONA: PACIENTE ---
       {
         path: 'paciente',

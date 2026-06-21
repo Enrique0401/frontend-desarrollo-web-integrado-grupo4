@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { UsuarioService } from '../../../services/usuario/usuario';
+import { AuthService } from '../../../services/auth'; // <--- Cambiado al servicio real
 
 function passwordsIgualesValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -36,7 +36,7 @@ export class RegistroComponent {
   );
 
   constructor(
-    private usuarioService: UsuarioService,
+    private authService: AuthService, // <--- Inyectamos el servicio real
     private router: Router
   ) {}
 
@@ -55,19 +55,30 @@ export class RegistroComponent {
 
     const { nombre, apellido, correo, username, password } = this.form.value;
 
-    this.usuarioService
-      .registrar({ nombre: nombre!, apellido: apellido!, correo: correo!, username: username!, password: password! })
-      .subscribe({
-        next: () => {
-          this.cargando.set(false);
-          this.exito.set(true);
-          setTimeout(() => this.router.navigate(['/iniciar-sesion']), 1500);
-        },
-        error: (err: Error) => {
-          this.cargando.set(false);
-          this.errorMensaje.set(err.message);
-        },
-      });
+    const nuevoPaciente = {
+      nombre: nombre!,
+      apellido: apellido!,
+      correo: correo!,
+      username: username!,
+      password: password!,
+      rol: 'PACIENTE'
+    };
+
+    // Viaje directo al backend en Render -> Base de datos en Aiven
+    this.authService.registrar(nuevoPaciente).subscribe({
+      next: (respuesta: any) => {
+        this.cargando.set(false);
+        this.exito.set(true);
+        // Redirige al login tras un breve delay para que vea el mensaje de éxito
+        setTimeout(() => this.router.navigate(['/iniciar-sesion']), 1500);
+      },
+      error: (err: any) => {
+        this.cargando.set(false);
+        // Si el usuario o correo ya existen, Spring Boot devolverá el mensaje de error aquí
+        this.errorMensaje.set(err.error?.mensaje || err.message || 'Error al registrar en la base de datos.');
+        console.error('Error de registro en el backend:', err);
+      },
+    });
   }
 
   campoInvalido(campo: string): boolean {
