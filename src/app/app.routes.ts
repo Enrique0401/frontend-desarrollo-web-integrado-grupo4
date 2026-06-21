@@ -1,10 +1,13 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
+
 export type Rol = 'SUPER_ADMIN' | 'ADMIN_CLINICA' | 'RECEPCIONISTA' | 'MEDICO' | 'ENFERMERA' | 'PACIENTE';
 
 export const routes: Routes = [
+  // ==========================================
   // RUTAS PÚBLICAS 
+  // ==========================================
   {
     path: '',
     // Esta es la Landing Page libre que verá cualquier persona (con mapas, sedes, etc.)
@@ -34,16 +37,45 @@ export const routes: Routes = [
   // RUTAS PRIVADAS (requieren autenticación)
   {
     path: 'panel',
-    canActivate: [authGuard],
+    canActivate: [authGuard], // Guardián general de sesión
     children: [
 
       // --- ZONA: SUPER_ADMIN ---
       {
         path: 'super-admin',
         canActivate: [roleGuard],
-        data: { roles: ['SUPER_ADMIN'] as Rol[] }, // ¡Ahora TypeScript ya sabe qué es Rol!
-        loadComponent: () => import('./components/super-admin/pantalla-super-admin/pantalla-super-admin').then(m => m.PantallaSuperAdmin)
+        data: { roles: ['SUPER_ADMIN'] as Rol[] },
+        // Contenedor principal del Super Admin (Layout con Sidebar y Navbar)
+        loadComponent: () => import('./components/super-admin/pantalla-super-admin/pantalla-super-admin').then(m => m.PantallaSuperAdmin),
+        children: [
+          { 
+            path: '', 
+            redirectTo: 'dashboard', 
+            pathMatch: 'full' 
+          },
+          { 
+            path: 'dashboard', 
+            loadComponent: () => import('./components/super-admin/pantalla-super-admin/pantalla-super-admin').then(m => m.PantallaSuperAdmin) 
+          },
+          { 
+            path: 'clinicas', 
+            loadComponent: () => import('./components/super-admin/clinicas/clinicas').then(m => m.Clinicas) 
+          },
+          { 
+            path: 'administradores', 
+            loadComponent: () => import('./components/super-admin/administradores/administradores').then(m => m.Administradores) 
+          },
+          { 
+            path: 'navbar', 
+            loadComponent: () => import('./components/super-admin/nav-super-admin/nav-super-admin').then(m => m.NavSuperAdmin) 
+          },
+          { 
+            path: 'agregar-clinica', 
+            loadComponent: () => import('./components/super-admin/agregar-clinica/agregar-clinica').then(m => m.AgregarClinica) 
+          }
+        ]
       },
+
       // --- ZONA: ADMIN_CLINICA ---
       {
         path: 'admin-clinica',
@@ -68,7 +100,7 @@ export const routes: Routes = [
         loadComponent: () => import('./components/medico/pantalla-medico/pantalla-medico').then(m => m.PantallaMedico)
       },
 
-      // --- ZONA: ENFERMERA---
+      // --- ZONA: ENFERMERA ---
       {
         path: 'enfermeria',
         canActivate: [roleGuard],
@@ -86,15 +118,7 @@ export const routes: Routes = [
 
     ]
   },
+  
+  // Ruta comodín para capturar cualquier error de URL y enviarlo al inicio
   { path: '**', redirectTo: '' }
 ];
-
-
-
-
-// --- DASHBOARD GENÉRICO ---
-// Pantalla comodín (por si un usuario no tiene un flujo asignado o para redirección por defecto)
-/* {
-  path: 'dashboard',
-  loadComponent: () => import('./components/privado/dashboard-generico/dashboard-generico.component').then(m => m.DashboardGenericoComponent)
-}, */
