@@ -1,22 +1,32 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { UsuarioService } from '../services/usuario/usuario';
-import { Rol } from '../models/enums.model';
 
 export const roleGuard: CanActivateFn = (route, state) => {
-  const usuarioService = inject(UsuarioService);
   const router = inject(Router);
-  const usuario = usuarioService.usuarioActual();
+  const token = localStorage.getItem('token');
 
-  // Obtenemos los roles permitidos desde la configuración de la ruta
-  const rolesPermitidos = route.data['roles'] as Array<Rol>;
-
-  if (usuario && rolesPermitidos.includes(usuario.rol)) {
-    return true;
+  if (!token) {
+    router.navigate(['/iniciar-sesion']);
+    return false;
   }
 
-  // Si no tiene el rol, lo mandamos a un dashboard genérico o de error
-  console.warn('Acceso denegado: No tienes el rol necesario para esta vista.');
-  router.navigate(['/app/dashboard']);
-  return false;
+  try {
+    const payloadDecodificado = JSON.parse(atob(token.split('.')[1]));
+    const rolDelUsuario = payloadDecodificado.rol;
+
+    const rolesPermitidos = route.data['roles'] as Array<string>;
+
+    if (rolDelUsuario && rolesPermitidos.includes(rolDelUsuario)) {
+      return true;
+    }
+
+    console.warn(`Acceso denegado: Tu rol es ${rolDelUsuario} y necesitas ${rolesPermitidos}`);
+    router.navigate(['/']); 
+    return false;
+
+  } catch (error) {
+    console.error('Error al leer el token de seguridad', error);
+    router.navigate(['/iniciar-sesion']);
+    return false;
+  }
 };
