@@ -16,7 +16,6 @@ export const routes: Routes = [
   // ==========================================
   {
     path: '',
-    // Esta es la Landing Page libre que verá cualquier persona (con mapas, sedes, etc.)
     loadComponent: () =>
       import('./components/publico/panel-general.component/panel-general.component').then(
         (m) => m.PanelGeneralComponent,
@@ -58,21 +57,28 @@ export const routes: Routes = [
       ),
   },
 
-  // RUTAS PRIVADAS (requieren autenticación)
+  // ==========================================
+  // RUTAS PRIVADAS
+  // ==========================================
   {
     path: 'panel',
-    canActivate: [authGuard], // Guardián general de sesión
+    canActivate: [authGuard],
     children: [
-      // --- ZONA: SUPER_ADMIN ---
+      // ======================================
+      // ZONA: SUPER_ADMIN
+      // ======================================
       {
         path: 'super-admin',
         canActivate: [roleGuard],
         data: { roles: ['SUPER_ADMIN'] as Rol[] },
-        // Contenedor principal del Super Admin (Layout con Sidebar y Navbar)
+
+        // Layout principal del Super Admin
+        // Aquí se carga el nav/sidebar/header una sola vez
         loadComponent: () =>
-          import('./components/super-admin/pantalla-super-admin/pantalla-super-admin').then(
-            (m) => m.PantallaSuperAdmin,
+          import('./components/super-admin/nav-super-admin/nav-super-admin').then(
+            (m) => m.NavSuperAdmin,
           ),
+
         children: [
           {
             path: '',
@@ -89,20 +95,15 @@ export const routes: Routes = [
           {
             path: 'clinicas',
             loadComponent: () =>
-              import('./components/super-admin/clinicas/clinicas').then((m) => m.Clinicas),
+              import('./components/super-admin/clinicas/clinicas').then(
+                (m) => m.Clinicas,
+              ),
           },
           {
             path: 'administradores',
             loadComponent: () =>
               import('./components/super-admin/administradores/administradores').then(
                 (m) => m.Administradores,
-              ),
-          },
-          {
-            path: 'navbar',
-            loadComponent: () =>
-              import('./components/super-admin/nav-super-admin/nav-super-admin').then(
-                (m) => m.NavSuperAdmin,
               ),
           },
           {
@@ -122,7 +123,9 @@ export const routes: Routes = [
         ],
       },
 
-      // --- ZONA: ADMIN_CLINICA ---
+      // ======================================
+      // ZONA: ADMIN_CLINICA
+      // ======================================
       {
         path: 'admin-clinica',
         canActivate: [roleGuard],
@@ -133,7 +136,9 @@ export const routes: Routes = [
           ),
       },
 
-      // --- ZONA: RECEPCIONISTA ---
+      // ======================================
+      // ZONA: RECEPCIONISTA
+      // ======================================
       {
         path: 'recepcion',
         canActivate: [roleGuard],
@@ -144,7 +149,9 @@ export const routes: Routes = [
           ),
       },
 
-      // --- ZONA: MÉDICO Y ENFERMERA (Pueden compartir ciertas pantallas) ---
+      // ======================================
+      // ZONA: MÉDICO / ENFERMERA
+      // ======================================
       {
         path: 'medico',
         canActivate: [roleGuard],
@@ -155,7 +162,9 @@ export const routes: Routes = [
           ),
       },
 
-      // --- ZONA: ENFERMERA ---
+      // ======================================
+      // ZONA: ENFERMERA
+      // ======================================
       {
         path: 'enfermeria',
         canActivate: [roleGuard],
@@ -166,7 +175,9 @@ export const routes: Routes = [
           ),
       },
 
-      // --- ZONA: PACIENTE ---
+      // ======================================
+      // ZONA: PACIENTE
+      // ======================================
       {
         path: 'paciente',
         canActivate: [roleGuard],
@@ -179,6 +190,5 @@ export const routes: Routes = [
     ],
   },
 
-  // Ruta comodín para capturar cualquier error de URL y enviarlo al inicio
   { path: '**', redirectTo: '' },
 ];

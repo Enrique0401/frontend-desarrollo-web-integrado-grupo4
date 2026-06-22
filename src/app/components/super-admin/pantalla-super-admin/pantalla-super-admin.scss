@@ -1,158 +1,199 @@
-$teal: #26b8b5;
-$dark: #1a202c;
-$bg-light: #f3f4f6;
-$sidebar-width: 260px;
+$primary: #26b8b5;
+$primary-hover: #1f9d9a;
+$secondary: #1a202c;
+$surface: #ffffff;
+$text-muted: #64748b;
+$border: #e2e8f0;
 
-.admin-layout {
-  display: flex;
-  height: 100vh;
-  width: 100%;
-  overflow: hidden;
-  background-color: $bg-light;
-}
+.dashboard-header {
+  margin-bottom: 2rem;
 
-// --- SIDEBAR LATERAL ---
-.sidebar {
-  width: $sidebar-width;
-  background-color: $dark;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-
-  &__brand {
-    padding: 2rem 1.5rem;
-    text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-
-    .sidebar__logo {
-      width: 60px;
-      margin-bottom: 0.5rem;
-    }
-
-    .sidebar__title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin: 0 0 0.5rem 0;
-      letter-spacing: 0.5px;
-    }
-
-    .badge-role {
-      background-color: rgba(38, 184, 181, 0.2);
-      color: $teal;
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      border: 1px solid rgba(38, 184, 181, 0.3);
-    }
+  h2 {
+    color: $secondary;
+    font-size: 1.85rem;
+    font-weight: 800;
+    margin-bottom: 0.4rem;
   }
 
-  &__nav {
-    flex: 1;
-    padding: 1.5rem 0;
-    overflow-y: auto;
-
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-
-      li {
-        margin-bottom: 0.25rem;
-
-        a {
-          display: flex;
-          align-items: center;
-          padding: 0.85rem 1.5rem;
-          color: #9ca3af;
-          text-decoration: none;
-          font-weight: 500;
-          transition: all 0.2s ease;
-          border-left: 3px solid transparent;
-
-          span[class^="pi pi-"] {
-            margin-right: 0.75rem;
-            font-size: 1.1rem;
-          }
-
-          &:hover {
-            color: #fff;
-            background-color: rgba(255, 255, 255, 0.05);
-          }
-
-          // Clase que Angular agrega automáticamente a la ruta activa
-          &.active-link {
-            color: #fff;
-            background-color: rgba(38, 184, 181, 0.15);
-            border-left-color: $teal;
-
-            span {
-              color: $teal;
-            }
-          }
-        }
-      }
-    }
+  p {
+    color: $text-muted;
+    margin: 0;
   }
 }
 
-// --- CONTENEDOR DERECHO ---
-.main-wrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
-// --- BARRA SUPERIOR ---
-.topbar {
-  height: 70px;
-  background-color: #fff;
+.metric-card {
+  background: $surface;
+  border: 1px solid rgba($border, 0.7);
+  border-radius: 18px;
+  padding: 1.5rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  z-index: 5;
+  gap: 1rem;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.035);
 
-  &__greeting {
-    h3 {
-      margin: 0;
-      font-size: 1.1rem;
-      color: $dark;
-      font-weight: 600;
-    }
+  .metric-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba($primary, 0.12);
+    color: $primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
   }
 
-  &__actions {
-    .btn-logout {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: none;
-      border: 1px solid #dc3545;
-      color: #dc3545;
-      padding: 0.4rem 1rem;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
+  p {
+    margin: 0;
+    color: $text-muted;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
 
-      &:hover {
-        background: #dc3545;
-        color: #fff;
-      }
+  h3 {
+    margin: 0.25rem 0 0;
+    color: $secondary;
+    font-size: 2rem;
+    font-weight: 800;
+  }
+
+  &.success .metric-icon {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  &.warning .metric-icon {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  &.danger .metric-icon {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+}
+
+.dashboard-content {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 1.25rem;
+}
+
+.card {
+  background: $surface;
+  border-radius: 18px;
+  padding: 1.5rem;
+  border: 1px solid rgba($border, 0.7);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.035);
+
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: $secondary;
+    margin-bottom: 1.25rem;
+  }
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  color: $secondary;
+  font-weight: 700;
+  margin-bottom: 0.45rem;
+}
+
+.progress {
+  width: 100%;
+  height: 9px;
+  background: #f1f5f9;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 1.2rem;
+
+  .bar {
+    height: 100%;
+    border-radius: 20px;
+
+    &.active {
+      background: #22c55e;
+    }
+
+    &.warning {
+      background: #f59e0b;
+    }
+
+    &.danger {
+      background: #ef4444;
     }
   }
 }
 
-// --- ÁREA DINÁMICA (Donde van los componentes) ---
-.content-area {
-  flex: 1;
-  padding: 2rem;
-  overflow-y: auto;
+.clinic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.clinic-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid $border;
+  border-radius: 14px;
+  background: #f8fafc;
+
+  strong {
+    display: block;
+    color: $secondary;
+    font-size: 0.95rem;
+  }
+
+  span {
+    color: $text-muted;
+    font-size: 0.82rem;
+  }
+}
+
+.badge-status {
+  padding: 0.4rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+
+  &.active {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  &.inactive {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  &.cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+}
+
+.empty-text {
+  color: $text-muted;
+}
+
+@media (max-width: 992px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-content {
+    grid-template-columns: 1fr;
+  }
 }

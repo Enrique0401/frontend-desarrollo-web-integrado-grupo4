@@ -1,1 +1,50 @@
-<p>nav-super-admin works!</p>
+<div class="super-admin-layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo-box">
+        <span class="pi pi-star-of-life"></span>
+      </div>
+
+      <h2>Nova Salud</h2>
+      <span>SUPER ADMIN</span>
+    </div>
+
+    <nav class="menu">
+      <a
+        routerLink="/panel/super-admin/dashboard"
+        routerLinkActive="active">
+        <span class="pi pi-chart-bar"></span>
+        Dashboard
+      </a>
+
+      <a
+        routerLink="/panel/super-admin/clinicas"
+        routerLinkActive="active">
+        <span class="pi pi-building"></span>
+        Gestión de Clínicas
+      </a>
+
+      <a
+        routerLink="/panel/super-admin/administradores"
+        routerLinkActive="active">
+        <span class="pi pi-users"></span>
+        Administradores
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <h1>Panel de Control Principal</h1>
+
+      <button class="btn-logout" (click)="salir()">
+        <span class="pi pi-sign-out"></span>
+        Salir
+      </button>
+    </header>
+
+    <section class="page-content">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>
