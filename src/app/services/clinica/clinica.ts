@@ -16,13 +16,16 @@ export class ClinicaService {
     return this.http.get<Clinica[]>(this.apiUrl);
   }
 
-  registrarClinica(clinica: Partial<Clinica>): Observable<Clinica> {
+  obtenerPorId(id: number): Observable<Clinica> {
+    return this.http.get<Clinica>(`${this.apiUrl}/${id}`);
+  }
+
+  registrarClinica(clinica: any): Observable<Clinica> {
     return this.http.post<Clinica>(this.apiUrl, clinica);
   }
 
-  // NUEVO: Método para actualizar la clínica (Editar o cambiar estado)
-  actualizar(id: number, clinica: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, clinica);
+  actualizar(id: number, clinica: any): Observable<Clinica> {
+    return this.http.put<Clinica>(`${this.apiUrl}/${id}`, clinica);
   }
 
   actualizarSignal(datosBD: Clinica[]): void {

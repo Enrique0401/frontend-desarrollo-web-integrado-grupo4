@@ -1,82 +1,148 @@
 <div class="dashboard-header d-flex justify-content-between align-items-center">
-    <div>
-        <h2>Gestión de Clínicas</h2>
-        <p>Administra las sedes de Nova Salud a nivel nacional.</p>
-    </div>
+  <div>
+    <h2>Gestión de Clínicas</h2>
+    <p>Administra las sedes de Nova Salud a nivel nacional.</p>
+  </div>
 
-    <button class="btn-primary" routerLink="../agregar-clinica">
-        <span class="pi pi-plus"></span> Nueva Sede
-    </button>
+  <button class="btn-primary" routerLink="../agregar-clinica">
+    <span class="pi pi-plus"></span>
+    Nueva Sede
+  </button>
 </div>
 
 <div class="card table-card">
-    <div class="table-header">
-        <h3 class="card-title mb-0">Sedes Activas</h3>
-        <div class="search-box">
-            <span class="pi pi-search"></span>
-            <input type="text" placeholder="Buscar sede...">
-        </div>
+
+  <div class="table-header">
+
+    <h3 class="card-title mb-0">
+      Sedes Activas
+    </h3>
+
+    <div class="search-box">
+      <span class="pi pi-search"></span>
+
+      <input
+        type="text"
+        placeholder="Buscar sede..."
+        (input)="buscarSede($event)">
     </div>
 
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Información de Sede</th>
-                    <th>Contacto / RUC</th>
-                    <th>Plan</th>
-                    <th>Estado</th>
-                    <th class="text-center">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (clinica of clinicas(); track clinica.id) {
-                <tr>
-                    <td>
-                        <div class="info-cell">
-                            <strong>{{ clinica.nombre }}</strong>
-                            <span><i class="pi pi-map-marker me-1"></i> {{ clinica.direccion }}</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="info-cell">
-                            <span><i class="pi pi-phone me-1"></i> {{ clinica.telefono }}</span>
-                            <span><i class="pi pi-id-card me-1"></i> RUC: {{ clinica.ruc }}</span>
-                        </div>
-                    </td>
-                    <td><span class="badge-plan">{{ clinica.planSuscripcion }}</span></td>
+  </div>
 
-                    <td>
-                        <span class="badge-status" [class.active]="clinica.estado === 'ACTIVA'"
-                            [class.inactive]="clinica.estado !== 'ACTIVA'">
-                            {{ clinica.estado }}
-                        </span>
-                    </td>
+  <div class="table-responsive">
 
-                    <td class="text-center actions-cell">
-                        <button class="btn-icon text-primary" title="Editar" (click)="editarClinica(clinica)">
-                            <span class="pi pi-pencil"></span>
-                        </button>
+    <table class="table clinicas-table">
 
-                        @if (clinica.estado === 'ACTIVA') {
-                        <button class="btn-icon text-danger" title="Desactivar clínica" (click)="toggleEstado(clinica)">
-                            <span class="pi pi-power-off"></span>
-                        </button>
-                        } @else {
-                        <button class="btn-icon text-success" title="Activar clínica" (click)="toggleEstado(clinica)">
-                            <span class="pi pi-check-circle"></span>
-                        </button>
-                        }
-                    </td>
-                </tr>
-                } @empty {
-                <tr>
-                    <td colspan="5" class="text-center py-4 text-muted">
-                        No hay clínicas registradas en la base de datos.
-                    </td>
-                </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+      <thead>
+        <tr>
+          <th>Información de Sede</th>
+          <th>Contacto / RUC</th>
+          <th>Plan</th>
+          <th>Estado</th>
+          <th class="text-center">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        @for (clinica of clinicasFiltradas(); track obtenerId(clinica)) {
+
+        <tr>
+
+          <td>
+            <div class="info-cell">
+              <strong>{{ clinica.nombre }}</strong>
+
+              <span>
+                <i class="pi pi-map-marker me-1"></i>
+                {{ clinica.direccion }}
+              </span>
+            </div>
+          </td>
+
+          <td>
+            <div class="info-cell">
+
+              <span>
+                <i class="pi pi-phone me-1"></i>
+                {{ clinica.telefono }}
+              </span>
+
+              <span>
+                <i class="pi pi-id-card me-1"></i>
+                RUC: {{ clinica.ruc }}
+              </span>
+
+            </div>
+          </td>
+
+          <td>
+            <span class="badge-plan">
+              {{ clinica.planSuscripcion }}
+            </span>
+          </td>
+
+          <td>
+
+            <span
+              class="badge-status"
+              [class.active]="clinica.estado === 'ACTIVA'"
+              [class.inactive]="clinica.estado === 'SUSPENDIDA'"
+              [class.cancelled]="clinica.estado === 'CANCELADA'">
+
+              {{ clinica.estado }}
+
+            </span>
+
+          </td>
+
+          <td class="actions-cell">
+
+            <div class="actions-wrapper">
+
+              <button
+                class="btn-icon edit"
+                title="Editar"
+                (click)="editarClinica(clinica)">
+
+                <span class="pi pi-pencil"></span>
+
+              </button>
+
+              <button
+                class="btn-icon power"
+                [class.off]="clinica.estado !== 'ACTIVA'"
+                [title]="clinica.estado === 'ACTIVA' ? 'Suspender clínica' : 'Activar clínica'"
+                (click)="toggleEstado(clinica)">
+
+                <span class="pi pi-power-off"></span>
+
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        } @empty {
+
+        <tr>
+
+          <td colspan="5" class="text-center py-4 text-muted">
+
+            No se encontraron clínicas.
+
+          </td>
+
+        </tr>
+
+        }
+
+      </tbody>
+
+    </table>
+
+  </div>
+
 </div>
