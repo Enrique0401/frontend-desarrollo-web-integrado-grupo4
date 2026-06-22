@@ -58,23 +58,27 @@ export const routes: Routes = [
   },
 
   // ==========================================
-  // RUTAS PRIVADAS (requieren autenticación)
+  // RUTAS PRIVADAS
   // ==========================================
   {
     path: 'panel',
     canActivate: [authGuard],
     children: [
-      // --- ZONA: SUPER_ADMIN ---
+      // ======================================
+      // ZONA: SUPER_ADMIN
+      // ======================================
       {
         path: 'super-admin',
         canActivate: [roleGuard],
         data: { roles: ['SUPER_ADMIN'] as Rol[] },
-        // Contenedor principal del Super Admin (Layout con Sidebar y Navbar)
+
+        // Layout principal del Super Admin
+        // Aquí se carga el nav/sidebar/header una sola vez
         loadComponent: () =>
           import('./components/super-admin/pantalla-super-admin/pantalla-super-admin').then(
             (m) => m.PantallaSuperAdmin,
           ),
-        loadComponent: () => import('./components/super-admin/pantalla-super-admin/pantalla-super-admin').then(m => m.PantallaSuperAdmin),
+
         children: [
           {
             path: '',
@@ -91,20 +95,15 @@ export const routes: Routes = [
           {
             path: 'clinicas',
             loadComponent: () =>
-              import('./components/super-admin/clinicas/clinicas').then((m) => m.Clinicas),
+              import('./components/super-admin/clinicas/clinicas').then(
+                (m) => m.Clinicas,
+              ),
           },
           {
             path: 'administradores',
             loadComponent: () =>
               import('./components/super-admin/administradores/administradores').then(
                 (m) => m.Administradores,
-              ),
-          },
-          {
-            path: 'navbar',
-            loadComponent: () =>
-              import('./components/super-admin/nav-super-admin/nav-super-admin').then(
-                (m) => m.NavSuperAdmin,
               ),
           },
           {
@@ -122,13 +121,6 @@ export const routes: Routes = [
               ),
           },
         ],
-          { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-          { path: 'dashboard', loadComponent: () => import('./components/super-admin/pantalla-super-admin/pantalla-super-admin').then(m => m.PantallaSuperAdmin) },
-          { path: 'clinicas', loadComponent: () => import('./components/super-admin/clinicas/clinicas').then(m => m.Clinicas) },
-          { path: 'administradores', loadComponent: () => import('./components/super-admin/administradores/administradores').then(m => m.Administradores) },
-          { path: 'navbar', loadComponent: () => import('./components/super-admin/nav-super-admin/nav-super-admin').then(m => m.NavSuperAdmin) },
-          { path: 'agregar-clinica', loadComponent: () => import('./components/super-admin/agregar-clinica/agregar-clinica').then(m => m.AgregarClinica) }
-        ]
       },
 
       // ======================================
@@ -157,7 +149,9 @@ export const routes: Routes = [
           ),
       },
 
-      // --- ZONA: MÉDICO Y ENFERMERA ---
+      // ======================================
+      // ZONA: MÉDICO / ENFERMERA
+      // ======================================
       {
         path: 'medico',
         canActivate: [roleGuard],
@@ -196,36 +190,5 @@ export const routes: Routes = [
     ],
   },
 
-  // Ruta comodín para capturar cualquier error de URL y enviarlo al inicio
   { path: '**', redirectTo: '' },
-        loadComponent: () => import('./components/paciente/pantalla-paciente/pantalla-paciente').then(m => m.PantallaPaciente),
-        children: [
-          { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-          { 
-            path: 'dashboard', 
-            // CORRECCIÓN: Aquí cargamos el contenido del dashboard, NO el layout completo
-            loadComponent: () => import('./components/paciente/datos-paciente/datos-paciente').then(m => m.DatosPaciente) 
-          },
-          { 
-            path: 'citas', 
-            loadComponent: () => import('./components/paciente/mis-citas/mis-citas').then(m => m.MisCitas) 
-          },
-          { 
-            path: 'recetas', 
-            loadComponent: () => import('./components/paciente/mis-recetas/mis-recetas').then(m => m.MisRecetas) 
-          },
-          { 
-            path: 'archivo-clinico', 
-            loadComponent: () => import('./components/paciente/mis-archivos-clinicos/mis-archivos-clinicos').then(m => m.MisArchivosClinicos) 
-          },
-          { 
-            path: 'historial-clinico', 
-            loadComponent: () => import('./components/paciente/mi-historia-clinica/mi-historia-clinica').then(m => m.MiHistoriaClinica) 
-          }
-        ]
-      }
-    ]
-  },
-  
-  { path: '**', redirectTo: '' }
 ];
