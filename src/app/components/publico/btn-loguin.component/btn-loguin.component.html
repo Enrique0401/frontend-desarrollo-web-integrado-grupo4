@@ -1,3 +1,28 @@
-<button class="btn-login" routerLink="/iniciar-sesion">
+@if (usuario()) {
+  <div class="usuario-pill">
+    <i class="pi pi-user-circle"></i>
+    <span class="usuario-nombre">{{ usuario()?.nombre }}</span>
+    <button class="btn-cerrar-sesion" (click)="abrirConfirmacion()" title="Cerrar sesión">
+      <i class="pi pi-sign-out"></i>
+    </button>
+  </div>
+} @else {
+  <button class="btn-login" routerLink="/iniciar-sesion">
     Iniciar Sesión
-</button>
+  </button>
+}
+
+@if (mostrarConfirmacion()) {
+  <div class="modal-overlay" (click)="cancelarCierre()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <i class="pi pi-sign-out modal-icon"></i>
+      <h3>¿Deseas salir?</h3>
+      <p>Vas a cerrar tu sesión actual en Nova Salud.</p>
+
+      <div class="modal-actions">
+        <button class="btn-cancelar" (click)="cancelarCierre()">Cancelar</button>
+        <button class="btn-confirmar" (click)="confirmarCierreSesion()">Sí, salir</button>
+      </div>
+    </div>
+  </div>
+}
