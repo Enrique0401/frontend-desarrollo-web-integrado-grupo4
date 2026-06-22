@@ -1,50 +1,126 @@
-<div class="admin-layout">
-  
-    <aside class="sidebar">
-      <div class="sidebar__brand">
-        <img src="/logo.png" alt="Nova Salud" class="sidebar__logo" />
-        <h2 class="sidebar__title">Nova Salud</h2>
-        <span class="badge-role">Super Admin</span>
-      </div>
-  
-      <nav class="sidebar__nav">
-        <ul>
-          <li>
-            <a routerLink="./dashboard" routerLinkActive="active-link">
-              <span class="pi pi-chart-bar"></span> Dashboard
-            </a>
-          </li>
-          <li>
-            <a routerLink="./clinicas" routerLinkActive="active-link">
-              <span class="pi pi-building"></span> Gestión de Clínicas
-            </a>
-          </li>
-          <li>
-            <a routerLink="./administradores" routerLinkActive="active-link">
-              <span class="pi pi-users"></span> Administradores
-            </a>
-          </li>
-        </ul>
-      </nav>
-    </aside>
-  
-    <div class="main-wrapper">
-      
-      <header class="topbar">
-        <div class="topbar__greeting">
-          <h3>Panel de Control Principal</h3>
-        </div>
-        
-        <div class="topbar__actions">
-          <button class="btn-logout" (click)="cerrarSesion()">
-            <span class="pi pi-sign-out"></span> Salir
-          </button>
-        </div>
-      </header>
-  
-      <main class="content-area">
-        <router-outlet></router-outlet> 
-      </main>
-  
+<div class="dashboard-header">
+  <div>
+    <h2>Dashboard General</h2>
+    <p>Resumen global de la red Nova Salud.</p>
+  </div>
+</div>
+
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-icon">
+      <span class="pi pi-building"></span>
+    </div>
+    <div>
+      <p>Total Clínicas</p>
+      <h3>{{ totalClinicas() }}</h3>
     </div>
   </div>
+
+  <div class="metric-card success">
+    <div class="metric-icon">
+      <span class="pi pi-check-circle"></span>
+    </div>
+    <div>
+      <p>Clínicas Activas</p>
+      <h3>{{ clinicasActivas() }}</h3>
+    </div>
+  </div>
+
+  <div class="metric-card warning">
+    <div class="metric-icon">
+      <span class="pi pi-pause-circle"></span>
+    </div>
+    <div>
+      <p>Clínicas Suspendidas</p>
+      <h3>{{ clinicasSuspendidas() }}</h3>
+    </div>
+  </div>
+
+  <div class="metric-card danger">
+    <div class="metric-icon">
+      <span class="pi pi-times-circle"></span>
+    </div>
+    <div>
+      <p>Clínicas Canceladas</p>
+      <h3>{{ clinicasCanceladas() }}</h3>
+    </div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon">
+      <span class="pi pi-users"></span>
+    </div>
+    <div>
+      <p>Total Pacientes</p>
+      <h3>{{ totalPacientes() }}</h3>
+    </div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon">
+      <span class="pi pi-calendar"></span>
+    </div>
+    <div>
+      <p>Volumen de Citas</p>
+      <h3>{{ volumenCitas() }}</h3>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard-content">
+  <div class="card">
+    <h3>Estado de la Red</h3>
+
+    <div class="status-row">
+      <span>Activas</span>
+      <strong>{{ clinicasActivas() }}</strong>
+    </div>
+
+    <div class="progress">
+      <div class="bar active" [style.width.%]="totalClinicas() ? (clinicasActivas() * 100 / totalClinicas()) : 0"></div>
+    </div>
+
+    <div class="status-row">
+      <span>Suspendidas</span>
+      <strong>{{ clinicasSuspendidas() }}</strong>
+    </div>
+
+    <div class="progress">
+      <div class="bar warning" [style.width.%]="totalClinicas() ? (clinicasSuspendidas() * 100 / totalClinicas()) : 0"></div>
+    </div>
+
+    <div class="status-row">
+      <span>Canceladas</span>
+      <strong>{{ clinicasCanceladas() }}</strong>
+    </div>
+
+    <div class="progress">
+      <div class="bar danger" [style.width.%]="totalClinicas() ? (clinicasCanceladas() * 100 / totalClinicas()) : 0"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Últimas Sedes Registradas</h3>
+
+    <div class="clinic-list">
+      @for (clinica of ultimasClinicas(); track clinica.id) {
+        <div class="clinic-item">
+          <div>
+            <strong>{{ clinica.nombre }}</strong>
+            <span>{{ clinica.direccion }}</span>
+          </div>
+
+          <span
+            class="badge-status"
+            [class.active]="clinica.estado === 'ACTIVA'"
+            [class.inactive]="clinica.estado === 'SUSPENDIDA'"
+            [class.cancelled]="clinica.estado === 'CANCELADA'">
+            {{ clinica.estado }}
+          </span>
+        </div>
+      } @empty {
+        <p class="empty-text">No hay sedes registradas.</p>
+      }
+    </div>
+  </div>
+</div>

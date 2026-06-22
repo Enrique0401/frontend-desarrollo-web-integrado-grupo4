@@ -1,17 +1,36 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Observable, of, delay } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Cita } from '../../models/atencion-medica.model';
 
 @Injectable({ providedIn: 'root' })
 export class CitaService {
+  private apiUrl = 'https://backend-desarrollo-web-integrado-grupo4.onrender.com/api/citas';
+
   private _citas = signal<Cita[]>([]);
   public citas = computed(() => this._citas());
 
-  constructor() {
-    this._citas.set([{ idCita: 1, pacienteId: 1, medicoId: 1, consultorioId: 1, clinicaId: 1, fechaHora: '2026-06-20T10:00:00', fechaFin: '2026-06-20T10:30:00', motivo: 'Chequeo general', estado: 'PROGRAMADA' }]);
+  constructor(private http: HttpClient) {}
+
+  private obtenerCabeceras(): HttpHeaders {
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      return new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+    }
+
+    return new HttpHeaders();
   }
 
   obtenerCitas(): Observable<Cita[]> {
-    return of(this._citas()).pipe(delay(400));
+    return this.http.get<Cita[]>(this.apiUrl, {
+      headers: this.obtenerCabeceras()
+    });
+  }
+
+  actualizarSignal(datosBD: Cita[]): void {
+    this._citas.set(datosBD);
   }
 }

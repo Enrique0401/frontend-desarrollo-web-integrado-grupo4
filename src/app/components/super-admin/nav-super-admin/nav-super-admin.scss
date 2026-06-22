@@ -1,0 +1,124 @@
+$primary: #26b8b5;
+$secondary: #1a202c;
+$surface: #ffffff;
+$text-muted: #64748b;
+$border: #e2e8f0;
+
+.super-admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f7fb;
+}
+
+.sidebar {
+  width: 260px;
+  background: #111827;
+  color: white;
+  flex-shrink: 0;
+}
+
+.brand {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  .logo-box {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 0.75rem;
+    border-radius: 16px;
+    background: rgba($primary, 0.2);
+    color: $primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    margin: 0;
+    font-weight: 800;
+  }
+
+  span {
+    display: inline-block;
+    margin-top: 0.5rem;
+    background: rgba($primary, 0.18);
+    color: $primary;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+}
+
+.menu {
+  padding: 1rem 0;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem 1.5rem;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-weight: 700;
+    transition: 0.25s;
+
+    &:hover,
+    &.active {
+      background: rgba($primary, 0.18);
+      color: white;
+      border-left: 4px solid $primary;
+    }
+
+    .pi {
+      color: $primary;
+    }
+  }
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar {
+  height: 72px;
+  background: $surface;
+  border-bottom: 1px solid $border;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+
+  h1 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin: 0;
+    color: $secondary;
+  }
+}
+
+.btn-logout {
+  background: white;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+
+  &:hover {
+    background: #fee2e2;
+  }
+}
+
+.page-content {
+  padding: 2rem;
+}
