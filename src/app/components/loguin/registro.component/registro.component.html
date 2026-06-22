@@ -42,6 +42,73 @@
             </div>
           </div>
 
+          <div class="row">
+            <div class="col-4 mb-3">
+              <label class="form-label">Documento</label>
+              <div class="input-icon-group">
+                <span class="pi pi-id-card"></span>
+                <select class="form-control" formControlName="tipoDocumento" style="appearance: auto; background: transparent;">
+                  <option value="DNI">DNI</option>
+                  <option value="PASAPORTE">Pasaporte</option>
+                  <option value="CARNET_EXTRANJERIA">Carnet de Extranjería</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-8 mb-3">
+              <label class="form-label">Número</label>
+              <div class="input-icon-group" [class.is-invalid]="campoInvalido('numeroDocumento')">
+                <span class="pi pi-hashtag"></span>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  formControlName="numeroDocumento" 
+                  [placeholder]="form.get('tipoDocumento')?.value === 'DNI' ? '8 números' : 'Ej: A12345678'" 
+                  maxlength="9" 
+                  style="text-transform: uppercase;"
+                />
+              </div>
+              @if (campoInvalido('numeroDocumento')) {
+                <div class="error-text">
+                  @if (form.get('tipoDocumento')?.value === 'DNI') {
+                    El DNI debe tener exactamente 8 números.
+                  } @else if (form.get('tipoDocumento')?.value === 'PASAPORTE') {
+                    El Pasaporte requiere 1 letra y 8 números.
+                  } @else {
+                    El Carnet debe tener 9 caracteres alfanuméricos.
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-5 mb-3">
+              <label class="form-label">Seguro Médico</label>
+              <div class="input-icon-group">
+                <span class="pi pi-heart"></span>
+                <select class="form-control" formControlName="seguroMedico" style="appearance: auto; background: transparent;">
+                  <option value="NINGUNO">Ninguno</option>
+                  <option value="ESSALUD">EsSalud</option>
+                  <option value="SIS">SIS</option>
+                  <option value="EPS">EPS</option>
+                  <option value="PRIVADO">Privado</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-7 mb-3">
+              <label class="form-label">Número de Seguro</label>
+              <div class="input-icon-group" [class.is-invalid]="campoInvalido('numeroSeguro')">
+                <span class="pi pi-hashtag"></span>
+                <input type="text" class="form-control" formControlName="numeroSeguro" placeholder="N° de póliza o afiliación" />
+              </div>
+              @if (campoInvalido('numeroSeguro')) {
+                <div class="error-text">Requerido si tienes seguro.</div>
+              }
+            </div>
+          </div>
+
           <div class="mb-3">
             <label class="form-label">Correo electrónico</label>
             <div class="input-icon-group" [class.is-invalid]="campoInvalido('correo')">
@@ -53,15 +120,29 @@
             }
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">Teléfono</label>
-            <div class="input-icon-group" [class.is-invalid]="campoInvalido('telefono')">
-              <span class="pi pi-phone"></span>
-              <input type="tel" class="form-control" formControlName="telefono" placeholder="Ej: 987654321" />
+          <div class="row">
+            <div class="col-5 mb-3">
+              <label class="form-label">Género</label>
+              <div class="input-icon-group">
+                <span class="pi pi-users"></span>
+                <select class="form-control" formControlName="genero" style="appearance: auto; background: transparent;">
+                  <option value="MASCULINO">Masculino</option>
+                  <option value="FEMENINO">Femenino</option>
+                  <option value="OTRO">Otro</option>
+                </select>
+              </div>
             </div>
-            @if (campoInvalido('telefono')) {
-              <div class="error-text">El número debe tener 9 dígitos y empezar por 9.</div>
-            }
+
+            <div class="col-7 mb-3">
+              <label class="form-label">Teléfono</label>
+              <div class="input-icon-group" [class.is-invalid]="campoInvalido('telefono')">
+                <span class="pi pi-phone"></span>
+                <input type="tel" class="form-control" formControlName="telefono" placeholder="Ej: 987654321" />
+              </div>
+              @if (campoInvalido('telefono')) {
+                <div class="error-text">9 dígitos y empezar por 9.</div>
+              }
+            </div>
           </div>
 
           <div class="mb-3">
@@ -74,7 +155,7 @@
               <div class="error-text">Obligatorio (mín. 3 caracteres)</div>
             }
             @if (form.controls.username.hasError('ocupado')) {
-              <div class="error-text">¡Hey, ese usuario ya tiene dueño! Intenta con otro nombre de ususario</div>
+              <div class="error-text">¡Hey, ese usuario ya tiene dueño! Intenta con otro nombre de usuario</div>
             }
           </div>
 
