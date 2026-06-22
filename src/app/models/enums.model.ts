@@ -1,5 +1,5 @@
 export type Rol = 'SUPER_ADMIN' | 'ADMIN_CLINICA' | 'RECEPCIONISTA' | 'MEDICO' | 'ENFERMERA' | 'PACIENTE';
-export type TipoDocumento = 'DNI' | 'PASAPORTE' | 'CARNET_EXTRANJERIA' | 'OTRO';
+export type TipoDocumento = 'DNI' | 'PASAPORTE' | 'CARNET_EXTRANJERIA';
 export type Genero = 'MASCULINO' | 'FEMENINO' | 'OTRO';
 export type GrupoSanguineo = 'A_POSITIVO' | 'A_NEGATIVO' | 'B_POSITIVO' | 'B_NEGATIVO' | 'AB_POSITIVO' | 'AB_NEGATIVO' | 'O_POSITIVO' | 'O_NEGATIVO';
 export type SeguroMedico = 'ESSALUD' | 'SIS' | 'EPS' | 'PRIVADO' | 'NINGUNO';

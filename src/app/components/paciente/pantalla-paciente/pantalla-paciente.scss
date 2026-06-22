@@ -1,0 +1,71 @@
+.paciente-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8fafc;
+
+    .sidebar {
+        width: 260px;
+        background: #1e293b;
+        color: white;
+        padding: 2rem 1rem;
+
+        .brand {
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #26b8b5;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 0;
+
+            li {
+                margin-bottom: 1rem;
+
+                a {
+                    color: #94a3b8;
+                    text-decoration: none;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 0.8rem;
+                    border-radius: 8px;
+                    transition: 0.3s;
+                    cursor: pointer;
+
+                    &:hover,
+                    &.active {
+                        background: #26b8b5;
+                        color: white;
+                    }
+                }
+            }
+
+            .logout-item {
+                margin-top: auto;
+                border-top: 1px solid #334155;
+                padding-top: 1rem;
+            }
+        }
+    }
+
+    .content {
+        flex: 1;
+        padding: 2rem;
+
+        .header {
+            margin-bottom: 2rem;
+
+            h1 {
+                color: #1e293b;
+            }
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+    }
+}

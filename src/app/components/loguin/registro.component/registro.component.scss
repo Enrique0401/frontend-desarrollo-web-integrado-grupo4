@@ -81,7 +81,6 @@ $dark: #1a202c;
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 
-  // Selecciona automáticamente todos los íconos PrimeNG del formulario y les da estilo
   span[class^="pi pi-"] {
     color: $teal;
     margin-right: 0.6rem;
@@ -91,10 +90,17 @@ $dark: #1a202c;
     border: none;
     box-shadow: none;
     padding: 0.65rem 0.25rem;
+    width: 100%;
 
     &:focus {
       box-shadow: none;
       outline: none;
+    }
+
+    &:disabled {
+      background-color: #f3f4f6;
+      color: #9ca3af;
+      cursor: not-allowed;
     }
   }
 
@@ -102,7 +108,7 @@ $dark: #1a202c;
     color: #9ca3af;
     cursor: pointer;
     padding-left: 0.5rem;
-    margin-right: 0; // Remueve el margen derecho heredado para el ojo del password
+    margin-right: 0;
 
     &:hover {
       color: $teal;
@@ -186,7 +192,7 @@ $dark: #1a202c;
   }
 }
 
-// Responsive
+// Ajustes Responsive
 @media (max-width: 768px) {
   .login-card {
     flex-direction: column;
@@ -200,7 +206,19 @@ $dark: #1a202c;
   .login-form-panel {
     padding: 2rem 1.5rem;
   }
+
   .registro-card {
     max-width: 980px;
+  }
+
+  // Hacemos que las columnas en móviles ocupen el 100% para que no se aprieten los inputs
+  .row {
+    display: flex;
+    flex-direction: column;
+
+    [class^="col-"] {
+      width: 100%;
+      max-width: 100%;
+    }
   }
 }

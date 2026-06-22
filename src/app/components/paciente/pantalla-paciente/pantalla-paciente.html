@@ -1,1 +1,25 @@
-<p>pantalla-paciente works!</p>
+<div class="paciente-layout">
+  <nav class="sidebar">
+    <div class="brand">
+      <h2>Nova Salud</h2>
+    </div>
+    <ul class="nav-links">
+      <li><a routerLink="/panel/paciente/dashboard" routerLinkActive="active"><i class="pi pi-home"></i> Dashboard</a></li>
+      <li><a routerLink="/panel/paciente/citas" routerLinkActive="active"><i class="pi pi-calendar"></i> Mis citas</a></li>
+      <li><a routerLink="/panel/paciente/historial-clinico" routerLinkActive="active"><i class="pi pi-book"></i> Mi historia clínica</a></li>
+      <li><a routerLink="/panel/paciente/recetas" routerLinkActive="active"><i class="pi pi-file-o"></i> Mis recetas</a></li>
+      <li><a routerLink="/panel/paciente/archivo-clinico" routerLinkActive="active"><i class="pi pi-folder"></i> Mis archivos clínicos</a></li>
+      <li class="logout-item"><a (click)="logout()" class="logout-btn"><i class="pi pi-sign-out"></i> Salir</a></li>
+    </ul>
+  </nav>
+
+  <main class="content">
+    <header class="header">
+      <h1>Bienvenido, {{ nombrePaciente() }}</h1>
+    </header>
+    
+    <div class="dashboard-body">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>
