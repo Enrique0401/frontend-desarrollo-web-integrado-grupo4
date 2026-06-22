@@ -202,7 +202,13 @@ $success-text: #166534;
   align-items: center;
   justify-content: center;
 }
+.btn-icon.cancel {
+  color: #dc2626;
+}
 
+.btn-icon.cancel:hover {
+  background: #fee2e2;
+}
 .badge-status {
   padding: 0.4rem 0.8rem;
   border-radius: 20px;

@@ -66,6 +66,32 @@ export class Clinicas implements OnInit {
       this.obtenerId(clinica)
     ]);
   }
+  cancelarClinica(clinica: any): void {
+  const confirmar = confirm('¿Seguro que deseas cancelar esta clínica? Esta acción dejará la clínica como CANCELADA.');
+
+  if (!confirmar) {
+    return;
+  }
+
+  const body = {
+    nombre: clinica.nombre,
+    ruc: clinica.ruc,
+    direccion: clinica.direccion,
+    telefono: clinica.telefono,
+    correo: clinica.correo,
+    planSuscripcion: clinica.planSuscripcion,
+    estado: 'CANCELADA'
+  };
+
+  this.clinicaService.actualizar(this.obtenerId(clinica), body).subscribe({
+    next: () => {
+      this.cargarSedes();
+    },
+    error: (err) => {
+      console.error('Error al cancelar clínica:', err);
+    }
+  });
+}
 
   toggleEstado(clinica: any): void {
 
