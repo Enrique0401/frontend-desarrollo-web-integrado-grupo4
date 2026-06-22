@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ClinicaService } from '../../../services/clinica/clinica';
 
@@ -10,7 +10,26 @@ import { ClinicaService } from '../../../services/clinica/clinica';
   styleUrl: './clinicas.scss'
 })
 export class Clinicas implements OnInit {
+
   clinicas = signal<any[]>([]);
+  terminoBusqueda = signal('');
+
+  clinicasFiltradas = computed(() => {
+    const texto = this.terminoBusqueda().toLowerCase().trim();
+
+    if (!texto) {
+      return this.clinicas();
+    }
+
+    return this.clinicas().filter(clinica =>
+      clinica.nombre?.toLowerCase().includes(texto) ||
+      clinica.direccion?.toLowerCase().includes(texto) ||
+      clinica.telefono?.toLowerCase().includes(texto) ||
+      clinica.ruc?.toLowerCase().includes(texto) ||
+      clinica.planSuscripcion?.toLowerCase().includes(texto) ||
+      clinica.estado?.toLowerCase().includes(texto)
+    );
+  });
 
   constructor(
     private clinicaService: ClinicaService,
@@ -23,40 +42,56 @@ export class Clinicas implements OnInit {
 
   cargarSedes(): void {
     this.clinicaService.obtenerClinicas().subscribe({
-      next: (datosBD) => {
-        this.clinicas.set(datosBD);
-        
-        if (typeof this.clinicaService.actualizarSignal === 'function') {
-          this.clinicaService.actualizarSignal(datosBD);
-        }
+      next: (datos) => {
+        this.clinicas.set(datos);
       },
       error: (err) => {
-        console.error('Error al traer clínicas del backend:', err);
+        console.error('Error al cargar clínicas:', err);
       }
     });
   }
 
-  // Función para ir a la pantalla de edición
-  editarClinica(clinica: any): void {
-    this.router.navigate(['../editar-clinica', clinica.id]);
+  buscarSede(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.terminoBusqueda.set(input.value);
   }
 
-  // Función para cambiar el estado entre ACTIVA e INACTIVA
-  toggleEstado(clinica: any): void {
-    const nuevoEstado = clinica.estado === 'ACTIVA' ? 'INACTIVA' : 'ACTIVA';
-    
-    // Armamos el objeto con el estado invertido
-    const clinicaActualizada = { ...clinica, estado: nuevoEstado };
+  obtenerId(clinica: any): number {
+    return clinica.id ?? clinica.idClinica;
+  }
 
-    // Enviamos el PUT al backend
-    this.clinicaService.actualizar(clinica.id, clinicaActualizada).subscribe({
+  editarClinica(clinica: any): void {
+    this.router.navigate([
+      '/panel/super-admin/editar-clinica',
+      this.obtenerId(clinica)
+    ]);
+  }
+
+  toggleEstado(clinica: any): void {
+
+    const nuevoEstado =
+      clinica.estado === 'ACTIVA'
+        ? 'SUSPENDIDA'
+        : 'ACTIVA';
+
+    const body = {
+      nombre: clinica.nombre,
+      ruc: clinica.ruc,
+      direccion: clinica.direccion,
+      telefono: clinica.telefono,
+      correo: clinica.correo,
+      planSuscripcion: clinica.planSuscripcion,
+      estado: nuevoEstado
+    };
+
+    this.clinicaService.actualizar(this.obtenerId(clinica), body).subscribe({
       next: () => {
-        // Refrescamos la tabla para ver los cambios impactados
         this.cargarSedes();
       },
       error: (err) => {
-        console.error('Error al cambiar el estado de la clínica:', err);
+        console.error('Error al cambiar estado:', err);
       }
     });
+
   }
 }
