@@ -23,33 +23,29 @@ $border: #e2e8f0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
   .logo-box {
-    width: 70px;
-    height: 70px;
+    width: 78px;
+    height: 78px;
     margin: 0 auto 0.75rem;
-    border-radius: 16px;
-    background: rgba($primary, 0.2);
-    color: $primary;
+    border: none;
+    border-radius: 18px;
+    background: rgba($primary, 0.18);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
-  }
+    cursor: pointer;
+    padding: 0.4rem;
+    transition: 0.25s;
 
-  h2 {
-    font-size: 1.3rem;
-    margin: 0;
-    font-weight: 800;
-  }
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
 
-  span {
-    display: inline-block;
-    margin-top: 0.5rem;
-    background: rgba($primary, 0.18);
-    color: $primary;
-    padding: 0.35rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 800;
+    &:hover {
+      transform: scale(1.05);
+      background: rgba($primary, 0.28);
+    }
   }
 }
 

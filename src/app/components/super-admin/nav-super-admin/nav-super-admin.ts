@@ -16,4 +16,7 @@ export class NavSuperAdmin {
     localStorage.removeItem('rol');
     this.router.navigate(['/iniciar-sesion']);
   }
+  recargarPagina(): void {
+  window.location.reload();
+}
 }

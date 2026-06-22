@@ -16,8 +16,10 @@
 
     <div class="search-box">
       <span class="pi pi-search"></span>
-
-      <input type="text" placeholder="Buscar sede..." (input)="buscarSede($event)" />
+      <input
+        type="text"
+        placeholder="Buscar sede..."
+        (input)="buscarSede($event)">
     </div>
   </div>
 
@@ -35,78 +37,110 @@
 
       <tbody>
         @for (clinica of clinicasFiltradas(); track obtenerId(clinica)) {
-          <tr>
-            <td>
-              <div class="info-cell">
-                <strong>{{ clinica.nombre }}</strong>
-
-                <span>
-                  <i class="pi pi-map-marker me-1"></i>
-                  {{ clinica.direccion }}
-                </span>
-              </div>
-            </td>
-
-            <td>
-              <div class="info-cell">
-                <span>
-                  <i class="pi pi-phone me-1"></i>
-                  {{ clinica.telefono }}
-                </span>
-
-                <span>
-                  <i class="pi pi-id-card me-1"></i>
-                  RUC: {{ clinica.ruc }}
-                </span>
-              </div>
-            </td>
-
-            <td>
-              <span class="badge-plan">
-                {{ clinica.planSuscripcion }}
+        <tr>
+          <td>
+            <div class="info-cell">
+              <strong>{{ clinica.nombre }}</strong>
+              <span>
+                <i class="pi pi-map-marker me-1"></i>
+                {{ clinica.direccion }}
               </span>
-            </td>
+            </div>
+          </td>
 
-            <td>
-              <span
-                class="badge-status"
-                [class.active]="clinica.estado === 'ACTIVA'"
-                [class.inactive]="clinica.estado === 'SUSPENDIDA'"
-                [class.cancelled]="clinica.estado === 'CANCELADA'"
-              >
-                {{ clinica.estado }}
+          <td>
+            <div class="info-cell">
+              <span>
+                <i class="pi pi-phone me-1"></i>
+                {{ clinica.telefono }}
               </span>
-            </td>
+              <span>
+                <i class="pi pi-id-card me-1"></i>
+                RUC: {{ clinica.ruc }}
+              </span>
+            </div>
+          </td>
 
-            <td class="actions-cell">
-              <div class="actions-wrapper">
-                <button class="btn-icon edit" title="Editar" (click)="editarClinica(clinica)">
-                  <span class="pi pi-pencil"></span>
-                </button>
+          <td>
+            <span class="badge-plan">
+              {{ clinica.planSuscripcion }}
+            </span>
+          </td>
+
+          <td>
+            <span
+              class="badge-status"
+              [class.active]="clinica.estado === 'ACTIVA'"
+              [class.inactive]="clinica.estado === 'SUSPENDIDA'"
+              [class.cancelled]="clinica.estado === 'CANCELADA'">
+              {{ clinica.estado }}
+            </span>
+          </td>
+
+          <td class="actions-cell">
+            <div class="actions-wrapper">
+              <button
+                class="btn-icon edit"
+                title="Editar"
+                (click)="editarClinica(clinica)">
+                <span class="pi pi-pencil"></span>
+              </button>
+
+              <button
+                class="btn-icon power"
+                [class.off]="clinica.estado !== 'ACTIVA'"
+                [title]="clinica.estado === 'ACTIVA' ? 'Suspender clínica' : 'Activar clínica'"
+                (click)="toggleEstado(clinica)">
+                <span class="pi pi-power-off"></span>
+              </button>
+
+              @if (clinica.estado !== 'CANCELADA') {
                 <button
                   class="btn-icon cancel"
                   title="Cancelar clínica"
-                  (click)="cancelarClinica(clinica)"
-                >
+                  (click)="abrirModalCancelar(clinica)">
                   <span class="pi pi-times-circle"></span>
                 </button>
-                <button
-                  class="btn-icon power"
-                  [class.off]="clinica.estado !== 'ACTIVA'"
-                  [title]="clinica.estado === 'ACTIVA' ? 'Suspender clínica' : 'Activar clínica'"
-                  (click)="toggleEstado(clinica)"
-                >
-                  <span class="pi pi-power-off"></span>
-                </button>
-              </div>
-            </td>
-          </tr>
+              }
+            </div>
+          </td>
+        </tr>
         } @empty {
-          <tr>
-            <td colspan="5" class="text-center py-4 text-muted">No se encontraron clínicas.</td>
-          </tr>
+        <tr>
+          <td colspan="5" class="text-center py-4 text-muted">
+            No se encontraron clínicas.
+          </td>
+        </tr>
         }
       </tbody>
     </table>
   </div>
 </div>
+
+@if (mostrarModalCancelar()) {
+  <div class="modal-backdrop-custom">
+    <div class="modal-card-custom">
+      <div class="modal-icon">
+        <span class="pi pi-exclamation-triangle"></span>
+      </div>
+
+      <h3>Cancelar clínica</h3>
+
+      <p>
+        ¿Seguro que deseas cancelar
+        <strong>{{ clinicaParaCancelar()?.nombre }}</strong>?
+        Esta acción dejará la clínica como <strong>CANCELADA</strong>.
+      </p>
+
+      <div class="modal-actions">
+        <button class="btn-modal-secondary" (click)="cerrarModalCancelar()">
+          No, volver
+        </button>
+
+        <button class="btn-modal-danger" (click)="confirmarCancelarClinica()">
+          Sí, cancelar clínica
+        </button>
+      </div>
+    </div>
+  </div>
+}
