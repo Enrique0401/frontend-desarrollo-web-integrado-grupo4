@@ -1,89 +1,62 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Observable, of, delay, throwError } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Usuario } from '../../models/usuario.model';
-
-interface UsuarioRegistrado extends Usuario {
-  password: string;
-}
-
-interface DatosRegistro {
-  nombre: string;
-  apellido: string;
-  correo: string;
-  username: string;
-  password: string;
-  rol?: string;
-}
-
-const STORAGE_KEY = 'nova_salud_usuarios';
 
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
+  private apiUrl = 'https://backend-desarrollo-web-integrado-grupo4.onrender.com/api/usuarios';
+
   private _usuarioActual = signal<Usuario | null>(null);
   public usuarioActual = computed(() => this._usuarioActual());
 
-  private usuarios: UsuarioRegistrado[] = this.cargarUsuarios();
+  constructor(private http: HttpClient) {}
 
-  private cargarUsuarios(): UsuarioRegistrado[] {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  }
+  private obtenerCabeceras(): HttpHeaders {
+    const token = localStorage.getItem('token');
 
-  private guardarUsuarios(): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.usuarios));
-  }
-
-  registrar(datos: DatosRegistro): Observable<Usuario> {
-    const existeUsername = this.usuarios.some(
-      (u) => u.username.toLowerCase() === datos.username.toLowerCase()
-    );
-    const existeCorreo = this.usuarios.some(
-      (u) => u.correo.toLowerCase() === datos.correo.toLowerCase()
-    );
-
-    if (existeUsername) {
-      return throwError(() => new Error('Ese nombre de usuario ya está registrado.')).pipe(delay(600));
-    }
-    if (existeCorreo) {
-      return throwError(() => new Error('Ese correo ya está registrado.')).pipe(delay(600));
+    if (token) {
+      return new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
     }
 
-    const nuevoUsuario: UsuarioRegistrado = {
-      idUsuario: this.usuarios.length + 1,
-      username: datos.username,
-      correo: datos.correo,
-      nombre: datos.nombre,
-      apellido: datos.apellido,
-      password: datos.password,
-      rol: 'PACIENTE',
-      activo: true,
-      clinicaId: 1,
-    };
-
-    this.usuarios.push(nuevoUsuario);
-    this.guardarUsuarios();
-
-    const { password: _password, ...usuarioSinPassword } = nuevoUsuario;
-    return of(usuarioSinPassword).pipe(delay(800));
+    return new HttpHeaders();
   }
 
-  login(username: string, password: string): Observable<Usuario> {
-    const encontrado = this.usuarios.find(
-      (u) => u.username.toLowerCase() === username.toLowerCase() && u.password === password
-    );
+  obtenerUsuarios(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl, {
+      headers: this.obtenerCabeceras()
+    });
+  }
 
-    if (!encontrado) {
-      return throwError(
-        () => new Error('Usuario o contraseña incorrectos, o aún no te has registrado.')
-      ).pipe(delay(600));
-    }
+  obtenerAdminsClinica(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/rol/ADMIN_CLINICA`, {
+      headers: this.obtenerCabeceras()
+    });
+  }
 
-    const { password: _pw, ...usuarioSinPassword } = encontrado;
-    this._usuarioActual.set(usuarioSinPassword);
-    return of(usuarioSinPassword).pipe(delay(800));
+  crearUsuario(usuario: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, usuario, {
+      headers: this.obtenerCabeceras()
+    });
+  }
+
+  actualizarUsuario(id: number, usuario: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, usuario, {
+      headers: this.obtenerCabeceras()
+    });
+  }
+
+  eliminarUsuario(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, {
+      headers: this.obtenerCabeceras()
+    });
   }
 
   logout(): void {
     this._usuarioActual.set(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('rol');
   }
 }
