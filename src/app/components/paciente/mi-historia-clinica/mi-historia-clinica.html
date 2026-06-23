@@ -1,1 +1,78 @@
-<p>mi-historia-clinica works!</p>
+<div class="historial-container">
+    <div class="header-section">
+        <h2>Mi Historia Clínica</h2>
+        <p>Visualiza tu expediente maestro y la línea de tiempo de tus atenciones médicas.</p>
+    </div>
+
+    @if (cargando) {
+    <div class="estado-mensaje">
+        <i class="pi pi-spin pi-spinner icon-cargando"></i>
+        <p>Abriendo tu expediente médico...</p>
+    </div>
+    }
+
+    @if (!cargando && errorMensaje) {
+    <div class="estado-mensaje error">
+        <i class="pi pi-exclamation-triangle icon-error"></i>
+        <p>{{ errorMensaje }}</p>
+    </div>
+    }
+
+    @if (!cargando && !historia && !errorMensaje) {
+    <div class="estado-mensaje vacio">
+        <i class="pi pi-folder-open icon-vacio"></i>
+        <p>Aún no tienes una Historia Clínica abierta. Se creará automáticamente en tu primera consulta.</p>
+    </div>
+    }
+
+    @if (!cargando && historia) {
+    <div class="expediente-card">
+        <div class="expediente-header">
+            <div class="titulo">
+                <i class="pi pi-address-book"></i>
+                <h3>Expediente N° #{{ historia.id }}</h3>
+            </div>
+            <span class="badge-clinica">{{ historia.clinica?.nombre || 'Nova Salud' }}</span>
+        </div>
+
+        <div class="expediente-body">
+            <div class="info-item">
+                <strong>Paciente:</strong>
+                <span>{{ historia.paciente?.nombre }} {{ historia.paciente?.apellido }}</span>
+            </div>
+            <div class="info-item">
+                <strong>Fecha de Apertura:</strong>
+                <span>{{ formatearFecha(historia.fechaCreacion) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="timeline-section">
+        <h3><i class="pi pi-history"></i> Línea de Tiempo de Consultas</h3>
+
+        @if (historia.consultas && historia.consultas.length > 0) {
+        <div class="timeline">
+            @for (consulta of historia.consultas; track consulta.id) {
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="consulta-header">
+                        <strong>{{ formatearFecha(consulta.fechaConsulta) }}</strong>
+                        <span class="estado-badge {{ consulta.estadoConsulta?.toLowerCase() }}">{{
+                            consulta.estadoConsulta }}</span>
+                    </div>
+                    <div class="consulta-body">
+                        <p class="motivo"><strong>Motivo:</strong> {{ consulta.motivoConsulta }}</p>
+                        <p class="diagnostico"><strong>Diagnóstico:</strong> {{ consulta.diagnostico || 'Pendiente' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+        } @else {
+        <p class="sin-consultas">Tu expediente está abierto, pero aún no tienes consultas registradas.</p>
+        }
+    </div>
+    }
+</div>
