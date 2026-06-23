@@ -86,6 +86,10 @@ $border: #e2e8f0;
   gap: 1.25rem;
 }
 
+.secondary-content {
+  margin-top: 1.5rem;
+}
+
 .card {
   background: $surface;
   border-radius: 18px;
@@ -98,6 +102,104 @@ $border: #e2e8f0;
     font-weight: 800;
     color: $secondary;
     margin-bottom: 1.25rem;
+  }
+}
+
+.chart-card {
+  margin-bottom: 1.5rem;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: $secondary;
+  }
+
+  p {
+    margin: 0.3rem 0 0;
+    color: $text-muted;
+    font-size: 0.9rem;
+  }
+}
+
+.chart-badge {
+  background: rgba($primary, 0.12);
+  color: $primary-hover;
+  padding: 0.5rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bar-item {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bar-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  span {
+    color: #334155;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  strong {
+    color: #0f172a;
+    font-size: 1rem;
+    font-weight: 900;
+  }
+}
+
+.bar-track {
+  width: 100%;
+  height: 18px;
+  background: #eef2f7;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 20px;
+  transition: width 0.5s ease;
+
+  &.primary {
+    background: linear-gradient(90deg, $primary, $primary-hover);
+  }
+
+  &.success {
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+  }
+
+  &.warning {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+  }
+
+  &.danger {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+  }
+
+  &.info {
+    background: linear-gradient(90deg, #38bdf8, #0284c7);
   }
 }
 
@@ -184,6 +286,62 @@ $border: #e2e8f0;
   }
 }
 
+.mini-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem;
+
+  div {
+    background: #f8fafc;
+    border: 1px solid $border;
+    border-radius: 14px;
+    padding: 1rem;
+
+    span {
+      display: block;
+      color: $text-muted;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+    }
+
+    strong {
+      color: $secondary;
+      font-size: 1.5rem;
+      font-weight: 900;
+    }
+  }
+}
+
+.summary-card {
+  p {
+    color: $text-muted;
+    line-height: 1.7;
+    margin: 0;
+
+    strong {
+      color: $secondary;
+      font-weight: 900;
+    }
+  }
+}
+
+.summary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1.25rem;
+
+  span {
+    background: rgba($primary, 0.1);
+    color: $primary-hover;
+    border-radius: 20px;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+}
+
 .empty-text {
   color: $text-muted;
 }
@@ -196,4 +354,51 @@ $border: #e2e8f0;
   .dashboard-content {
     grid-template-columns: 1fr;
   }
+
+  .bar-item {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .chart-card {
+  margin-bottom: 1.5rem;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: $secondary;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    color: $text-muted;
+    font-size: 0.9rem;
+  }
+}
+
+.chart-badge {
+  background: rgba($primary, 0.12);
+  color: $primary-hover;
+  padding: 0.5rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.chart-wrapper {
+  width: 100%;
+  height: 360px;
+}
 }

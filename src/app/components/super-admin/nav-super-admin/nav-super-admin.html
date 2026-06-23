@@ -1,32 +1,26 @@
 <div class="super-admin-layout">
   <aside class="sidebar">
     <div class="brand">
-      <div class="logo-box">
-        <span class="pi pi-star-of-life"></span>
-      </div>
+      <button class="logo-box" type="button" (click)="recargarPagina()">
+        <img src="/logo.png" alt="Nova Salud" />
+      </button>
 
       <h2>Nova Salud</h2>
       <span>SUPER ADMIN</span>
     </div>
 
     <nav class="menu">
-      <a
-        routerLink="/panel/super-admin/dashboard"
-        routerLinkActive="active">
+      <a routerLink="/panel/super-admin/dashboard" routerLinkActive="active">
         <span class="pi pi-chart-bar"></span>
         Dashboard
       </a>
 
-      <a
-        routerLink="/panel/super-admin/clinicas"
-        routerLinkActive="active">
+      <a routerLink="/panel/super-admin/clinicas" routerLinkActive="active">
         <span class="pi pi-building"></span>
         Gestión de Clínicas
       </a>
 
-      <a
-        routerLink="/panel/super-admin/administradores"
-        routerLinkActive="active">
+      <a routerLink="/panel/super-admin/administradores" routerLinkActive="active">
         <span class="pi pi-users"></span>
         Administradores
       </a>

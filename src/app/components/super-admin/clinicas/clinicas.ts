@@ -10,9 +10,11 @@ import { ClinicaService } from '../../../services/clinica/clinica';
   styleUrl: './clinicas.scss'
 })
 export class Clinicas implements OnInit {
-
   clinicas = signal<any[]>([]);
   terminoBusqueda = signal('');
+
+  mostrarModalCancelar = signal(false);
+  clinicaParaCancelar = signal<any | null>(null);
 
   clinicasFiltradas = computed(() => {
     const texto = this.terminoBusqueda().toLowerCase().trim();
@@ -66,35 +68,8 @@ export class Clinicas implements OnInit {
       this.obtenerId(clinica)
     ]);
   }
-  cancelarClinica(clinica: any): void {
-  const confirmar = confirm('¿Seguro que deseas cancelar esta clínica? Esta acción dejará la clínica como CANCELADA.');
-
-  if (!confirmar) {
-    return;
-  }
-
-  const body = {
-    nombre: clinica.nombre,
-    ruc: clinica.ruc,
-    direccion: clinica.direccion,
-    telefono: clinica.telefono,
-    correo: clinica.correo,
-    planSuscripcion: clinica.planSuscripcion,
-    estado: 'CANCELADA'
-  };
-
-  this.clinicaService.actualizar(this.obtenerId(clinica), body).subscribe({
-    next: () => {
-      this.cargarSedes();
-    },
-    error: (err) => {
-      console.error('Error al cancelar clínica:', err);
-    }
-  });
-}
 
   toggleEstado(clinica: any): void {
-
     const nuevoEstado =
       clinica.estado === 'ACTIVA'
         ? 'SUSPENDIDA'
@@ -118,6 +93,47 @@ export class Clinicas implements OnInit {
         console.error('Error al cambiar estado:', err);
       }
     });
+  }
 
+  abrirModalCancelar(clinica: any): void {
+    if (clinica.estado === 'CANCELADA') {
+      return;
+    }
+
+    this.clinicaParaCancelar.set(clinica);
+    this.mostrarModalCancelar.set(true);
+  }
+
+  cerrarModalCancelar(): void {
+    this.mostrarModalCancelar.set(false);
+    this.clinicaParaCancelar.set(null);
+  }
+
+  confirmarCancelarClinica(): void {
+    const clinica = this.clinicaParaCancelar();
+
+    if (!clinica) {
+      return;
+    }
+
+    const body = {
+      nombre: clinica.nombre,
+      ruc: clinica.ruc,
+      direccion: clinica.direccion,
+      telefono: clinica.telefono,
+      correo: clinica.correo,
+      planSuscripcion: clinica.planSuscripcion,
+      estado: 'CANCELADA'
+    };
+
+    this.clinicaService.actualizar(this.obtenerId(clinica), body).subscribe({
+      next: () => {
+        this.cerrarModalCancelar();
+        this.cargarSedes();
+      },
+      error: (err) => {
+        console.error('Error al cancelar clínica:', err);
+      }
+    });
   }
 }
