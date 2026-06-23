@@ -1,85 +1,274 @@
-<div class="dashboard-header">
-    <h2>Prueba de Seguridad: Datos de la BD</h2>
-    <p>Verificando el volcado de datos con token JWT.</p>
+<div class="dashboard-header d-flex justify-content-between align-items-center">
+  <div>
+    <h2>Gestión de Administradores</h2>
+    <p>Administra las cuentas de los encargados de cada clínica.</p>
   </div>
-  
-  <div class="status-panel" 
-       [class.success]="estado() === 'exito'" 
-       [class.error]="estado() === 'error'"
-       [class.loading]="estado() === 'cargando'">
-    
-    <span class="pi" 
-          [class.pi-spin]="estado() === 'cargando'"
-          [class.pi-spinner]="estado() === 'cargando'"
-          [class.pi-check-circle]="estado() === 'exito'"
-          [class.pi-times-circle]="estado() === 'error'">
-    </span>
-    <strong>{{ mensaje() }}</strong>
+
+  <button class="btn-primary" (click)="abrirNuevoAdmin()">
+    <span class="pi pi-plus"></span>
+    Nuevo Admin Clínica
+  </button>
+</div>
+
+<div class="card table-card">
+  <div class="table-header">
+    <h3 class="card-title mb-0">Administradores de Clínica</h3>
+
+    <div class="search-box">
+      <span class="pi pi-search"></span>
+      <input
+        type="text"
+        placeholder="Buscar administrador..."
+        (input)="buscarAdmin($event)">
+    </div>
   </div>
-  
-  @if (estado() === 'exito') {
-    <div class="card table-card">
-      <div class="table-header">
-        <h3 class="card-title mb-0">Registros Obtenidos</h3>
+
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Administrador</th>
+          <th>Contacto</th>
+          <th>Sede asignada</th>
+          <th>Rol</th>
+          <th>Estado</th>
+          <th>Fecha creación</th>
+          <th class="text-center">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (admin of administradoresFiltrados(); track obtenerId(admin)) {
+          <tr>
+            <td>
+              <div class="info-cell">
+                <strong>{{ admin.nombre }} {{ admin.apellido }}</strong>
+                <span><i class="pi pi-user me-1"></i> {{ admin.username }}</span>
+              </div>
+            </td>
+
+            <td>
+              <div class="info-cell">
+                <span><i class="pi pi-envelope me-1"></i> {{ admin.correo }}</span>
+                <span><i class="pi pi-phone me-1"></i> {{ admin.telefono }}</span>
+              </div>
+            </td>
+
+            <td>
+              <div class="info-cell">
+                <span><i class="pi pi-building me-1"></i> {{ nombreClinica(admin.clinicaId) }}</span>
+              </div>
+            </td>
+
+            <td>
+              <span class="badge-rol">{{ admin.rol }}</span>
+            </td>
+
+            <td>
+              <span
+                class="badge-status"
+                [class.active]="admin.activo === true"
+                [class.inactive]="admin.activo === false">
+                {{ admin.activo ? 'ACTIVO' : 'INACTIVO' }}
+              </span>
+            </td>
+
+            <td>
+              <span class="date-cell">
+                <i class="pi pi-calendar me-1"></i>
+                {{ admin.fechaCreacion | date:'dd/MM/yyyy' }}
+              </span>
+            </td>
+
+            <td class="actions-cell">
+              <div class="actions-wrapper">
+                <button
+                  class="btn-icon edit"
+                  title="Editar administrador"
+                  (click)="abrirEditarAdmin(admin)">
+                  <span class="pi pi-pencil"></span>
+                </button>
+
+                <button
+                  class="btn-icon power"
+                  [class.off]="!admin.activo"
+                  [title]="admin.activo ? 'Dar de baja' : 'Activar administrador'"
+                  (click)="cambiarEstado(admin)">
+                  <span class="pi pi-power-off"></span>
+                </button>
+
+                <select
+                  class="role-select"
+                  [value]="admin.rol"
+                  (change)="abrirModalCambioRol(admin, $any($event.target).value); $any($event.target).value = admin.rol">
+                  <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                  <option value="ADMIN_CLINICA">ADMIN_CLINICA</option>
+                  <option value="MEDICO">MEDICO</option>
+                  <option value="RECEPCIONISTA">RECEPCIONISTA</option>
+                  <option value="ENFERMERA">ENFERMERA</option>
+                  <option value="PERSONAL_ADMINISTRATIVO">PERSONAL_ADMINISTRATIVO</option>
+                </select>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="text-center py-4 text-muted">
+              No se encontraron administradores de clínica.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@if (mostrarModal()) {
+  <div class="modal-backdrop-custom">
+    <div class="modal-card-custom">
+      <div class="modal-header-custom">
+        <div>
+          <h3>{{ modoEditar() ? 'Editar Admin Clínica' : 'Nuevo Admin Clínica' }}</h3>
+          <p>
+            {{ modoEditar() ? 'Modifica los datos del administrador.' : 'Crea una cuenta para un encargado de sede.' }}
+          </p>
+        </div>
+
+        <button class="btn-close-custom" (click)="cerrarModal()">
+          <span class="pi pi-times"></span>
+        </button>
       </div>
-  
-      <div class="table-responsive">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Usuario / Credencial</th>
-              <th>Contacto</th>
-              <th>Rol / Sede</th>
-              <th>Estado</th>
-              <th>Fecha Creación</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (usr of usuarios(); track usr.id_usuario) {
-              <tr>
-                <td><strong>#{{ usr.id_usuario }}</strong></td>
-                
-                <td>
-                  <div class="info-cell">
-                    <strong>{{ usr.nombre }} {{ usr.apellido }}</strong>
-                    <span><i class="pi pi-user me-1"></i> @{{ usr.username }}</span>
-                  </div>
-                </td>
-                
-                <td>
-                  <div class="info-cell">
-                    <span><i class="pi pi-envelope me-1"></i> {{ usr.correo }}</span>
-                    <span><i class="pi pi-phone me-1"></i> {{ usr.telefono }}</span>
-                  </div>
-                </td>
-                
-                <td>
-                  <div class="info-cell">
-                    <span class="badge-rol">{{ usr.rol }}</span>
-                    <span class="text-muted mt-1"><i class="pi pi-building me-1"></i> Sede {{ usr.clinica_id }}</span>
-                  </div>
-                </td>
-                
-                <td>
-                  <span class="badge-status" 
-                        [class.active]="usr.activo === 1 || usr.activo === true" 
-                        [class.inactive]="usr.activo === 0 || usr.activo === false">
-                    {{ (usr.activo === 1 || usr.activo === true) ? 'Activo' : 'Inactivo' }}
-                  </span>
-                </td>
-                
-                <td>
-                  <span class="date-cell"><i class="pi pi-calendar me-1"></i> {{ usr.fecha_creacion | date:'dd/MM/yyyy' }}</span>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="6" class="text-center py-4 text-muted">La conexión fue exitosa, pero no hay registros para mostrar.</td>
-              </tr>
+
+      <form [formGroup]="form" (ngSubmit)="guardarAdmin()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Usuario</label>
+            <input type="text" formControlName="username" placeholder="admincentral">
+            @if (campoInvalido('username')) {
+              <small>Ingrese un usuario válido.</small>
             }
-          </tbody>
-        </table>
+          </div>
+
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input
+              type="password"
+              formControlName="password"
+              [placeholder]="modoEditar() ? 'Opcional si no desea cambiarla' : 'Mínimo 6 caracteres'">
+          </div>
+
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" formControlName="nombre" placeholder="Carlos">
+            @if (campoInvalido('nombre')) {
+              <small>Ingrese el nombre.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Apellido</label>
+            <input type="text" formControlName="apellido" placeholder="Ramírez">
+            @if (campoInvalido('apellido')) {
+              <small>Ingrese el apellido.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Correo</label>
+            <input type="email" formControlName="correo" placeholder="admin@novasalud.com">
+            @if (campoInvalido('correo')) {
+              <small>Ingrese un correo válido.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="tel" formControlName="telefono" placeholder="987654321" maxlength="9">
+            @if (campoInvalido('telefono')) {
+              <small>Debe empezar con 9 y tener 9 dígitos.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Clínica asignada</label>
+            <select formControlName="clinicaId">
+              <option [ngValue]="null">Seleccione una clínica</option>
+              @for (clinica of clinicas(); track clinica.id) {
+                <option [ngValue]="clinica.id">{{ clinica.nombre }}</option>
+              }
+            </select>
+            @if (campoInvalido('clinicaId')) {
+              <small>Seleccione una clínica.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Rol</label>
+            <select formControlName="rol">
+              <option value="ADMIN_CLINICA">ADMIN_CLINICA</option>
+              <option value="MEDICO">MEDICO</option>
+              <option value="RECEPCIONISTA">RECEPCIONISTA</option>
+              <option value="ENFERMERA">ENFERMERA</option>
+              <option value="PERSONAL_ADMINISTRATIVO">PERSONAL_ADMINISTRATIVO</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-modal-secondary" (click)="cerrarModal()">
+            Cancelar
+          </button>
+
+          <button type="submit" class="btn-modal-primary" [disabled]="cargando()">
+            <span class="pi pi-save"></span>
+            {{ cargando() ? 'Guardando...' : (modoEditar() ? 'Guardar Cambios' : 'Crear Administrador') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (mostrarModalRol()) {
+  <div class="modal-backdrop-custom">
+    <div class="modal-card-custom rol-modal">
+      <div class="modal-icon-role">
+        <span class="pi pi-shield"></span>
+      </div>
+
+      <h3>Cambiar rol de usuario</h3>
+
+      <p>
+        ¿Seguro que deseas cambiar el rol de
+        <strong>{{ adminParaRol()?.nombre }} {{ adminParaRol()?.apellido }}</strong>
+        a <strong>{{ rolNuevoSeleccionado() }}</strong>?
+      </p>
+
+      <div class="role-warning">
+        @if (rolNuevoSeleccionado() === 'SUPER_ADMIN') {
+          Este usuario tendrá acceso total al sistema: clínicas, usuarios, configuraciones y administración global.
+        } @else if (rolNuevoSeleccionado() === 'ADMIN_CLINICA') {
+          Este usuario podrá administrar la clínica asignada y sus operaciones internas.
+        } @else if (rolNuevoSeleccionado() === 'MEDICO') {
+          Este usuario pasará a tener permisos médicos dentro del sistema.
+        } @else if (rolNuevoSeleccionado() === 'RECEPCIONISTA') {
+          Este usuario podrá gestionar recepción, pacientes y programación de citas.
+        } @else if (rolNuevoSeleccionado() === 'ENFERMERA') {
+          Este usuario tendrá permisos relacionados con atención y apoyo clínico.
+        } @else {
+          Este usuario pasará a un rol administrativo menor.
+        }
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-modal-secondary" (click)="cerrarModalCambioRol()">
+          Cancelar
+        </button>
+
+        <button class="btn-modal-primary" (click)="confirmarCambioRol()">
+          Confirmar cambio
+        </button>
       </div>
     </div>
-  }
+  </div>
+}
