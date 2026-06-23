@@ -1,25 +1,61 @@
 <div class="paciente-layout">
   <nav class="sidebar">
-    <div class="brand">
+    <div class="brand-section">
+      <div class="logo-box">
+        <img src="/logo.png" alt="Logo Nova Salud" class="logo-placeholder">
+      </div>
       <h2>Nova Salud</h2>
+      <span class="role-badge">PACIENTE</span>
     </div>
+
     <ul class="nav-links">
-      <li><a routerLink="/panel/paciente/dashboard" routerLinkActive="active"><i class="pi pi-home"></i> Dashboard</a></li>
-      <li><a routerLink="/panel/paciente/citas" routerLinkActive="active"><i class="pi pi-calendar"></i> Mis citas</a></li>
-      <li><a routerLink="/panel/paciente/historial-clinico" routerLinkActive="active"><i class="pi pi-book"></i> Mi historia clínica</a></li>
-      <li><a routerLink="/panel/paciente/recetas" routerLinkActive="active"><i class="pi pi-file-o"></i> Mis recetas</a></li>
-      <li><a routerLink="/panel/paciente/archivo-clinico" routerLinkActive="active"><i class="pi pi-folder"></i> Mis archivos clínicos</a></li>
-      <li class="logout-item"><a (click)="logout()" class="logout-btn"><i class="pi pi-sign-out"></i> Salir</a></li>
+      <li>
+        <a routerLink="/panel/paciente/datos-paciente" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <i class="pi pi-chart-bar"></i> Dashboard
+        </a>
+      </li>
+      <li>
+        <a routerLink="/panel/paciente/citas" routerLinkActive="active">
+          <i class="pi pi-calendar"></i> Mis citas
+        </a>
+      </li>
+      <li>
+        <a routerLink="/panel/paciente/historial-clinico" routerLinkActive="active">
+          <i class="pi pi-book"></i> Mi historia clínica
+        </a>
+      </li>
+      <li>
+        <a routerLink="/panel/paciente/recetas" routerLinkActive="active">
+          <i class="pi pi-file-o"></i> Mis recetas
+        </a>
+      </li>
+      <li>
+        <a routerLink="/panel/paciente/archivos-clinicos" routerLinkActive="active">
+          <i class="pi pi-folder"></i> Mis archivos clínicos
+        </a>
+      </li>
     </ul>
   </nav>
 
-  <main class="content">
-    <header class="header">
-      <h1>Bienvenido, {{ nombrePaciente() }}</h1>
+  <div class="main-area">
+    <header class="top-navbar">
+      <div class="nav-title">
+        <h3>Panel de Control del Paciente</h3>
+      </div>
+      <button class="btn-logout" (click)="logout()">
+        <i class="pi pi-sign-out"></i> Salir
+      </button>
     </header>
-    
-    <div class="dashboard-body">
-      <router-outlet></router-outlet>
-    </div>
-  </main>
+
+    <main class="content-wrapper">
+      <div class="dashboard-header">
+        <h2>Bienvenido, {{ nombrePaciente() }}</h2>
+        <p>Tu portal personal de salud y bienestar.</p>
+      </div>
+      
+      <div class="dashboard-body">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
 </div>

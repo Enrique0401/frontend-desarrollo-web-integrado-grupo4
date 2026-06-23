@@ -71,9 +71,6 @@ export const routes: Routes = [
         path: 'super-admin',
         canActivate: [roleGuard],
         data: { roles: ['SUPER_ADMIN'] as Rol[] },
-
-        // Layout principal del Super Admin
-        // Aquí se carga el nav/sidebar/header una sola vez
         loadComponent: () =>
           import('./components/super-admin/nav-super-admin/nav-super-admin').then(
             (m) => m.NavSuperAdmin,
@@ -186,6 +183,49 @@ export const routes: Routes = [
           import('./components/paciente/pantalla-paciente/pantalla-paciente').then(
             (m) => m.PantallaPaciente,
           ),
+
+        children: [
+          {
+            path: '',
+            redirectTo: 'datos-paciente',
+            pathMatch: 'full',
+          },
+          {
+            path: 'datos-paciente',
+            loadComponent: () =>
+              import('./components/paciente/datos-paciente/datos-paciente').then(
+                (m) => m.DatosPaciente,
+              ),
+          },
+          {
+            path: 'citas',
+            loadComponent: () =>
+              import('./components/paciente/mis-citas/mis-citas').then(
+                (m) => m.MisCitas,
+              ),
+          },
+          {
+            path: 'historial-clinico',
+            loadComponent: () =>
+              import('./components/paciente/mi-historia-clinica/mi-historia-clinica').then(
+                (m) => m.MiHistoriaClinica,
+              ),
+          },
+          {
+            path: 'recetas',
+            loadComponent: () =>
+              import('./components/paciente/mis-recetas/mis-recetas').then(
+                (m) => m.MisRecetas,
+              ),
+          },
+          {
+            path: 'archivos-clinicos',
+            loadComponent: () =>
+              import('./components/paciente/mis-archivos-clinicos/mis-archivos-clinicos').then(
+                (m) => m.MisArchivosClinicos,
+              ),
+          }
+        ],
       },
     ],
   },

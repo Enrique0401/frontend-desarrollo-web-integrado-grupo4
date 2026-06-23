@@ -1,1 +1,78 @@
-<p>mis-citas works!</p>
+<div class="citas-container">
+    <div class="header-section">
+        <h2>Mis Citas Médicas</h2>
+        <p>Revisa el historial y tus próximas atenciones programadas.</p>
+    </div>
+
+    @if (cargando) {
+    <div class="estado-mensaje">
+        <i class="pi pi-spin pi-spinner icon-cargando"></i>
+        <p>Buscando tu historial de citas...</p>
+    </div>
+    }
+
+    @if (!cargando && errorMensaje) {
+    <div class="estado-mensaje error">
+        <i class="pi pi-exclamation-triangle icon-error"></i>
+        <p>{{ errorMensaje }}</p>
+    </div>
+    }
+
+    @if (!cargando && citas.length === 0 && !errorMensaje) {
+    <div class="estado-mensaje vacio">
+        <i class="pi pi-calendar-times icon-vacio"></i>
+        <p>No tienes citas médicas registradas en Nova Salud.</p>
+    </div>
+    }
+
+    @if (!cargando && citas.length > 0) {
+    <div class="citas-grid">
+        @for (cita of citas; track cita.id) {
+        <div class="cita-card">
+            <div class="cita-header">
+                <span class="cita-id">Código: #{{ cita.id }}</span>
+                <span class="badge" [ngClass]="obtenerClaseEstado(cita.estado)">{{ cita.estado }}</span>
+            </div>
+
+            <div class="cita-body">
+                <div class="info-row">
+                    <div class="icon-wrap"><i class="pi pi-calendar"></i></div>
+                    <div class="info-text">
+                        <strong>Fecha y Hora de Atención</strong>
+                        <span class="detalle-fecha">Inicio: {{ formatearFecha(cita.fechaHora) }}</span>
+                        <span class="detalle-fecha">Fin: {{ formatearFecha(cita.fechaFin) }}</span>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="icon-wrap"><i class="pi pi-user"></i></div>
+                    <div class="info-text">
+                        <strong>Médico Tratante</strong>
+                        <span>Dr(a). {{ cita.medico?.nombre || 'Por asignar' }} {{ cita.medico?.apellido || '' }}</span>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="icon-wrap"><i class="pi pi-info-circle"></i></div>
+                    <div class="info-text">
+                        <strong>Motivo de Consulta</strong>
+                        <span>{{ cita.motivoConsulta || 'Consulta general' }}</span>
+                    </div>
+                </div>
+
+                @if (cita.notas || cita.notasMedico) {
+                <div class="notas-box">
+                    <div class="notas-title"><i class="pi pi-file-edit"></i> Notas de la consulta:</div>
+                    <p>{{ cita.notas || cita.notasMedico }}</p>
+                </div>
+                }
+            </div>
+
+            <div class="cita-footer">
+                <span>Fecha de creación del ticket: {{ formatearFecha(cita.fechaCreacion) }}</span>
+            </div>
+        </div>
+        }
+    </div>
+    }
+</div>
