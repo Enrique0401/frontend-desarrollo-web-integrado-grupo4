@@ -1,1 +1,58 @@
-<p>mis-archivos-clinicos works!</p>
+<div class="historia-container">
+    <div class="header-section">
+      <h2>Mis Archivos Médicos</h2>
+      <p>Revisa tus archivos médicos personales</p>
+    </div>
+  
+    @if (cargando) {
+      <div class="estado-mensaje">
+        <i class="pi pi-spin pi-spinner icon-cargando"></i>
+        <p>Buscando tus registros médicos...</p>
+      </div>
+    }
+  
+    @if (!cargando && errorMensaje) {
+      <div class="estado-mensaje error">
+        <i class="pi pi-exclamation-triangle icon-error"></i>
+        <p>{{ errorMensaje }}</p>
+      </div>
+    }
+  
+    @if (!cargando && archivos.length === 0 && !errorMensaje) {
+      <div class="estado-mensaje vacio">
+        <i class="pi pi-folder-open icon-vacio"></i>
+        <p>Aún no tienes archivos clínicos registrados en tu historial.</p>
+      </div>
+    }
+  
+    @if (!cargando && archivos.length > 0) {
+      <div class="archivos-list">
+        @for (archivo of archivos; track archivo.id) {
+          <div class="archivo-card">
+            
+            <div class="icono-tipo">
+              <i class="pi {{ obtenerIconoPorTipo(archivo.tipoArchivo) }}"></i>
+            </div>
+            
+            <div class="archivo-info">
+              <h3 class="nombre-archivo">{{ archivo.nombreArchivo }}</h3>
+              <p class="descripcion-archivo">{{ archivo.descripcion }}</p>
+              
+              <div class="meta-data">
+                <span class="badge-tipo">{{ archivo.tipoArchivo | uppercase }}</span>
+                <span><i class="pi pi-calendar"></i> Subido el: {{ formatearFecha(archivo.fechaSubida) }}</span>
+                <span><i class="pi pi-stethoscope"></i> Cita ID: #{{ archivo.consultaMedica?.id || 'N/A' }}</span>
+              </div>
+            </div>
+            
+            <div class="archivo-acciones">
+              <a [href]="archivo.rutaArchivo" target="_blank" class="btn-abrir" rel="noopener noreferrer">
+                <i class="pi pi-external-link"></i> Abrir
+              </a>
+            </div>
+  
+          </div>
+        }
+      </div>
+    }
+  </div>

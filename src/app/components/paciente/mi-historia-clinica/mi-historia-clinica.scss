@@ -1,0 +1,102 @@
+$primary: #26b8b5;
+$secondary: #1a202c;
+$surface: #ffffff;
+$text-muted: #64748b;
+$border: #e2e8f0;
+
+.historial-container { width: 100%; }
+
+.header-section {
+  margin-bottom: 2rem;
+  h2 { margin: 0 0 0.5rem 0; color: $secondary; }
+  p { margin: 0; color: $text-muted; }
+}
+
+.estado-mensaje {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 4rem 0; color: $text-muted; gap: 1rem;
+  background: $surface; border-radius: 12px; border: 1px dashed $border;
+  p { font-weight: 600; margin: 0; }
+  .icon-cargando, .icon-vacio { font-size: 2.5rem; color: $primary; }
+  &.error { color: #ef4444; border-color: #fca5a5; background: #fef2f2; .icon-error { font-size: 2.5rem; } }
+}
+
+/* Tarjeta del Expediente */
+.expediente-card {
+  background: $surface; border: 1px solid $border; border-radius: 12px;
+  overflow: hidden; margin-bottom: 2.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.expediente-header {
+  background: linear-gradient(135deg, $primary, #1e9996);
+  padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;
+  
+  .titulo {
+    display: flex; align-items: center; gap: 0.8rem; color: white;
+    h3 { margin: 0; font-size: 1.3rem; font-weight: 700; }
+    i { font-size: 1.4rem; }
+  }
+
+  .badge-clinica {
+    background: rgba(255,255,255,0.2); color: white; padding: 0.4rem 0.8rem;
+    border-radius: 6px; font-weight: 600; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.4);
+  }
+}
+
+.expediente-body {
+  padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  
+  .info-item {
+    display: flex; flex-direction: column;
+    strong { font-size: 0.85rem; color: $text-muted; text-transform: uppercase; margin-bottom: 0.2rem; }
+    span { font-size: 1.05rem; color: $secondary; font-weight: 600; }
+  }
+}
+
+/* Línea de Tiempo */
+.timeline-section {
+  h3 { display: flex; align-items: center; gap: 0.5rem; color: $secondary; font-size: 1.2rem; margin-bottom: 1.5rem; i { color: $primary; } }
+}
+
+.timeline {
+  position: relative; padding-left: 2rem;
+  &::before {
+    content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: $border;
+  }
+}
+
+.timeline-item {
+  position: relative; margin-bottom: 1.5rem;
+  
+  .timeline-marker {
+    position: absolute; left: -2rem; top: 0.3rem; width: 16px; height: 16px;
+    background: white; border: 3px solid $primary; border-radius: 50%; z-radius: 2;
+  }
+}
+
+.timeline-content {
+  background: $surface; border: 1px solid $border; padding: 1.25rem; border-radius: 10px;
+  
+  .consulta-header {
+    display: flex; justify-content: space-between; margin-bottom: 0.8rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem;
+    strong { color: $primary; font-size: 0.95rem; }
+  }
+
+  .consulta-body {
+    p { margin: 0 0 0.4rem 0; font-size: 0.95rem; color: #334155; }
+    strong { color: $secondary; }
+  }
+}
+
+.estado-badge {
+  padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700;
+  &.completada { background: #dcfce7; color: #0f766e; }
+  &.pendiente { background: #fef9c3; color: #b45309; }
+  &.cancelada { background: #fee2e2; color: #b91c1c; }
+}
+
+.sin-consultas { color: $text-muted; font-style: italic; }
+
+@media (max-width: 768px) {
+  .expediente-body { grid-template-columns: 1fr; }
+}
