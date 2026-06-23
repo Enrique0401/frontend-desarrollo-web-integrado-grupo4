@@ -1,0 +1,246 @@
+$primary: #26b8b5;
+$secondary: #1a202c;
+$surface: #ffffff;
+$text-muted: #64748b;
+$border: #e2e8f0;
+
+.recetas-container {
+  width: 100%;
+}
+
+.header-section {
+  margin-bottom: 2rem;
+  h2 {
+    margin: 0 0 0.5rem 0;
+    color: $secondary;
+  }
+  p {
+    margin: 0;
+    color: $text-muted;
+  }
+}
+
+.estado-mensaje {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
+  color: $text-muted;
+  gap: 1rem;
+  background: $surface;
+  border-radius: 12px;
+  border: 1px dashed $border;
+
+  p { font-weight: 600; margin: 0; }
+  .icon-cargando, .icon-vacio { font-size: 2.5rem; color: $primary; }
+  
+  &.error {
+    color: #ef4444;
+    border-color: #fca5a5;
+    background: #fef2f2;
+    .icon-error { font-size: 2.5rem; }
+  }
+}
+
+.recetas-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.receta-card {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.025);
+}
+
+.receta-header {
+  background: #f8fafc;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid $border;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  .receta-id {
+    font-weight: 700;
+    color: $secondary;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    i { color: $primary; }
+  }
+
+  .fecha-emision {
+    font-size: 0.9rem;
+    display: flex;
+    gap: 0.4rem;
+
+    strong { font-weight: 700; color: $text-muted; }
+    span { font-weight: 400; color: $secondary; }
+  }
+}
+
+.receta-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* --- GRID DE INFORMACIÓN GENERAL --- */
+.meta-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  background: #fdfdfd;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba($border, 0.5);
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+
+  i {
+    font-size: 1.1rem;
+    margin-top: 0.2rem;
+    &.icon-blue { color: $primary; }
+  }
+
+  .text-group {
+    display: flex;
+    flex-direction: column;
+
+    strong {
+      font-weight: 700; // Título grueso
+      color: $secondary;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.2rem;
+    }
+
+    span {
+      font-weight: 400; // Valor normal
+      color: #334155;
+      font-size: 0.95rem;
+    }
+  }
+}
+
+/* --- SECCIÓN Y TABLA DE MEDICAMENTOS --- */
+.medicamentos-seccion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .seccion-titulo {
+    font-weight: 700;
+    color: $secondary;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    i { color: $primary; }
+  }
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.medicamentos-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+
+  thead {
+    background-color: #f1f5f9;
+    th {
+      padding: 0.75rem 1rem;
+      color: $text-muted;
+      font-weight: 700;
+      border-bottom: 2px solid $border;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid $border;
+      transition: background-color 0.15s;
+      &:hover { background-color: #f8fafc; }
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      color: #334155;
+      font-weight: 400; // Datos normales
+
+      &.txt-comercial {
+        font-weight: 600;
+        color: $secondary;
+      }
+    }
+  }
+}
+
+.via-tag {
+  background: rgba($primary, 0.08);
+  color: #147a78;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* --- CUADRO DE INDICACIONES --- */
+.indicaciones-box {
+  background: #f0fdfa;
+  border-left: 4px solid $primary;
+  padding: 1rem;
+  border-radius: 0 10px 10px 0;
+
+  .indicaciones-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #115e5c;
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+
+    strong { font-weight: 700; }
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #134e4a;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+}
+
+@media (max-width: 768px) {
+  .meta-info-grid { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+
+.row-dosis {
+    background-color: rgba($primary, 0.02);
+    td {
+      padding: 0.5rem 1rem 1rem 1rem !important;
+      border-bottom: 2px solid $border !important;
+      color: $text-muted;
+    }
+  }

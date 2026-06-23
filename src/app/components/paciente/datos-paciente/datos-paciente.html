@@ -1,1 +1,89 @@
-<p>datos-paciente works!</p>
+<div class="datos-container">
+
+  @if (cargando) {
+    <div class="estado-mensaje">
+      <i class="pi pi-spin pi-spinner icon-cargando"></i>
+      <p>Cargando tu historial médico...</p>
+    </div>
+  }
+
+  @if (!cargando && errorMensaje) {
+    <div class="estado-mensaje error">
+      <i class="pi pi-exclamation-triangle icon-error"></i>
+      <p>{{ errorMensaje }}</p>
+    </div>
+  }
+
+  @if (!cargando && paciente) {
+    <div class="cards-grid">
+      
+      <div class="data-card">
+        <div class="card-header">
+          <div class="icon-box"><i class="pi pi-user"></i></div>
+          <h3>Información Personal</h3>
+        </div>
+        <div class="card-body">
+          <div class="data-row"><span>Nombre:</span> <strong>{{ verificarDato(paciente.nombre) }}</strong></div>
+          <div class="data-row"><span>Apellido:</span> <strong>{{ verificarDato(paciente.apellido) }}</strong></div>
+          <div class="data-row"><span>Género:</span> <strong>{{ verificarDato(paciente.genero) }}</strong></div>
+          <div class="data-row"><span>Fecha de Nac.:</span> <strong>{{ verificarDato(paciente.fechaNacimiento) }}</strong></div>
+          <div class="data-row"><span>Correo:</span> <strong>{{ verificarDato(paciente.correo) }}</strong></div>
+          <div class="data-row"><span>Teléfono:</span> <strong>{{ verificarDato(paciente.telefono) }}</strong></div>
+          <div class="data-row full-width-row">
+            <span>Dirección Domiciliaria:</span> 
+            <strong [class.pendiente]="!paciente.direccion">{{ verificarDato(paciente.direccion) }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="data-card">
+        <div class="card-header">
+          <div class="icon-box"><i class="pi pi-id-card"></i></div>
+          <h3>Identificación y Seguro</h3>
+        </div>
+        <div class="card-body">
+          <div class="data-row"><span>Tipo Documento:</span> <strong>{{ verificarDato(paciente.tipoDocumento) }}</strong></div>
+          <div class="data-row"><span>N° Documento:</span> <strong>{{ verificarDato(paciente.numeroDocumento) }}</strong></div>
+          <div class="data-row"><span>Miembro desde:</span> <strong>{{ verificarDato(paciente.fechaRegistro) }}</strong></div>
+          
+          <hr class="divider">
+
+          <div class="data-row"><span>Seguro Médico:</span> <strong>{{ verificarDato(paciente.seguroMedico) }}</strong></div>
+          <div class="data-row"><span>N° de Seguro:</span> 
+            <strong [class.pendiente]="!paciente.numeroSeguro">{{ verificarDato(paciente.numeroSeguro) }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="data-card full-width">
+        <div class="card-header">
+          <div class="icon-box"><i class="pi pi-heart-fill"></i></div>
+          <h3>Datos Médicos y Emergencias</h3>
+          <span class="badge-readonly"><i class="pi pi-lock"></i> Solo lectura</span>
+        </div>
+        <div class="card-body grid-2-cols">
+          <div class="data-row"><span>Grupo Sanguíneo:</span> <strong>{{ verificarDato(paciente.grupoSanguineo) }}</strong></div>
+          <div class="data-row"><span>Alergias:</span> 
+            <strong [class.pendiente]="!paciente.alergias">{{ verificarDato(paciente.alergias) }}</strong>
+          </div>
+          <div class="data-row"><span>Contacto Emergencia:</span> <strong>{{ verificarDato(paciente.contactoEmergencia) }}</strong></div>
+          <div class="data-row"><span>Tel. Emergencia:</span> <strong>{{ verificarDato(paciente.telefonoEmergencia) }}</strong></div>
+          
+          <div class="data-row full-col">
+            <span>Antecedentes Personales:</span> 
+            <div class="text-box" [class.pendiente]="!paciente.antecedentesPersonales">
+              {{ verificarDato(paciente.antecedentesPersonales) }}
+            </div>
+          </div>
+          <div class="data-row full-col">
+            <span>Antecedentes Familiares:</span> 
+            <div class="text-box" [class.pendiente]="!paciente.antecedentesFamiliares">
+              {{ verificarDato(paciente.antecedentesFamiliares) }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+</div>

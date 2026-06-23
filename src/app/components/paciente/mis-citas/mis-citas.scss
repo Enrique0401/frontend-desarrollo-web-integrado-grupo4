@@ -1,0 +1,201 @@
+$primary: #26b8b5;
+$secondary: #1a202c;
+$surface: #ffffff;
+$text-muted: #64748b;
+$border: #e2e8f0;
+
+.citas-container {
+  width: 100%;
+}
+
+.header-section {
+  margin-bottom: 2rem;
+  h2 {
+    margin: 0 0 0.5rem 0;
+    color: $secondary;
+  }
+  p {
+    margin: 0;
+    color: $text-muted;
+  }
+}
+
+.estado-mensaje {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
+  color: $text-muted;
+  gap: 1rem;
+  background: $surface;
+  border-radius: 12px;
+  border: 1px dashed $border;
+
+  p { font-weight: 600; margin: 0; }
+  .icon-cargando, .icon-vacio { font-size: 2.5rem; color: $primary; }
+  
+  &.error {
+    color: #ef4444;
+    border-color: #fca5a5;
+    background: #fef2f2;
+    .icon-error { font-size: 2.5rem; }
+  }
+}
+
+.citas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.cita-card {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.cita-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid $border;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+
+  .cita-id {
+    font-weight: 700;
+    color: $text-muted;
+    font-size: 0.85rem;
+  }
+}
+
+.cita-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex-grow: 1;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+
+  .icon-wrap {
+    background: rgba($primary, 0.1);
+    color: $primary;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  /* --- TEXTOS INVERTIDOS --- */
+  .info-text {
+    display: flex;
+    flex-direction: column;
+    
+    strong {
+      color: $secondary;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.2rem;
+      font-weight: 700; // Título grueso
+    }
+    
+    span {
+      color: #334155; // Texto de dato, un poco más oscuro que el muted
+      font-size: 0.95rem;
+      line-height: 1.3;
+      font-weight: 400; // Valor normal
+    }
+
+    .detalle-fecha {
+      font-size: 0.9rem;
+      color: #475569;
+      margin-top: 0.15rem;
+    }
+  }
+}
+
+.notas-box {
+  background: #fffbeb;
+  border-left: 4px solid #f50b0b;
+  padding: 0.85rem;
+  border-radius: 0 8px 8px 0;
+  margin-top: 0.5rem;
+
+  .notas-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #b40909;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #780f0f;
+    line-height: 1.4;
+  }
+}
+
+.cita-footer {
+  padding: 0.75rem 1.25rem;
+  background: #f8fafc;
+  border-top: 1px solid $border;
+  text-align: right;
+  
+  span {
+    font-size: 0.75rem;
+    color: #94a3b8;
+  }
+}
+
+/* --- COLORES PARA LOS ESTADOS (ENUMS) --- */
+.badge {
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+
+  &.badge-programada {
+    background-color: #e0f2fe; color: #0284c7;
+  }
+  &.badge-confirmada {
+    background-color: #f0fdf4; color: #16a34a;
+  }
+  &.badge-completada {
+    background-color: #f1f5f9; color: #475569;
+  }
+  &.badge-cancelada {
+    background-color: #fef2f2; color: #dc2626;
+  }
+  &.badge-no-asistio {
+    background-color: #fefce8; color: #d90606;
+  }
+  &.badge-default {
+    background-color: #f1f5f9; color: $text-muted;
+  }
+}
