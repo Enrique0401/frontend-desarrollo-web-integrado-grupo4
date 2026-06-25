@@ -17,7 +17,7 @@ export class CitaService {
 
     if (token) {
       return new HttpHeaders({
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       });
     }
 
@@ -26,11 +26,21 @@ export class CitaService {
 
   obtenerCitas(): Observable<Cita[]> {
     return this.http.get<Cita[]>(this.apiUrl, {
-      headers: this.obtenerCabeceras()
+      headers: this.obtenerCabeceras(),
     });
   }
-
+  obtenerCitasClinicaPorRango(clinicaId: number, inicio: string, fin: string): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/clinica/${clinicaId}/rango?inicio=${inicio}&fin=${fin}`,
+      { headers: this.obtenerCabeceras() },
+    );
+  }
   actualizarSignal(datosBD: Cita[]): void {
     this._citas.set(datosBD);
+  }
+  contarPorClinica(clinicaId: number): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/clinica/${clinicaId}/contar`, {
+      headers: this.obtenerCabeceras(),
+    });
   }
 }

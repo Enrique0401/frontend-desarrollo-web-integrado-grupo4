@@ -1,0 +1,147 @@
+<div class="dashboard-header">
+  <div>
+    <h2>Gestión del Personal</h2>
+    <p>Administra médicos, enfermeras, recepcionistas y personal administrativo de tu clínica.</p>
+  </div>
+
+  <button class="btn-primary" (click)="nuevoPersonal()">
+    <span class="pi pi-plus"></span>
+    Nuevo Personal
+  </button>
+</div>
+
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-icon">
+      <span class="pi pi-users"></span>
+    </div>
+    <div>
+      <p>Total Personal</p>
+      <h3>{{ totalPersonal() }}</h3>
+    </div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon">
+      <span class="pi pi-user-plus"></span>
+    </div>
+    <div>
+      <p>Médicos</p>
+      <h3>{{ totalMedicos() }}</h3>
+    </div>
+  </div>
+
+  <div class="metric-card success">
+    <div class="metric-icon">
+      <span class="pi pi-heart"></span>
+    </div>
+    <div>
+      <p>Enfermeras</p>
+      <h3>{{ totalEnfermeras() }}</h3>
+    </div>
+  </div>
+
+  <div class="metric-card warning">
+    <div class="metric-icon">
+      <span class="pi pi-desktop"></span>
+    </div>
+    <div>
+      <p>Recepción</p>
+      <h3>{{ totalRecepcionistas() }}</h3>
+    </div>
+  </div>
+</div>
+
+<div class="card table-card">
+  <div class="table-header">
+    <h3>Listado de Personal</h3>
+
+    <div class="search-box">
+      <span class="pi pi-search"></span>
+      <input
+        type="text"
+        placeholder="Buscar trabajador..."
+        (input)="buscarPersonal($event)">
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Trabajador</th>
+          <th>Contacto</th>
+          <th>Rol</th>
+          <th>Estado</th>
+          <th>Fecha creación</th>
+          <th class="text-center">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (persona of personalFiltrado(); track obtenerId(persona)) {
+          <tr>
+            <td>
+              <div class="info-cell">
+                <strong>{{ persona.nombre }} {{ persona.apellido }}</strong>
+                <span><i class="pi pi-user me-1"></i>{{ persona.username }}</span>
+              </div>
+            </td>
+
+            <td>
+              <div class="info-cell">
+                <span><i class="pi pi-envelope me-1"></i>{{ persona.correo }}</span>
+                <span><i class="pi pi-phone me-1"></i>{{ persona.telefono }}</span>
+              </div>
+            </td>
+
+            <td>
+              <span class="badge-rol">{{ persona.rol }}</span>
+            </td>
+
+            <td>
+              <span
+                class="badge-status"
+                [class.active]="persona.activo === true"
+                [class.inactive]="persona.activo === false">
+                {{ persona.activo ? 'ACTIVO' : 'INACTIVO' }}
+              </span>
+            </td>
+
+            <td>
+              <span class="date-cell">
+                <i class="pi pi-calendar me-1"></i>
+                {{ persona.fechaCreacion | date:'dd/MM/yyyy' }}
+              </span>
+            </td>
+
+            <td class="actions-cell">
+              <div class="actions-wrapper">
+                <button
+                  class="btn-icon edit"
+                  title="Editar"
+                  (click)="editarPersonal(persona)">
+                  <span class="pi pi-pencil"></span>
+                </button>
+
+                <button
+                  class="btn-icon power"
+                  [class.off]="!persona.activo"
+                  [title]="persona.activo ? 'Dar de baja' : 'Reactivar'"
+                  (click)="cambiarEstado(persona)">
+                  <span class="pi pi-power-off"></span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="text-center py-4 text-muted">
+              No se encontró personal registrado.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

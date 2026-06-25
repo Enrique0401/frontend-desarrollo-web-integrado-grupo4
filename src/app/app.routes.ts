@@ -92,9 +92,7 @@ export const routes: Routes = [
           {
             path: 'clinicas',
             loadComponent: () =>
-              import('./components/super-admin/clinicas/clinicas').then(
-                (m) => m.Clinicas,
-              ),
+              import('./components/super-admin/clinicas/clinicas').then((m) => m.Clinicas),
           },
           {
             path: 'administradores',
@@ -128,9 +126,47 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN_CLINICA'] as Rol[] },
         loadComponent: () =>
-          import('./components/admin-clinica/pantalla-admin-clinica/pantalla-admin-clinica').then(
-            (m) => m.PantallaAdminClinica,
+          import('./components/admin-clinica/nav-admin-clinica/nav-admin-clinica').then(
+            (m) => m.NavAdminClinica,
           ),
+        children: [
+          {
+            path: '',
+            redirectTo: 'dashboard',
+            pathMatch: 'full',
+          },
+          {
+            path: 'dashboard',
+            loadComponent: () =>
+              import('./components/admin-clinica/pantalla-admin-clinica/pantalla-admin-clinica').then(
+                (m) => m.PantallaAdminClinica,
+              ),
+          },
+          {
+            path: 'personal',
+            loadComponent: () =>
+              import('./components/admin-clinica/personal/personal').then((m) => m.Personal),
+          },
+          {
+            path: 'horarios',
+            loadComponent: () =>
+              import('./components/admin-clinica/horarios/horarios').then((m) => m.Horarios),
+          },
+          {
+            path: 'agregar-personal',
+            loadComponent: () =>
+              import('./components/admin-clinica/agregar-personal/agregar-personal').then(
+                (m) => m.AgregarPersonal,
+              ),
+          },
+          {
+            path: 'editar-personal/:id',
+            loadComponent: () =>
+              import('./components/admin-clinica/agregar-personal/agregar-personal').then(
+                (m) => m.AgregarPersonal,
+              ),
+          },
+        ],
       },
 
       // ======================================
@@ -200,9 +236,7 @@ export const routes: Routes = [
           {
             path: 'citas',
             loadComponent: () =>
-              import('./components/paciente/mis-citas/mis-citas').then(
-                (m) => m.MisCitas,
-              ),
+              import('./components/paciente/mis-citas/mis-citas').then((m) => m.MisCitas),
           },
           {
             path: 'historial-clinico',
@@ -214,9 +248,7 @@ export const routes: Routes = [
           {
             path: 'recetas',
             loadComponent: () =>
-              import('./components/paciente/mis-recetas/mis-recetas').then(
-                (m) => m.MisRecetas,
-              ),
+              import('./components/paciente/mis-recetas/mis-recetas').then((m) => m.MisRecetas),
           },
           {
             path: 'archivos-clinicos',
@@ -224,7 +256,7 @@ export const routes: Routes = [
               import('./components/paciente/mis-archivos-clinicos/mis-archivos-clinicos').then(
                 (m) => m.MisArchivosClinicos,
               ),
-          }
+          },
         ],
       },
     ],

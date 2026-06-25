@@ -1,0 +1,269 @@
+$primary: #3b82f6;
+$secondary: #1a202c;
+$surface: #ffffff;
+$text-muted: #64748b;
+$border: #e2e8f0;
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f7fb;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+  width: 260px;
+  background: #111827;
+  color: white;
+  flex-shrink: 0;
+}
+
+.brand {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+
+  h2{
+    margin-top:.8rem;
+    font-size:1.35rem;
+    font-weight:800;
+  }
+
+  .role-badge{
+    display:inline-block;
+    margin-top:.6rem;
+    background:rgba($primary,.18);
+    color:#dbeafe;
+    padding:.45rem .9rem;
+    border-radius:25px;
+    font-size:.75rem;
+    font-weight:700;
+    letter-spacing:.5px;
+  }
+
+  .logo-box{
+
+    width:78px;
+    height:78px;
+
+    margin:0 auto;
+
+    border:none;
+    border-radius:18px;
+
+    background:rgba($primary,.18);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      padding:8px;
+    }
+
+    &:hover{
+
+      transform:scale(1.05);
+
+      background:rgba($primary,.28);
+
+    }
+
+  }
+
+}
+
+/* =========================
+   MENÚ
+========================= */
+
+.menu{
+
+  padding:1rem 0;
+
+  display:flex;
+  flex-direction:column;
+
+  a{
+
+    display:flex;
+    align-items:center;
+
+    gap:.85rem;
+
+    color:#cbd5e1;
+
+    text-decoration:none;
+
+    padding:1rem 1.6rem;
+
+    font-weight:700;
+
+    transition:.25s;
+
+    border-left:4px solid transparent;
+
+    i{
+      color:$primary;
+      font-size:1rem;
+    }
+
+    &:hover{
+
+      background:rgba($primary,.15);
+
+      border-left:4px solid $primary;
+
+      color:white;
+
+    }
+
+    &.active{
+
+      background:rgba($primary,.18);
+
+      border-left:4px solid $primary;
+
+      color:white;
+
+    }
+
+  }
+
+}
+
+/* =========================
+   CONTENIDO
+========================= */
+
+.content{
+
+  flex:1;
+
+  display:flex;
+
+  flex-direction:column;
+
+}
+
+.topbar{
+
+  height:72px;
+
+  background:white;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  padding:0 2rem;
+
+  border-bottom:1px solid $border;
+
+  box-shadow:0 2px 12px rgba(0,0,0,.04);
+
+}
+
+.topbar-left{
+
+  h3{
+
+    margin:0;
+
+    color:$secondary;
+
+    font-size:1.1rem;
+
+    font-weight:800;
+
+  }
+
+}
+
+.logout-btn{
+
+  background:white;
+
+  color:#ef4444;
+
+  border:1px solid #ef4444;
+
+  border-radius:10px;
+
+  padding:.7rem 1rem;
+
+  cursor:pointer;
+
+  font-weight:700;
+
+  display:flex;
+
+  gap:.5rem;
+
+  align-items:center;
+
+  transition:.25s;
+
+  &:hover{
+
+    background:#fee2e2;
+
+  }
+
+}
+
+.page-content{
+
+  flex:1;
+
+  padding:2rem;
+
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:900px){
+
+  .sidebar{
+
+    width:220px;
+
+  }
+
+}
+
+@media(max-width:768px){
+
+  .admin-layout{
+
+    flex-direction:column;
+
+  }
+
+  .sidebar{
+
+    width:100%;
+
+  }
+
+  .topbar{
+
+    padding:0 1rem;
+
+  }
+
+}

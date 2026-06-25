@@ -15,13 +15,9 @@ export class UsuarioService {
   private obtenerCabeceras(): HttpHeaders {
     const token = localStorage.getItem('token');
 
-    if (token) {
-      return new HttpHeaders({
-        Authorization: `Bearer ${token}`
-      });
-    }
-
-    return new HttpHeaders();
+    return token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : new HttpHeaders();
   }
 
   obtenerUsuarios(): Observable<any[]> {
@@ -32,6 +28,18 @@ export class UsuarioService {
 
   obtenerAdminsClinica(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/rol/ADMIN_CLINICA`, {
+      headers: this.obtenerCabeceras()
+    });
+  }
+
+  obtenerPorClinica(clinicaId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/clinica/${clinicaId}`, {
+      headers: this.obtenerCabeceras()
+    });
+  }
+
+  obtenerPorUsername(username: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/username/${username}`, {
       headers: this.obtenerCabeceras()
     });
   }
