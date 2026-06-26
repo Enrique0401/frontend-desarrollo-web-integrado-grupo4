@@ -64,9 +64,7 @@ export const routes: Routes = [
     path: 'panel',
     canActivate: [authGuard],
     children: [
-      // ======================================
-      // ZONA: SUPER_ADMIN
-      // ======================================
+      //SUPER_ADMIN
       {
         path: 'super-admin',
         canActivate: [roleGuard],
@@ -118,9 +116,7 @@ export const routes: Routes = [
         ],
       },
 
-      // ======================================
-      // ZONA: ADMIN_CLINICA
-      // ======================================
+      //ADMIN_CLINICA
       {
         path: 'admin-clinica',
         canActivate: [roleGuard],
@@ -169,9 +165,7 @@ export const routes: Routes = [
         ],
       },
 
-      // ======================================
-      // ZONA: RECEPCIONISTA
-      // ======================================
+      // RECEPCIONISTA
       {
         path: 'recepcion',
         canActivate: [roleGuard],
@@ -217,9 +211,8 @@ export const routes: Routes = [
           ]
       },
 
-      // ======================================
-      // ZONA: MÉDICO / ENFERMERA
-      // ======================================
+      // MÉDICO 
+
       {
         path: 'medico',
         canActivate: [roleGuard],
@@ -230,9 +223,7 @@ export const routes: Routes = [
           ),
       },
 
-      // ======================================
-      // ZONA: ENFERMERA
-      // ======================================
+      //ENFERMERA
       {
         path: 'enfermeria',
         canActivate: [roleGuard],
@@ -243,9 +234,7 @@ export const routes: Routes = [
           ),
       },
 
-      // ======================================
-      // ZONA: PACIENTE
-      // ======================================
+      //PACIENTE
       {
         path: 'paciente',
         canActivate: [roleGuard],
@@ -292,6 +281,13 @@ export const routes: Routes = [
                 (m) => m.MisArchivosClinicos,
               ),
           },
+          {
+            path: 'factura',
+            loadComponent: () =>
+              import('./components/paciente/mis-facturas/mis-facturas').then(
+                (m) => m.MisFacturas,
+              ),
+          }
         ],
       },
     ],

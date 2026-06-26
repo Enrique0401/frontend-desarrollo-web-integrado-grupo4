@@ -1,1 +1,132 @@
-<p>cobros-facturacion works!</p>
+<div class="gestion-container">
+  @if (successMensaje) {
+  <div class="alerta success"><i class="pi pi-check-circle"></i> {{ successMensaje }}</div>
+  }
+  @if (errorMensaje) {
+  <div class="alerta error"><i class="pi pi-exclamation-triangle"></i> {{ errorMensaje }}</div>
+  }
+
+  <div class="action-bar">
+    <div class="search-box input-with-icon" style="width: 380px;">
+      <i class="pi pi-search"></i>
+      <input type="text" [(ngModel)]="filtroBuscador" (input)="ejecutarFiltro()"
+        placeholder="Buscar por DNI, Nombre o N° Cita..." class="input-filtro">
+    </div>
+    <button type="button" class="btn-primary" (click)="mostrarFormulario = !mostrarFormulario">
+      <i class="pi" [ngClass]="mostrarFormulario ? 'pi-times' : 'pi-receipt'"></i>
+      {{ mostrarFormulario ? 'Cancelar Registro' : 'Registrar Nuevo Pago' }}
+    </button>
+  </div>
+
+  @if (mostrarFormulario) {
+  <div class="form-card">
+    <div class="form-header">
+      <h4>Emisión de Comprobante de Pago y Facturación</h4>
+    </div>
+    <form (ngSubmit)="registrarCobro()" class="grid-form">
+
+      <div class="form-group full-width select-search-group">
+        <label>Seleccionar Cita Médica <span class="required">*</span></label>
+        <select [(ngModel)]="nuevaFactura.citaId" name="citaId" (change)="seleccionarCitaAuto()" required
+          class="select-paciente">
+          <option value="" disabled selected>Elija una cita pendiente de la lista inferior...</option>
+          @for (c of citasFiltradas; track c.id || c.idCita) {
+          <option [value]="c.id || c.idCita">
+            Cita #{{ c.id || c.idCita }} == Paciente: {{ getNombrePaciente(c.pacienteId || c.paciente_id ||
+            c.paciente?.id) }}
+          </option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group style-picker-container">
+        <label>Total a Cobrar (S/.) <span class="required">*</span></label>
+        <div class="picker-input-wrapper">
+          <i class="pi pi-dollar picker-icon text-primary"></i>
+          <input type="number" step="0.10" min="0.10" [(ngModel)]="nuevaFactura.montoTotal" name="monto"
+            placeholder="Ej. 150.00" required>
+        </div>
+      </div>
+
+      <div class="form-group style-picker-container">
+        <label>Método de Pago <span class="required">*</span></label>
+        <div class="picker-input-wrapper">
+          <i class="pi pi-wallet picker-icon text-orange"></i>
+          <select [(ngModel)]="nuevaFactura.metodoPago" name="metodoPago" required class="select-invisible">
+            <option value="EFECTIVO">Dinero en Efectivo</option>
+            <option value="TARJETA">Tarjeta (Débito/Crédito)</option>
+            <option value="TRANSFERENCIA">Transferencia Bancaria / Plin / Yape</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group style-picker-container">
+        <label>Estado de la Factura <span class="required">*</span></label>
+
+        <div class="picker-input-wrapper">
+          <i class="pi pi-file-edit picker-icon text-primary"></i>
+
+          <select [(ngModel)]="nuevaFactura.estado" name="estadoFactura" required class="select-invisible">
+
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="PAGADA">Pagada</option>
+            <option value="ANULADA">Anulada</option>
+
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions full-width">
+        <button type="submit" class="btn-submit"><i class="pi pi-check"></i> Emitir Factura y Procesar Pago</button>
+      </div>
+    </form>
+  </div>
+  }
+
+  <div class="table-card">
+    @if (cargando) {
+    <div class="spinner-box">
+      <i class="pi pi-spin pi-spinner"></i>
+      <p>Sincronizando información de tesorería y citas...</p>
+    </div>
+    } @else {
+    <div class="table-wrapper">
+      <table class="nova-table">
+        <thead>
+          <tr>
+            <th>N° Cita</th>
+            <th>Paciente</th>
+            <th>Fecha Agendada</th>
+            <th>Estado</th>
+            <th>Acción Directa</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cita of citasFiltradas; track cita.id || cita.idCita) {
+          <tr>
+            <td><b>#{{ cita.id || cita.idCita }}</b></td>
+            <td>{{ getNombrePaciente(cita.pacienteId || cita.paciente_id || cita.paciente?.id) }}</td>
+            <td class="fecha-td"><i class="pi pi-calendar"></i> {{ (cita.fechaHora || cita.fechaCita) | date:'dd/MM/yyyy
+              HH:mm' }}</td>
+            <td><span class="badge-estado" [ngClass]="(cita.estado || 'PENDIENTE').toLowerCase()">{{ cita.estado ||
+                'PENDIENTE' }}</span></td>
+            <td>
+              <button type="button" class="btn-primary btn-sm" (click)="abrirFormularioPago(cita.id || cita.idCita)">
+                <i class="pi pi-money-bill"></i> Realizar Cobro
+              </button>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="5" class="table-empty">
+              <i class="pi pi-check-circle"></i>
+              <p>Bandeja limpia. No hay citas pendientes con este criterio.</p>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  </div>
+</div>
