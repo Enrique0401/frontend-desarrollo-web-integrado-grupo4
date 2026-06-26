@@ -13,7 +13,6 @@ interface UsuarioPerfil {
 @Component({
   selector: 'app-pantalla-paciente',
   standalone: true,
-  // IMPORTANTE: Añadimos RouterOutlet aquí
   imports: [RouterLink, RouterLinkActive, RouterOutlet, CommonModule],
   templateUrl: './pantalla-paciente.html',
   styleUrl: './pantalla-paciente.scss',

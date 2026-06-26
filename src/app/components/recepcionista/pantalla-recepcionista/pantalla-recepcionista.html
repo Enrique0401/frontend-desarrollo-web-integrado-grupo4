@@ -1,1 +1,57 @@
-<p>pantalla-recepcionista works!</p>
+<div class="recepcionista-layout">
+    <nav class="sidebar">
+        <div class="brand-section">
+            <div class="logo-box">
+                <img src="/logo.png" alt="Logo Nova Salud" class="logo-placeholder">
+            </div>
+            <h2>Nova Salud</h2>
+            <span class="role-badge">RECEPCIONISTA</span>
+        </div>
+
+        <ul class="nav-links">
+            <li>
+                <a routerLink="/panel/recepcion/panel-principal" routerLinkActive="active"
+                    [routerLinkActiveOptions]="{exact: true}">
+                    <i class="pi pi-desktop"></i> Dashboard
+                </a>
+            </li>
+            <li>
+                <a routerLink="/panel/recepcion/gestion-citas" routerLinkActive="active">
+                    <i class="pi pi-calendar"></i> Gestión de Citas
+                </a>
+            </li>
+            <li>
+                <a routerLink="/panel/recepcion/admision" routerLinkActive="active">
+                    <i class="pi pi-user-plus"></i> Admisión de Pacientes
+                </a>
+            </li>
+            <li>
+                <a routerLink="/panel/recepcion/faacturacion" routerLinkActive="active">
+                    <i class="pi pi-wallet"></i> Facturación y Cobros
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="main-area">
+        <header class="top-navbar">
+            <div class="nav-title">
+                <h3>Panel de Control de Recepción</h3>
+            </div>
+            <button class="btn-logout" (click)="logout()">
+                <i class="pi pi-sign-out"></i> Salir
+            </button>
+        </header>
+
+        <main class="content-wrapper">
+            <div class="dashboard-header">
+                <h2>Hola, {{ nombreRecepcionista() }}</h2>
+                <p>Gestiona las citas, ingresos de pacientes y el flujo de la clínica desde aquí.</p>
+            </div>
+
+            <div class="dashboard-body">
+                <router-outlet></router-outlet>
+            </div>
+        </main>
+    </div>
+</div>

@@ -180,6 +180,41 @@ export const routes: Routes = [
           import('./components/recepcionista/pantalla-recepcionista/pantalla-recepcionista').then(
             (m) => m.PantallaRecepcionista,
           ),
+          children: [
+            {
+              path: '',
+              redirectTo: 'panel-principal',
+              pathMatch: 'full',
+            },
+            {
+              path: 'panel-principal',
+              loadComponent: () =>
+                import('./components/recepcionista/panel-principal/panel-principal').then(
+                    (m) => m.PanelPrincipal,
+                )
+            },
+            {
+              path: 'gestion-citas',
+              loadComponent: () =>
+                import('./components/recepcionista/gestion-citas/gestion-citas').then(
+                    (m) => m.GestionCitas,
+                )
+            },
+            {
+              path: 'faacturacion',
+              loadComponent: () =>
+                import('./components/recepcionista/cobros-facturacion/cobros-facturacion').then(
+                    (m) => m.CobrosFacturacion,
+                )
+            },
+            {
+              path: 'admision',
+              loadComponent: () =>
+                import('./components/recepcionista/admision-pacientes/admision-pacientes').then(
+                    (m) => m.AdmisionPacientes,
+                )
+            }
+          ]
       },
 
       // ======================================

@@ -1,11 +1,11 @@
 // Paleta extraída de tu Super Admin
 $sidebar-bg: #0f172a; // Azul oscuro del menú
 $sidebar-text: #cbd5e1;
-$primary: #26b8b5;    // Verde agua
+$primary: #26b8b5; // Verde agua
 $active-bg: rgba($primary, 0.15);
 $surface: #ffffff;
-$bg-body: #f8fafc;    // Gris clarito del fondo
-$danger: #ef4444;     // Rojo del botón salir
+$bg-body: #f8fafc; // Gris clarito del fondo
+$danger: #ef4444; // Rojo del botón salir
 $border: #e2e8f0;
 $text-main: #1e293b;
 $text-muted: #64748b;
@@ -44,7 +44,7 @@ $text-muted: #64748b;
       display: flex;
       align-items: center;
       justify-content: center;
-      
+
       // El pequeño guion celeste del centro del logo
       .logo-placeholder {
         width: 55px;
