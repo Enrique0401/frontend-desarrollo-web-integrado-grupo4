@@ -96,7 +96,7 @@ export class PantallaSuperAdmin implements OnInit {
   );
 
   citasProgramadas = computed(() =>
-    this.citas().filter(c => c.estado === 'PROGRAMADA').length
+    this.citas().filter(c => c.estado === 'PENDIENTE').length
   );
 
   citasConfirmadas = computed(() =>
@@ -104,7 +104,7 @@ export class PantallaSuperAdmin implements OnInit {
   );
 
   citasAtendidas = computed(() =>
-    this.citas().filter(c => c.estado === 'ATENDIDA').length
+    this.citas().filter(c => c.estado === 'COMPLETADA').length
   );
 
   citasCanceladas = computed(() =>

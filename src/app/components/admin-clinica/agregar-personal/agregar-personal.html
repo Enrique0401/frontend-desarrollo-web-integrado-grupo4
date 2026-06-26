@@ -1,0 +1,156 @@
+<div class="dashboard-header">
+  <div>
+    <h2>{{ modoEditar() ? 'Editar Personal' : 'Registrar Personal' }}</h2>
+    <p>
+      {{ modoEditar() ? 'Modifica los datos del trabajador.' : 'Registra un nuevo trabajador para la clínica.' }}
+    </p>
+  </div>
+
+  <button class="btn-outline" type="button" (click)="volver()">
+    <span class="pi pi-arrow-left"></span>
+    Volver a Personal
+  </button>
+</div>
+
+<div class="form-container">
+  <div class="card form-card">
+    <h3 class="card-title">Datos del Personal</h3>
+
+    @if (exito()) {
+      <div class="alert-success">
+        <span class="pi pi-check-circle"></span>
+        Personal guardado correctamente.
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+      <div class="section-title">Datos personales</div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" formControlName="nombre" placeholder="Ej: Carlos">
+          @if (campoInvalido('nombre')) {
+            <small>Ingrese el nombre.</small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Apellido</label>
+          <input type="text" formControlName="apellido" placeholder="Ej: Ramírez">
+          @if (campoInvalido('apellido')) {
+            <small>Ingrese el apellido.</small>
+          }
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>Correo</label>
+          <input type="email" formControlName="correo" placeholder="correo@novasalud.com">
+          @if (campoInvalido('correo')) {
+            <small>Ingrese un correo válido.</small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="tel" formControlName="telefono" placeholder="987654321" maxlength="9">
+          @if (campoInvalido('telefono')) {
+            <small>Debe empezar con 9 y tener 9 dígitos.</small>
+          }
+        </div>
+      </div>
+
+      <div class="section-title">Cuenta de acceso</div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>Usuario</label>
+          <input type="text" formControlName="username" placeholder="usuario123">
+          @if (campoInvalido('username')) {
+            <small>Ingrese un usuario válido.</small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input
+            type="password"
+            formControlName="password"
+            [placeholder]="modoEditar() ? 'Opcional si no desea cambiarla' : 'Mínimo 6 caracteres'">
+        </div>
+      </div>
+
+      <div class="section-title">Datos laborales</div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>Rol</label>
+          <select formControlName="rol">
+            <option value="MEDICO">Médico</option>
+            <option value="ENFERMERA">Enfermera</option>
+            <option value="RECEPCIONISTA">Recepcionista</option>
+            <option value="PERSONAL_ADMINISTRATIVO">Personal Administrativo</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Clínica asignada</label>
+          <select formControlName="clinicaId">
+            <option [ngValue]="null">Seleccione una clínica</option>
+            @for (clinica of clinicas(); track clinica.id) {
+              <option [ngValue]="clinica.id">{{ clinica.nombre }}</option>
+            }
+          </select>
+          @if (campoInvalido('clinicaId')) {
+            <small>Seleccione una clínica.</small>
+          }
+        </div>
+      </div>
+
+      @if (esMedico()) {
+        <div class="row">
+          <div class="form-group">
+            <label>Especialidad</label>
+            <select formControlName="especialidadId">
+              <option [ngValue]="null">Seleccione una especialidad</option>
+              @for (especialidad of especialidades(); track especialidad.id) {
+                <option [ngValue]="especialidad.id">{{ especialidad.nombre }}</option>
+              }
+            </select>
+            @if (campoInvalido('especialidadId')) {
+              <small>Seleccione la especialidad.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Número de colegiatura</label>
+            <input type="text" formControlName="numeroColegiatura" placeholder="Ej: CMP-12345">
+            @if (campoInvalido('numeroColegiatura')) {
+              <small>Ingrese el número de colegiatura.</small>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="estado-box">
+        <label>
+          <input type="checkbox" formControlName="activo">
+          Trabajador activo
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="volver()">
+          Cancelar
+        </button>
+
+        <button type="submit" class="btn-primary" [disabled]="cargando()">
+          <span class="pi pi-save"></span>
+          {{ cargando() ? 'Guardando...' : (modoEditar() ? 'Guardar Cambios' : 'Registrar Personal') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

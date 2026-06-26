@@ -1,0 +1,308 @@
+<div class="dashboard-header">
+  <div>
+    <h2>Gestión de Horarios</h2>
+    <p>Configura los turnos médicos y horarios de atención de tu clínica.</p>
+  </div>
+
+  <button class="btn-primary" (click)="abrirModal()">
+    <span class="pi pi-plus"></span>
+    Nuevo Horario
+  </button>
+</div>
+
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-icon">
+      <span class="pi pi-calendar"></span>
+    </div>
+    <div>
+      <p>Total Horarios</p>
+      <h3>{{ totalHorarios() }}</h3>
+    </div>
+  </div>
+
+  <div class="metric-card success">
+    <div class="metric-icon">
+      <span class="pi pi-check-circle"></span>
+    </div>
+    <div>
+      <p>Activos</p>
+      <h3>{{ horariosActivos() }}</h3>
+    </div>
+  </div>
+
+  <div class="metric-card danger">
+    <div class="metric-icon">
+      <span class="pi pi-times-circle"></span>
+    </div>
+    <div>
+      <p>Inactivos</p>
+      <h3>{{ horariosInactivos() }}</h3>
+    </div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon">
+      <span class="pi pi-user-plus"></span>
+    </div>
+    <div>
+      <p>Médicos con horario</p>
+      <h3>{{ totalMedicosConHorario() }}</h3>
+    </div>
+  </div>
+</div>
+
+<div class="card table-card">
+  <div class="table-header">
+    <h3>Horarios Registrados</h3>
+
+    <div class="filters">
+      <div class="search-box">
+        <span class="pi pi-search"></span>
+        <input type="text" placeholder="Buscar médico..." (input)="buscar($event)" />
+      </div>
+
+      <select (change)="cambiarFiltroDia($event)">
+        <option value="TODOS">Todos los días</option>
+        <option value="MONDAY">Lunes</option>
+        <option value="TUESDAY">Martes</option>
+        <option value="WEDNESDAY">Miércoles</option>
+        <option value="THURSDAY">Jueves</option>
+        <option value="FRIDAY">Viernes</option>
+        <option value="SATURDAY">Sábado</option>
+        <option value="SUNDAY">Domingo</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Médico</th>
+          <th>Día</th>
+          <th>Horario</th>
+          <th>Duración turno</th>
+          <th>Estado</th>
+          <th class="text-center">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (horario of horariosFiltrados(); track horario.id) {
+          <tr>
+            <td>
+              <div class="info-cell">
+                <strong>{{ nombreMedico(horario.medicoId) }}</strong>
+                <span>
+                  <i class="pi pi-user me-1"></i>
+                  Médico de la clínica
+                </span>
+              </div>
+            </td>
+
+            <td>
+              <span class="badge-day">
+                @if (horario.diaSemana === 'MONDAY') {
+                  Lunes
+                } @else if (horario.diaSemana === 'TUESDAY') {
+                  Martes
+                } @else if (horario.diaSemana === 'WEDNESDAY') {
+                  Miércoles
+                } @else if (horario.diaSemana === 'THURSDAY') {
+                  Jueves
+                } @else if (horario.diaSemana === 'FRIDAY') {
+                  Viernes
+                } @else if (horario.diaSemana === 'SATURDAY') {
+                  Sábado
+                } @else if (horario.diaSemana === 'SUNDAY') {
+                  Domingo
+                }
+              </span>
+            </td>
+
+            <td>
+              <span class="time-cell">
+                <i class="pi pi-clock me-1"></i>
+                {{ horario.horaInicio }} - {{ horario.horaFin }}
+              </span>
+            </td>
+
+            <td>
+              <span class="duration-cell"> {{ horario.duracionTurnoMinutos }} min </span>
+            </td>
+
+            <td>
+              <span
+                class="badge-status"
+                [class.active]="horario.activo === true"
+                [class.inactive]="horario.activo === false"
+              >
+                {{ horario.activo ? 'ACTIVO' : 'INACTIVO' }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <div class="actions-wrapper">
+                <button class="btn-icon edit" title="Editar" (click)="editarHorario(horario)">
+                  <span class="pi pi-pencil"></span>
+                </button>
+
+                <button
+                  class="btn-icon power"
+                  [class.off]="horario.activo === false"
+                  [title]="horario.activo ? 'Desactivar horario' : 'Activar horario'"
+                  (click)="cambiarEstado(horario)"
+                >
+                  <span class="pi pi-power-off"></span>
+                </button>
+
+                <button
+                  class="btn-icon delete"
+                  title="Eliminar horario"
+                  (click)="abrirModalEliminar(horario)"
+                >
+                  <span class="pi pi-trash"></span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="text-center py-4 text-muted">
+              No se encontraron horarios registrados.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@if (mostrarModal()) {
+  <div class="modal-backdrop-custom">
+    <div class="modal-card-custom">
+      <div class="modal-header-custom">
+        <div>
+          <h3>Nuevo Horario Médico</h3>
+          <p>Registra un horario de atención para un médico de la clínica.</p>
+        </div>
+
+        <button class="btn-close-custom" type="button" (click)="cerrarModal()">
+          <span class="pi pi-times"></span>
+        </button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="guardarHorario()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Médico</label>
+            <select formControlName="medicoId">
+              <option [ngValue]="null">Seleccione un médico</option>
+              @for (medico of medicos(); track medico.id) {
+                <option [ngValue]="medico.id">
+                  {{ nombreMedico(medico.id) }}
+                </option>
+              }
+            </select>
+            @if (campoInvalido('medicoId')) {
+              <small>Seleccione un médico.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Día de la semana</label>
+            <select formControlName="diaSemana">
+              <option value="MONDAY">Lunes</option>
+              <option value="TUESDAY">Martes</option>
+              <option value="WEDNESDAY">Miércoles</option>
+              <option value="THURSDAY">Jueves</option>
+              <option value="FRIDAY">Viernes</option>
+              <option value="SATURDAY">Sábado</option>
+              <option value="SUNDAY">Domingo</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Hora inicio</label>
+            <input type="time" formControlName="horaInicio" />
+            @if (campoInvalido('horaInicio')) {
+              <small>Ingrese hora de inicio.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Hora fin</label>
+            <input type="time" formControlName="horaFin" />
+            @if (campoInvalido('horaFin')) {
+              <small>Ingrese hora de fin.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Duración del turno</label>
+            <select formControlName="duracionTurnoMinutos">
+              <option [ngValue]="15">15 minutos</option>
+              <option [ngValue]="20">20 minutos</option>
+              <option [ngValue]="30">30 minutos</option>
+              <option [ngValue]="45">45 minutos</option>
+              <option [ngValue]="60">60 minutos</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Estado</label>
+            <select formControlName="activo">
+              <option [ngValue]="true">Activo</option>
+              <option [ngValue]="false">Inactivo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-modal-secondary" (click)="cerrarModal()">
+            Cancelar
+          </button>
+
+          <button type="submit" class="btn-modal-primary">
+            <span class="pi pi-save"></span>
+            Guardar Horario
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+}
+@if (mostrarModalEliminar()) {
+  <div class="modal-backdrop-custom">
+    <div class="modal-card-custom delete-modal">
+      <div class="delete-icon">
+        <span class="pi pi-trash"></span>
+      </div>
+
+      <h3>Eliminar horario</h3>
+
+      <p>
+        ¿Seguro que deseas eliminar el horario de
+        <strong>{{ nombreMedico(horarioParaEliminar()?.medicoId) }}</strong>
+        del día
+        <strong>{{ nombreDia(horarioParaEliminar()?.diaSemana) }}</strong>?
+      </p>
+
+      <div class="delete-detail">
+        <span class="pi pi-clock"></span>
+        {{ horarioParaEliminar()?.horaInicio }} - {{ horarioParaEliminar()?.horaFin }}
+      </div>
+
+      <div class="modal-actions center">
+        <button type="button" class="btn-modal-secondary" (click)="cerrarModalEliminar()">
+          Cancelar
+        </button>
+
+        <button type="button" class="btn-modal-danger" (click)="confirmarEliminarHorario()">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,99 @@
+<div class="admin-layout">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <button
+        class="logo-box"
+        type="button"
+        (click)="recargarPagina()">
+
+        <img
+          src="/logo.png"
+          alt="Nova Salud">
+      </button>
+
+      <h2>Nova Salud</h2>
+
+      <span class="role-badge">
+        ADMIN CLÍNICA
+      </span>
+
+    </div>
+
+    <nav class="menu">
+
+      <a
+        routerLink="/panel/admin-clinica/dashboard"
+        routerLinkActive="active">
+
+        <i class="pi pi-chart-bar"></i>
+        <span>Dashboard</span>
+
+      </a>
+
+      <a
+        routerLink="/panel/admin-clinica/personal"
+        routerLinkActive="active">
+
+        <i class="pi pi-users"></i>
+        <span>Personal</span>
+
+      </a>
+
+      <a
+        routerLink="/panel/admin-clinica/horarios"
+        routerLinkActive="active">
+
+        <i class="pi pi-calendar"></i>
+        <span>Horarios</span>
+
+      </a>
+
+    </nav>
+
+  </aside>
+
+  <!-- ================= CONTENIDO ================= -->
+
+  <div class="content">
+
+    <!-- HEADER -->
+
+    <header class="topbar">
+
+      <div class="topbar-left">
+
+        <h3>Panel de Administración</h3>
+
+      </div>
+
+      <div class="topbar-right">
+
+        <button
+          class="logout-btn"
+          (click)="salir()">
+
+          <i class="pi pi-sign-out"></i>
+
+          Salir
+
+        </button>
+
+      </div>
+
+    </header>
+
+    <!-- CONTENIDO DINÁMICO -->
+
+    <main class="page-content">
+
+      <router-outlet></router-outlet>
+
+    </main>
+
+  </div>
+
+</div>
