@@ -26,20 +26,18 @@ export class GestionCitas implements OnInit {
   errorMensaje: string = '';
   successMensaje: string = '';
 
-  // Separamos fecha y hora para el diseño visual
   fechaSeleccionada: string = '';
   horaSeleccionada: string = '';
 
   nuevaCita = {
     pacienteId: '',
     medicoId: '',
-    fechaHora: '', // Se combinará antes de enviar
+    fechaHora: '',
     motivoConsulta: '',
     estado: 'PENDIENTE'
   };
 
   private http = inject(HttpClient);
-  // URL basada en tu consola de errores
   private urlBase = 'https://backend-desarrollo-web-integrado-grupo4.onrender.com/api';
 
   ngOnInit() {
@@ -53,28 +51,19 @@ export class GestionCitas implements OnInit {
     return headers;
   }
 
+  // Carga de datos original (estable)
   cargarDatosEstructurales() {
     this.cargando = true;
     const headers = this.obtenerHeaders();
 
-    // 1. Cargar Citas
     this.http.get<any[]>(`${this.urlBase}/citas`, { headers }).subscribe({
       next: (data) => {
         this.citas = data.sort((a, b) => new Date(b.fechaHora || b.fechaCita).getTime() - new Date(a.fechaHora || a.fechaCita).getTime());
 
-        // 2. Cargar Médicos
-        this.http.get<any[]>(`${this.urlBase}/medicos`, { headers }).subscribe({
-          next: (meds) => this.medicos = meds,
-          error: (err) => console.error(err)
-        });
-
-        // 3. Cargar Pacientes
-        this.http.get<any[]>(`${this.urlBase}/pacientes`, { headers }).subscribe({
-          next: (pacs) => {
-            this.pacientes = pacs;
-            this.pacientesFiltrados = pacs; // Al inicio mostramos todos
-          },
-          error: (err) => console.error(err)
+        this.http.get<any[]>(`${this.urlBase}/medicos`, { headers }).subscribe(meds => this.medicos = meds);
+        this.http.get<any[]>(`${this.urlBase}/pacientes`, { headers }).subscribe(pacs => {
+          this.pacientes = pacs;
+          this.pacientesFiltrados = pacs;
         });
 
         this.cargando = false;
@@ -87,40 +76,58 @@ export class GestionCitas implements OnInit {
     });
   }
 
-  // Filtro en tiempo real a prueba de errores
+  // 🔥 ESTO RESUELVE LA CULPA DEL BACKEND: Buscamos el nombre localmente usando el ID
+  getNombrePaciente(id: number): string {
+    const pac = this.pacientes.find(p => p.id === id);
+    return pac ? `${pac.nombre || pac.usuario?.nombre} ${pac.apellido || pac.usuario?.apellido}` : 'Desconocido';
+  }
+
+  getNombreMedico(id: number): string {
+    const med = this.medicos.find(m => m.id === id);
+    return med ? `Dr(a). ${med.nombre || med.usuario?.nombre} ${med.apellido || med.usuario?.apellido}` : 'No asignado';
+  }
+
   filtrarPacientes() {
     const termino = this.filtroPaciente.toLowerCase().trim();
     if (!termino) {
       this.pacientesFiltrados = [...this.pacientes];
       return;
     }
-
     this.pacientesFiltrados = this.pacientes.filter(p => {
       const nombreStr = (p.nombre || p.usuario?.nombre || '').toLowerCase();
       const apellidoStr = (p.apellido || p.usuario?.apellido || '').toLowerCase();
-      const nombreCompleto = `${nombreStr} ${apellidoStr}`.trim();
       const dniStr = (p.numeroDocumento || p.dni || p.usuario?.dni || p.usuario?.numeroDocumento || '').toString();
-
-      return nombreCompleto.includes(termino) || dniStr.includes(termino);
+      return `${nombreStr} ${apellidoStr}`.includes(termino) || dniStr.includes(termino);
     });
-
-    const existeEnFiltro = this.pacientesFiltrados.find(p => p.id == this.nuevaCita.pacienteId);
-    if (!existeEnFiltro) {
-      this.nuevaCita.pacienteId = '';
-    }
   }
 
   registrarCita() {
     if (!this.nuevaCita.pacienteId || !this.nuevaCita.medicoId || !this.fechaSeleccionada || !this.horaSeleccionada) {
-      this.mostrarAlerta('Por favor, completa los campos obligatorios (Paciente, Médico, Fecha y Hora).', false);
+      this.mostrarAlerta('Por favor, completa los campos obligatorios.', false);
       return;
     }
 
-    // Combinamos la fecha y hora seleccionada para el backend
-    this.nuevaCita.fechaHora = `${this.fechaSeleccionada}T${this.horaSeleccionada}:00`;
+    // Calcular inicio y fin automático
+    const dateInicio = new Date(`${this.fechaSeleccionada}T${this.horaSeleccionada}:00`);
+    const dateFin = new Date(dateInicio.getTime() + 30 * 60000); // 30 min
+
+    const formatoISO = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:00`;
+
+    // Armamos los datos obligatorios para que el backend no de error 500 ni 422
+    const payloadCita = {
+      pacienteId: Number(this.nuevaCita.pacienteId),
+      medicoId: Number(this.nuevaCita.medicoId),
+      clinicaId: 1,       // Dato faltante para la BD
+      consultorioId: 1,   // Dato faltante para la BD
+      fechaHora: formatoISO(dateInicio),
+      fechaFin: formatoISO(dateFin),
+      motivo: this.nuevaCita.motivoConsulta || 'Consulta médica',
+      notas: '',
+      estado: this.nuevaCita.estado
+    };
 
     const headers = this.obtenerHeaders();
-    this.http.post(`${this.urlBase}/citas`, this.nuevaCita, { headers }).subscribe({
+    this.http.post(`${this.urlBase}/citas`, payloadCita, { headers }).subscribe({
       next: () => {
         this.mostrarAlerta('Cita médica agendada correctamente.', true);
         this.mostrarFormulario = false;
@@ -129,21 +136,27 @@ export class GestionCitas implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.mostrarAlerta('No se pudo registrar la cita. Verifica la disponibilidad del horario.', false);
+        this.mostrarAlerta('Error interno del servidor. Revisa consola.', false);
       }
     });
   }
 
   cambiarEstadoCita(id: number, nuevoEstado: string) {
     const headers = this.obtenerHeaders();
-    const citaExistente = this.citas.find(c => c.id === id);
+    const citaExistente = this.citas.find(c => c.id === id || c.idCita === id);
     if (!citaExistente) return;
 
-    const citaActualizada = { ...citaExistente, pacienteId: citaExistente.paciente?.id, medicoId: citaExistente.medico?.id, estado: nuevoEstado };
+    const citaActualizada = {
+      ...citaExistente,
+      estado: nuevoEstado
+    };
 
-    this.http.put(`${this.urlBase}/citas/${id}`, citaActualizada, { headers }).subscribe({
+    // Usamos el identificador correcto según tu backend
+    const idReal = citaExistente.idCita || citaExistente.id;
+
+    this.http.put(`${this.urlBase}/citas/${idReal}`, citaActualizada, { headers }).subscribe({
       next: () => {
-        this.mostrarAlerta(`Estado de la cita actualizado a ${nuevoEstado}.`, true);
+        this.mostrarAlerta(`Estado actualizado a ${nuevoEstado}.`, true);
         this.cargarDatosEstructurales();
       },
       error: (err) => console.error(err)
@@ -151,11 +164,11 @@ export class GestionCitas implements OnInit {
   }
 
   eliminarCita(id: number) {
-    if (!confirm('¿Estás seguro de que deseas eliminar permanentemente esta cita?')) return;
+    if (!confirm('¿Estás seguro de que deseas eliminar esta cita?')) return;
     const headers = this.obtenerHeaders();
     this.http.delete(`${this.urlBase}/citas/${id}`, { headers, responseType: 'text' }).subscribe({
       next: () => {
-        this.mostrarAlerta('Cita removida del sistema con éxito.', true);
+        this.mostrarAlerta('Cita removida con éxito.', true);
         this.cargarDatosEstructurales();
       },
       error: (err) => console.error(err)
@@ -163,13 +176,8 @@ export class GestionCitas implements OnInit {
   }
 
   mostrarAlerta(msg: string, esExito: boolean) {
-    if (esExito) {
-      this.successMensaje = msg;
-      setTimeout(() => this.successMensaje = '', 4000);
-    } else {
-      this.errorMensaje = msg;
-      setTimeout(() => this.errorMensaje = '', 4000);
-    }
+    esExito ? this.successMensaje = msg : this.errorMensaje = msg;
+    setTimeout(() => { this.successMensaje = ''; this.errorMensaje = ''; }, 4000);
   }
 
   resetFormulario() {
@@ -182,7 +190,17 @@ export class GestionCitas implements OnInit {
 
   formatearFechaHora(fechaIso: string): string {
     if (!fechaIso) return 'No registrada';
-    const date = new Date(fechaIso);
-    return date.toLocaleString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+    return new Date(fechaIso).toLocaleString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+
+  esCitaVencida(fechaIso: string): boolean {
+    if (!fechaIso) return false;
+    const fechaCita = new Date(fechaIso).getTime();
+    const ahora = new Date().getTime();
+    return fechaCita < ahora;
+  }
+
+  esCitaBloqueada(estado: string): boolean {
+    return estado === 'COMPLETADA' || estado === 'NO_ASISTIO';
   }
 }
