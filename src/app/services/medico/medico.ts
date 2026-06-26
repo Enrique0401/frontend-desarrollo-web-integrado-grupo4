@@ -11,20 +11,29 @@ export class MedicoService {
   private obtenerCabeceras(): HttpHeaders {
     const token = localStorage.getItem('token');
 
-    return token
-      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
-      : new HttpHeaders();
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
   }
 
   obtenerPorClinica(clinicaId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/clinica/${clinicaId}`, {
-      headers: this.obtenerCabeceras()
+      headers: this.obtenerCabeceras(),
+    });
+  }
+  obtenerPorUsuario(usuarioId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/usuario/${usuarioId}`, {
+      headers: this.obtenerCabeceras(),
+    });
+  }
+
+  actualizarMedico(id: number, medico: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, medico, {
+      headers: this.obtenerCabeceras(),
     });
   }
 
   crearMedico(medico: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, medico, {
-      headers: this.obtenerCabeceras()
+      headers: this.obtenerCabeceras(),
     });
   }
 }
