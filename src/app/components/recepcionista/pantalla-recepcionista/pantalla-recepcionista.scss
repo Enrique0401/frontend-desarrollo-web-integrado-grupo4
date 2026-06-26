@@ -1,0 +1,214 @@
+$sidebar-bg: #0f172a;
+$sidebar-text: #cbd5e1;
+$primary: #26b8b5;
+$active-bg: rgba($primary, 0.15);
+$surface: #ffffff;
+$bg-body: #f8fafc;
+$danger: #ef4444;
+$border: #e2e8f0;
+$text-main: #1e293b;
+$text-muted: #64748b;
+
+/* 1. CONTENEDOR PRINCIPAL FIJO */
+.recepcionista-layout {
+    display: flex;
+    height: 100vh;
+    /* Obligamos a que ocupe exactamente la pantalla, ni un pixel más */
+    overflow: hidden;
+    /* Evita que la página entera haga scroll */
+    background-color: $bg-body;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+// ==============================
+// SIDEBAR OSCURO
+// ==============================
+.sidebar {
+    width: 260px;
+    background-color: $sidebar-bg;
+    color: $surface;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+    /* Por si en el futuro agregas más links y el menú crece */
+
+    /* Ocultamos la barra de scroll del menú lateral para que se vea más limpio */
+    &::-webkit-scrollbar {
+        width: 0;
+        background: transparent;
+    }
+
+    .brand-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2.5rem 1rem 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+        .logo-box {
+            width: 60px;
+            height: 60px;
+            background-color: #1e293b;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .logo-placeholder {
+                width: 55px;
+                height: 55px;
+                background-color: #1e293b;
+                border-radius: 4px;
+                object-fit: contain;
+            }
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem;
+            color: $surface;
+        }
+
+        .role-badge {
+            background-color: $active-bg;
+            color: $primary;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+    }
+
+    .nav-links {
+        list-style: none;
+        padding: 1.5rem 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+
+        li a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            color: $sidebar-text;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+            transition: all 0.2s ease;
+
+            i {
+                font-size: 1.2rem;
+            }
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+                color: $surface;
+            }
+
+            &.active {
+                background-color: $active-bg;
+                color: $surface;
+                border-left-color: $primary;
+            }
+        }
+    }
+}
+
+// ==============================
+// ÁREA PRINCIPAL Y NAVBAR
+// ==============================
+.main-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    /* Se asegura de respetar la altura de la pantalla */
+    overflow: hidden;
+}
+
+.top-navbar {
+    background-color: $surface;
+    height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.5rem;
+    border-bottom: 1px solid $border;
+    flex-shrink: 0;
+    /* Evita que la barra de navegación se aplaste si hay mucho contenido */
+
+    .nav-title h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: $text-main;
+    }
+
+    .btn-logout {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: transparent;
+        color: $danger;
+        border: 1px solid rgba($danger, 0.4);
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: rgba($danger, 0.05);
+            border-color: $danger;
+        }
+    }
+}
+
+// ==============================
+// 2. CONTENIDO DEL DASHBOARD (EL ÚNICO QUE HACE SCROLL)
+// ==============================
+.content-wrapper {
+    padding: 2.5rem;
+    flex-grow: 1;
+    overflow-y: auto;
+    /* Aquí le damos permiso al contenido de hacer scroll vertical */
+    height: 100%;
+
+    /* Opcional: Le damos un estilo bonito a esta barra de scroll interna */
+    &::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    .dashboard-header {
+        margin-bottom: 2rem;
+
+        h2 {
+            color: $text-main;
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0 0 0.5rem;
+        }
+
+        p {
+            color: $text-muted;
+            margin: 0;
+            font-size: 1rem;
+        }
+    }
+}

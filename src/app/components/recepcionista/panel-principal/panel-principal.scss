@@ -1,0 +1,225 @@
+$primary: #26b8b5;
+$surface: #ffffff;
+$bg-body: #f8fafc;
+$text-main: #1e293b;
+$text-muted: #64748b;
+$border: #e2e8f0;
+
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- MENSAJES DE ESTADO --- */
+.estado-mensaje {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
+  color: $text-muted;
+  gap: 1rem;
+  background: $surface;
+  border-radius: 12px;
+  border: 1px dashed $border;
+
+  p { font-weight: 600; margin: 0; }
+  .icon-cargando { font-size: 2.5rem; color: $primary; }
+  
+  &.error {
+    color: #ef4444;
+    border-color: #fca5a5;
+    background: #fef2f2;
+    .icon-error { font-size: 2.5rem; }
+  }
+}
+
+/* --- TARJETAS DE ESTADÍSTICAS --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+
+    &.bg-blue { background: #e0f2fe; color: #0284c7; }
+    &.bg-orange { background: #ffedd5; color: #ea580c; }
+    &.bg-red { background: #fee2e2; color: #dc2626; }
+  }
+
+  .stat-info {
+    p { margin: 0; color: $text-muted; font-size: 0.95rem; font-weight: 600; }
+    h3 { margin: 0.2rem 0 0 0; color: $text-main; font-size: 1.8rem; font-weight: 800; }
+  }
+}
+
+/* --- SECCIÓN AGENDA DE HOY --- */
+.agenda-section {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid $border;
+
+  .title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: $text-main;
+
+    i { font-size: 1.3rem; color: $primary; }
+    h3 { margin: 0; font-size: 1.25rem; font-weight: 700; }
+  }
+
+  .btn-nueva-cita {
+    background: $primary;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover { background: darken($primary, 10%); }
+  }
+}
+
+/* --- TABLAS --- */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.nova-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+
+  th {
+    padding: 1rem 1.5rem;
+    background: #f8fafc;
+    color: $text-muted;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid $border;
+  }
+
+  td {
+    padding: 1rem 1.5rem;
+    color: $text-main;
+    border-bottom: 1px solid $border;
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover { background-color: #f8fafc; }
+
+  .td-hora {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: $primary;
+    i { font-size: 0.9rem; }
+  }
+}
+
+/* --- BADGES DE ESTADO --- */
+.badge-estado {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: inline-block;
+
+  &.pendiente { background: #fef9c3; color: #b45309; }
+  &.en_espera { background: #ffedd5; color: #ea580c; }
+  &.confirmada { background: #e0f2fe; color: #0284c7; }
+  &.completada { background: #dcfce7; color: #166534; }
+  &.cancelada { background: #fee2e2; color: #b91c1c; }
+}
+
+/* --- BOTONES DE ACCIÓN --- */
+.td-acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  width: 35px;
+  height: 35px;
+  border-radius: 8px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &.success {
+    background: #dcfce7;
+    color: #16a34a;
+    &:hover { background: #16a34a; color: white; }
+  }
+
+  &.warning {
+    background: #fef9c3;
+    color: #ca8a04;
+    &:hover { background: #ca8a04; color: white; }
+  }
+}
+
+/* --- ESTADO VACÍO DE LA TABLA --- */
+.empty-state {
+  text-align: center;
+  padding: 3rem !important;
+  color: $text-muted;
+
+  i { font-size: 2.5rem; color: #cbd5e1; margin-bottom: 1rem; display: block; }
+  p { margin: 0; font-size: 1rem; font-weight: 500; }
+}

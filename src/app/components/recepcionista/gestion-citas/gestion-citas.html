@@ -1,0 +1,162 @@
+<div class="gestion-container">
+
+    @if (successMensaje) {
+    <div class="alerta success"><i class="pi pi-check-circle"></i> {{ successMensaje }}</div>
+    }
+    @if (errorMensaje) {
+    <div class="alerta error"><i class="pi pi-exclamation-triangle"></i> {{ errorMensaje }}</div>
+    }
+
+    <div class="action-bar">
+        <div class="search-box">
+            <h3><i class="pi pi-calendar-plus text-primary"></i> Control de Agenda Médica</h3>
+        </div>
+        <button class="btn-primary" (click)="mostrarFormulario = !mostrarFormulario">
+            <i class="pi" [ngClass]="mostrarFormulario ? 'pi-times' : 'pi-plus'"></i>
+            {{ mostrarFormulario ? 'Cancelar Registro' : 'Agendar Nueva Cita' }}
+        </button>
+    </div>
+
+    @if (mostrarFormulario) {
+    <div class="form-card">
+        <div class="form-header">
+            <h4>Formulario de Asignación de Citas</h4>
+        </div>
+        <form (ngSubmit)="registrarCita()" class="grid-form">
+
+            <div class="form-group select-search-group">
+                <label>Seleccionar Paciente <span class="required">*</span></label>
+
+                <div class="input-with-icon">
+                    <i class="pi pi-search"></i>
+                    <input type="text" [(ngModel)]="filtroPaciente" name="filtroPaciente" (input)="filtrarPacientes()"
+                        placeholder="Escriba aquí el DNI o Nombre para buscar..." autocomplete="off"
+                        class="input-filtro">
+                </div>
+
+                <select [(ngModel)]="nuevaCita.pacienteId" name="pacienteId" required class="select-paciente">
+                    <option value="" disabled selected>Elija un paciente de la lista de abajo...</option>
+                    @for (p of pacientesFiltrados; track p.id) {
+                    <option [value]="p.id">
+                        {{ p.nombre || p.usuario?.nombre }} {{ p.apellido || p.usuario?.apellido }} - DNI: {{
+                        p.numeroDocumento || p.dni || p.usuario?.numeroDocumento || 'N/A' }}
+                    </option>
+                    }
+                </select>
+                @if (pacientesFiltrados.length === 0) {
+                <small class="text-error">No se encontró ningún paciente con esos datos en el sistema.</small>
+                }
+            </div>
+
+            <div class="form-group">
+                <label>Seleccionar Especialista / Médico <span class="required">*</span></label>
+                <select [(ngModel)]="nuevaCita.medicoId" name="medicoId" required>
+                    <option value="" disabled selected>Elija un médico...</option>
+                    @for (m of medicos; track m.id) {
+                    <option [value]="m.id">Dr(a). {{ m.nombre || m.usuario?.nombre }} {{ m.apellido ||
+                        m.usuario?.apellido }}</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group style-picker-container">
+                <label>Fecha de la Cita <span class="required">*</span></label>
+                <div class="picker-input-wrapper">
+                    <i class="pi pi-calendar picker-icon text-primary"></i>
+                    <input type="date" [(ngModel)]="fechaSeleccionada" name="fechaSeleccionada" required>
+                </div>
+            </div>
+
+            <div class="form-group style-picker-container">
+                <label>Hora de la Cita <span class="required">*</span></label>
+                <div class="picker-input-wrapper">
+                    <i class="pi pi-clock picker-icon text-orange"></i>
+                    <input type="time" [(ngModel)]="horaSeleccionada" name="horaSeleccionada" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Estado Inicial</label>
+                <select [(ngModel)]="nuevaCita.estado" name="estado">
+                    <option value="PENDIENTE">PENDIENTE</option>
+                    <option value="CONFIRMADA">CONFIRMADA</option>
+                </select>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Motivo de la Consulta Médica</label>
+                <textarea [(ngModel)]="nuevaCita.motivoConsulta" name="motivoConsulta"
+                    placeholder="Describa brevemente los síntomas..."></textarea>
+            </div>
+
+            <div class="form-actions full-width">
+                <button type="submit" class="btn-submit"><i class="pi pi-save"></i> Guardar en Agenda</button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <div class="table-card">
+        @if (cargando) {
+        <div class="spinner-box">
+            <i class="pi pi-spin pi-spinner"></i>
+            <p>Extrayendo citas desde el servidor central...</p>
+        </div>
+        } @else {
+        <div class="table-wrapper">
+            <table class="nova-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Paciente</th>
+                        <th>Médico Especialista</th>
+                        <th>Fecha y Hora</th>
+                        <th>Estado</th>
+                        <th>Acciones de Control</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (cita of citas; track cita.id) {
+                    <tr>
+                        <td><b>#{{ cita.id }}</b></td>
+                        <td>{{ cita.paciente?.nombre || cita.paciente?.usuario?.nombre }} {{ cita.paciente?.apellido ||
+                            cita.paciente?.usuario?.apellido }}</td>
+                        <td>Dr/a. {{ cita.medico?.nombre || cita.medico?.usuario?.nombre }} {{ cita.medico?.apellido ||
+                            cita.medico?.usuario?.apellido }}</td>
+                        <td class="fecha-td"><i class="pi pi-clock"></i> {{ formatearFechaHora(cita.fechaHora ||
+                            cita.fechaCita) }}</td>
+                        <td><span class="badge-estado" [ngClass]="(cita.estado || 'PENDIENTE').toLowerCase()">{{
+                                cita.estado || 'PENDIENTE' }}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                @if (cita.estado !== 'CONFIRMADA' && cita.estado !== 'COMPLETADA') {
+                                <button class="btn-action success" (click)="cambiarEstadoCita(cita.id, 'CONFIRMADA')"
+                                    title="Confirmar Cita"><i class="pi pi-check"></i></button>
+                                }
+                                @if (cita.estado === 'CONFIRMADA') {
+                                <button class="btn-action orange" (click)="cambiarEstadoCita(cita.id, 'EN_ESPERA')"
+                                    title="Paciente en Sala"><i class="pi pi-users"></i></button>
+                                }
+                                @if (cita.estado !== 'CANCELADA' && cita.estado !== 'COMPLETADA') {
+                                <button class="btn-action danger" (click)="cambiarEstadoCita(cita.id, 'CANCELADA')"
+                                    title="Cancelar Cita"><i class="pi pi-ban"></i></button>
+                                }
+                                <button class="btn-action void" (click)="cita.id && eliminarCita(cita.id)"
+                                    title="Eliminar"><i class="pi pi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="6" class="table-empty">
+                            <i class="pi pi-calendar-times"></i>
+                            <p>No existen citas médicas configuradas.</p>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
+</div>
