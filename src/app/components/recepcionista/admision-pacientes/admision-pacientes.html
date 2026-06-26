@@ -1,1 +1,39 @@
-<p>admision-pacientes works!</p>
+<div class="admision-container">
+    <h3><i class="pi pi-user-plus"></i> Admisión de Nuevo Paciente</h3>
+
+    @if(mensaje) { <div class="alerta success">{{mensaje}}</div> }
+    @if(error) { <div class="alerta error">{{error}}</div> }
+
+    <form (ngSubmit)="registrarPaciente()" class="form-card">
+        <div class="grid-form">
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" [(ngModel)]="paciente.nombre" name="nombre" required>
+            </div>
+            <div class="form-group">
+                <label>Apellido</label>
+                <input type="text" [(ngModel)]="paciente.apellido" name="apellido" required>
+            </div>
+            <div class="form-group">
+                <label>DNI / Documento</label>
+                <input type="text" [(ngModel)]="paciente.numeroDocumento" name="dni" required>
+            </div>
+            <div class="form-group">
+                <label>Género</label>
+                <select [(ngModel)]="paciente.genero" name="genero">
+                    <option value="MASCULINO">Masculino</option>
+                    <option value="FEMENINO">Femenino</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Seguro Médico</label>
+                <select [(ngModel)]="paciente.seguroMedico" name="seguro">
+                    <option value="SIS">SIS</option>
+                    <option value="ESSALUD">ESSALUD</option>
+                    <option value="PARTICULAR">Particular</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn-submit">Registrar Paciente</button>
+    </form>
+</div>

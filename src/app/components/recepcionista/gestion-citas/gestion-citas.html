@@ -1,11 +1,9 @@
-<div class="gestion-container">
+<p-toast
+  position="center"
+  [breakpoints]="{ '768px': { width: '90vw' } }">
+</p-toast>
 
-    @if (successMensaje) {
-    <div class="alerta success"><i class="pi pi-check-circle"></i> {{ successMensaje }}</div>
-    }
-    @if (errorMensaje) {
-    <div class="alerta error"><i class="pi pi-exclamation-triangle"></i> {{ errorMensaje }}</div>
-    }
+<div class="gestion-container">
 
     <div class="action-bar">
         <div class="search-box">
@@ -59,19 +57,30 @@
                 </select>
             </div>
 
+            <!-- Fecha: [min] bloquea días anteriores a hoy; (change) recalcula la hora mínima -->
             <div class="form-group style-picker-container">
                 <label>Fecha de la Cita <span class="required">*</span></label>
                 <div class="picker-input-wrapper">
                     <i class="pi pi-calendar picker-icon text-primary"></i>
-                    <input type="date" [(ngModel)]="fechaSeleccionada" name="fechaSeleccionada" required>
+                    <input type="date"
+                           [(ngModel)]="fechaSeleccionada"
+                           name="fechaSeleccionada"
+                           required
+                           [min]="fechaMinima"
+                           (change)="onFechaChange()">
                 </div>
             </div>
 
+            <!-- Hora: [min] bloquea horas pasadas cuando la fecha elegida es hoy -->
             <div class="form-group style-picker-container">
                 <label>Hora de la Cita <span class="required">*</span></label>
                 <div class="picker-input-wrapper">
                     <i class="pi pi-clock picker-icon text-orange"></i>
-                    <input type="time" [(ngModel)]="horaSeleccionada" name="horaSeleccionada" required>
+                    <input type="time"
+                           [(ngModel)]="horaSeleccionada"
+                           name="horaSeleccionada"
+                           required
+                           [min]="horaMinima">
                 </div>
             </div>
 
@@ -120,38 +129,49 @@
                     <tr [ngClass]="{
                         'fila-completada': cita.estado === 'COMPLETADA',
                         'fila-no-asistio': cita.estado === 'NO_ASISTIO',
-                        'fila-cancelada': cita.estado === 'CANCELADA'
+                        'fila-cancelada':  cita.estado === 'CANCELADA'
                       }">
                         <td><b>#{{ cita.idCita || cita.id }}</b></td>
 
                         <td>{{ getNombrePaciente(cita.pacienteId) }}</td>
                         <td>{{ getNombreMedico(cita.medicoId) }}</td>
 
-                        <td class="fecha-td"><i class="pi pi-clock"></i> {{ formatearFechaHora(cita.fechaHora ||
-                            cita.fechaCita) }}</td>
-                        <td><span class="badge-estado" [ngClass]="(cita.estado || 'PENDIENTE').toLowerCase()">{{
-                                cita.estado || 'PENDIENTE' }}</span></td>
+                        <td class="fecha-td">
+                            <i class="pi pi-clock"></i>
+                            {{ formatearFechaHora(cita.fechaHora || cita.fechaCita) }}
+                        </td>
+                        <td>
+                            <span class="badge-estado" [ngClass]="(cita.estado || 'PENDIENTE').toLowerCase()">
+                                {{ cita.estado || 'PENDIENTE' }}
+                            </span>
+                        </td>
                         <td>
                             <div class="action-buttons" *ngIf="!esCitaBloqueada(cita.estado)">
                                 @if (cita.estado !== 'CONFIRMADA' && cita.estado !== 'COMPLETADA') {
                                 <button type="button" class="btn-action success"
                                     (click)="cambiarEstadoCita(cita.idCita || cita.id, 'CONFIRMADA')"
-                                    [disabled]="esCitaBloqueada(cita.estado)" title="Confirmar Cita"><i
-                                        class="pi pi-check"></i></button>
+                                    [disabled]="esCitaBloqueada(cita.estado)" title="Confirmar Cita">
+                                    <i class="pi pi-check"></i>
+                                </button>
                                 }
                                 @if (cita.estado === 'CONFIRMADA') {
                                 <button type="button" class="btn-action orange"
                                     (click)="cambiarEstadoCita(cita.idCita || cita.id, 'EN_ESPERA')"
-                                    title="Paciente en Sala"><i class="pi pi-users"></i></button>
+                                    title="Paciente en Sala">
+                                    <i class="pi pi-users"></i>
+                                </button>
                                 }
                                 @if (cita.estado !== 'CANCELADA' && cita.estado !== 'COMPLETADA') {
                                 <button type="button" class="btn-action danger"
                                     (click)="cambiarEstadoCita(cita.idCita || cita.id, 'CANCELADA')"
-                                    title="Cancelar Cita"><i class="pi pi-ban"></i></button>
+                                    title="Cancelar Cita">
+                                    <i class="pi pi-ban"></i>
+                                </button>
                                 }
                                 <button type="button" class="btn-action void"
-                                    (click)="eliminarCita(cita.idCita || cita.id)" title="Eliminar"><i
-                                        class="pi pi-trash"></i></button>
+                                    (click)="eliminarCita(cita.idCita || cita.id)" title="Eliminar">
+                                    <i class="pi pi-trash"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>

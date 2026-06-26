@@ -1,0 +1,66 @@
+$primary: #26b8b5;
+$surface: #ffffff;
+$border: #e2e8f0;
+
+.admision-container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: auto;
+}
+
+.form-card {
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: 12px;
+    padding: 2rem;
+
+    .grid-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+}
+
+input,
+select {
+    padding: 0.75rem;
+    border: 1px solid $border;
+    border-radius: 8px;
+    width: 100%;
+}
+
+.btn-submit {
+    background: $primary;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    cursor: pointer;
+
+    &:hover {
+        background: darken($primary, 10%);
+    }
+}
+
+.alerta {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+
+.success {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.error {
+    background: #fee2e2;
+    color: #b91c1c;
+}

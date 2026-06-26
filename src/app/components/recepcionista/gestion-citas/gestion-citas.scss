@@ -494,3 +494,20 @@ $text-orange: #ea580c;
         }
     }
 }
+
+
+.fila-completada {
+    background: rgba(22,163,74,.10);
+
+    &:hover{
+        background: rgba(22,163,74,.16);
+    }
+}
+
+.fila-no-asistio {
+    background: rgba(100,116,139,.14);
+
+    &:hover{
+        background: rgba(100,116,139,.20);
+    }
+}
