@@ -1,1 +1,99 @@
-<p>pantalla-medico works!</p>
+<div class="dashboard-header">
+  <div>
+    <h2>Bienvenido, Dr. {{ nombreMedico() }}</h2>
+    <p>Gestiona tus consultas y revisa las citas programadas para hoy.</p>
+  </div>
+</div>
+
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-icon">
+      <span class="pi pi-calendar"></span>
+    </div>
+
+    <div>
+      <p>Citas de Hoy</p>
+      <h3>{{ citasHoy() }}</h3>
+    </div>
+  </div>
+
+  <div class="metric-card warning">
+    <div class="metric-icon">
+      <span class="pi pi-clock"></span>
+    </div>
+
+    <div>
+      <p>Pendientes</p>
+      <h3>{{ pendientes() }}</h3>
+    </div>
+  </div>
+
+  <div class="metric-card info">
+    <div class="metric-icon">
+      <span class="pi pi-heart"></span>
+    </div>
+
+    <div>
+      <p>En Atención</p>
+      <h3>{{ enAtencion() }}</h3>
+    </div>
+  </div>
+
+  <div class="metric-card success">
+    <div class="metric-icon">
+      <span class="pi pi-check-circle"></span>
+    </div>
+
+    <div>
+      <p>Completadas</p>
+      <h3>{{ completadas() }}</h3>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3>Próximas citas</h3>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Hora</th>
+        <th>Paciente</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      @for (cita of citasDeHoy(); track cita.id ?? cita.idCita) {
+        <tr>
+          <td>{{ cita.fechaHora | date: 'HH:mm' }}</td>
+
+          <td>
+            {{
+              cita.pacienteNombre && cita.pacienteApellido
+                ? cita.pacienteNombre + ' ' + cita.pacienteApellido
+                : 'Paciente ID ' + cita.pacienteId
+            }}
+          </td>
+
+          <td>
+            <span class="badge">
+              {{ cita.estado }}
+            </span>
+          </td>
+
+          <td>
+            <button class="btn-atender" (click)="atenderCita(cita)">Atender</button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="4" class="text-center">No hay citas programadas.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

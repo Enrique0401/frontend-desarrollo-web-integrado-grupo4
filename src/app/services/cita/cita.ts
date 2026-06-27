@@ -43,4 +43,20 @@ export class CitaService {
       headers: this.obtenerCabeceras(),
     });
   }
+  obtenerCitasMedico(medicoId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/medico/${medicoId}`, {
+      headers: this.obtenerCabeceras(),
+    });
+  }
+  obtenerCitaPorId(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`, {
+      headers: this.obtenerCabeceras(),
+    });
+  }
+
+  actualizarCita(id: number, cita: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, cita, {
+      headers: this.obtenerCabeceras(),
+    });
+  }
 }

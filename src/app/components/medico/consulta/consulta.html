@@ -1,0 +1,94 @@
+<div class="consulta-header">
+  <div>
+    <h2>Consulta Médica</h2>
+    <p>Registra la atención clínica del paciente.</p>
+  </div>
+
+  <button class="btn-volver" type="button" (click)="volverDashboard()">
+    <span class="pi pi-arrow-left"></span>
+    Volver
+  </button>
+</div>
+
+@if (cita()) {
+  <div class="consulta-grid">
+    <div class="card paciente-card">
+      <div class="estado-badge">
+        {{ cita()?.estado }}
+      </div>
+
+      <h3>Datos de la cita</h3>
+
+      <div class="info-row">
+        <span>Paciente</span>
+        <strong>Paciente ID {{ cita()?.pacienteId }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Fecha y hora</span>
+        <strong>{{ cita()?.fechaHora | date: 'dd/MM/yyyy HH:mm' }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Motivo</span>
+        <strong>{{ cita()?.motivo || 'Sin motivo registrado' }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Notas</span>
+        <strong>{{ cita()?.notas || 'Sin notas' }}</strong>
+      </div>
+    </div>
+
+    <div class="card form-card">
+      <h3>Registro de atención</h3>
+
+      <form [formGroup]="form" (ngSubmit)="finalizarConsulta()">
+        <div class="form-group">
+          <label>Diagnóstico</label>
+          <textarea
+            formControlName="diagnostico"
+            placeholder="Ingrese el diagnóstico del paciente"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Observaciones</label>
+          <textarea
+            formControlName="observaciones"
+            placeholder="Ingrese observaciones clínicas"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Tratamiento</label>
+          <textarea
+            formControlName="tratamiento"
+            placeholder="Ingrese el tratamiento indicado"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Receta médica</label>
+          <textarea
+            formControlName="receta"
+            placeholder="Ingrese medicamentos o indicaciones"
+          ></textarea>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn-secondary" (click)="volverDashboard()">Cancelar</button>
+
+          <button type="submit" class="btn-primary">
+            <span class="pi pi-check-circle"></span>
+            Finalizar consulta
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+} @else {
+  <div class="card">
+    <p>Cargando consulta...</p>
+  </div>
+}
