@@ -174,45 +174,44 @@ export const routes: Routes = [
           import('./components/recepcionista/pantalla-recepcionista/pantalla-recepcionista').then(
             (m) => m.PantallaRecepcionista,
           ),
-          children: [
-            {
-              path: '',
-              redirectTo: 'panel-principal',
-              pathMatch: 'full',
-            },
-            {
-              path: 'panel-principal',
-              loadComponent: () =>
-                import('./components/recepcionista/panel-principal/panel-principal').then(
-                    (m) => m.PanelPrincipal,
-                )
-            },
-            {
-              path: 'gestion-citas',
-              loadComponent: () =>
-                import('./components/recepcionista/gestion-citas/gestion-citas').then(
-                    (m) => m.GestionCitas,
-                )
-            },
-            {
-              path: 'faacturacion',
-              loadComponent: () =>
-                import('./components/recepcionista/cobros-facturacion/cobros-facturacion').then(
-                    (m) => m.CobrosFacturacion,
-                )
-            },
-            {
-              path: 'admision',
-              loadComponent: () =>
-                import('./components/recepcionista/admision-pacientes/admision-pacientes').then(
-                    (m) => m.AdmisionPacientes,
-                )
-            }
-          ]
+        children: [
+          {
+            path: '',
+            redirectTo: 'panel-principal',
+            pathMatch: 'full',
+          },
+          {
+            path: 'panel-principal',
+            loadComponent: () =>
+              import('./components/recepcionista/panel-principal/panel-principal').then(
+                (m) => m.PanelPrincipal,
+              )
+          },
+          {
+            path: 'gestion-citas',
+            loadComponent: () =>
+              import('./components/recepcionista/gestion-citas/gestion-citas').then(
+                (m) => m.GestionCitas,
+              )
+          },
+          {
+            path: 'faacturacion',
+            loadComponent: () =>
+              import('./components/recepcionista/cobros-facturacion/cobros-facturacion').then(
+                (m) => m.CobrosFacturacion,
+              )
+          },
+          {
+            path: 'admision',
+            loadComponent: () =>
+              import('./components/recepcionista/admision-pacientes/admision-pacientes').then(
+                (m) => m.AdmisionPacientes,
+              )
+          }
+        ]
       },
 
       // MÉDICO 
-
       {
         path: 'medico',
         canActivate: [roleGuard],
@@ -232,6 +231,27 @@ export const routes: Routes = [
           import('./components/enfermera/pantalla-enfermera/pantalla-enfermera').then(
             (m) => m.PantallaEnfermera,
           ),
+        children: [
+          {
+            path: '',
+            redirectTo: 'sala-espera',
+            pathMatch: 'full',
+          },
+          {
+            path: 'sala-espera',
+            loadComponent: () =>
+              import('./components/enfermera/sala-espera/sala-espera').then(
+                (m) => m.SalaEspera,
+              ),
+          },
+          {
+            path: 'triage/:idCita',
+            loadComponent: () =>
+              import('./components/enfermera/atencion-triage/atencion-triage').then(
+                (m) => m.AtencionTriage,
+              ),
+          }
+        ]
       },
 
       //PACIENTE

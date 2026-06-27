@@ -1,112 +1,20 @@
-<div class="dashboard-container">
-  
-    @if (cargando) {
-      <div class="estado-mensaje">
-        <i class="pi pi-spin pi-spinner icon-cargando"></i>
-        <p>Sincronizando datos con la clínica...</p>
-      </div>
-    }
-  
-    @if (!cargando && errorMensaje) {
-      <div class="estado-mensaje error">
-        <i class="pi pi-exclamation-triangle icon-error"></i>
-        <p>{{ errorMensaje }}</p>
-      </div>
-    }
-  
-    @if (!cargando && !errorMensaje) {
-      <!-- TARJETAS DE ESTADÍSTICAS -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon bg-blue">
-            <i class="pi pi-calendar"></i>
-          </div>
-          <div class="stat-info">
-            <p>Total Citas Hoy</p>
-            <h3>{{ citasHoy.length }}</h3>
-          </div>
-        </div>
-  
-        <div class="stat-card">
-          <div class="stat-icon bg-orange">
-            <i class="pi pi-users"></i>
-          </div>
-          <div class="stat-info">
-            <p>Pacientes en Espera</p>
-            <h3>{{ citasEnEspera }}</h3>
-          </div>
-        </div>
-  
-        <div class="stat-card" routerLink="/panel/recepcion/faacturacion" style="cursor: pointer;">
-          <div class="stat-icon bg-red">
-            <i class="pi pi-wallet"></i>
-          </div>
-          <div class="stat-info">
-            <p>Pendientes de Pago</p>
-            <h3>{{ citasPendientesPago }}</h3>
-          </div>
-        </div>
-      </div>
-  
-      <!-- TABLA DE AGENDA DEL DÍA -->
-      <div class="agenda-section">
-        <div class="section-header">
-          <div class="title-group">
-            <i class="pi pi-list"></i>
-            <h3>Agenda del Día</h3>
-          </div>
-          <button class="btn-nueva-cita" routerLink="/panel/recepcion/gestion-citas">
-            <i class="pi pi-plus"></i> Nueva Cita
-          </button>
-        </div>
-  
-        <div class="table-container">
-          <table class="nova-table">
-            <thead>
-              <tr>
-                <th>Hora</th>
-                <th>Paciente</th>
-                <th>Médico</th>
-                <th>Estado</th>
-                <th>Acciones Rápidas</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (cita of citasHoy; track cita.id) {
-                <tr>
-                  <td class="fw-bold td-hora">
-                    <i class="pi pi-clock"></i> 
-                    {{ formatearHora(cita.fechaHora || cita.fechaCita || cita.fechaConsulta) }}
-                  </td>
-                  <td>{{ cita.paciente?.nombre }} {{ cita.paciente?.apellido }}</td>
-                  <td>Dr/a. {{ cita.medico?.nombre }} {{ cita.medico?.apellido }}</td>
-                  <td>
-                    <span class="badge-estado" [ngClass]="(cita.estado || 'PENDIENTE').toLowerCase()">
-                      {{ cita.estado || 'PENDIENTE' }}
-                    </span>
-                  </td>
-                  <td class="td-acciones">
-                    <!-- Botón para registrar que el paciente ya llegó a la clínica -->
-                    <button class="btn-icon success" title="Marcar Llegada">
-                      <i class="pi pi-check-circle"></i>
-                    </button>
-                    <!-- Botón para redirigir a facturación -->
-                    <button class="btn-icon warning" title="Ir a Facturación" routerLink="/panel/recepcion/faacturacion">
-                      <i class="pi pi-money-bill"></i>
-                    </button>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="5" class="empty-state">
-                    <i class="pi pi-calendar-times"></i>
-                    <p>No hay citas programadas para el día de hoy.</p>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-    }
+<div class="graficos-container">
+  <div class="grafico-card widget-dona">
+    <div class="card-header">
+      <h4>Distribución Diaria</h4>
+      <span class="badge-hoy">En vivo</span>
+    </div>
+    <div class="canvas-wrapper">
+      <canvas id="chartHoyCanvas"></canvas>
+    </div>
   </div>
+
+  <div class="grafico-card widget-linea">
+    <div class="card-header">
+      <h4>Rendimiento Histórico Mensual</h4>
+    </div>
+    <div class="canvas-wrapper">
+      <canvas id="chartGeneralCanvas"></canvas>
+    </div>
+  </div>
+</div>
