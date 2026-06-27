@@ -54,6 +54,16 @@
 <div class="card">
   <div class="card-header">
     <h3>Próximas citas</h3>
+    <div class="filters">
+  <div class="search-box">
+    <span class="pi pi-search"></span>
+    <input
+      type="text"
+      placeholder="Buscar paciente..."
+      (input)="buscar($event)"
+    />
+  </div>
+</div>
   </div>
 
   <table class="table">
@@ -64,10 +74,11 @@
         <th>Estado</th>
         <th></th>
       </tr>
+      
     </thead>
 
     <tbody>
-      @for (cita of citasDeHoy(); track cita.id ?? cita.idCita) {
+      @for (cita of citasFiltradas(); track cita.id ?? cita.idCita) {
         <tr>
           <td>{{ cita.fechaHora | date: 'HH:mm' }}</td>
 

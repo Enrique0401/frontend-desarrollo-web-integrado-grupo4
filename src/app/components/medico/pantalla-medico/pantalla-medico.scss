@@ -89,6 +89,10 @@ $surface: #ffffff;
 }
 
 .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1rem;
   border-bottom: 1px solid $border;
   padding-bottom: 1rem;
@@ -98,6 +102,47 @@ $surface: #ffffff;
     color: $secondary;
     font-size: 1.25rem;
     font-weight: 900;
+  }
+}
+.filters {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.search-box {
+  position: relative;
+  width: 320px;
+  max-width: 100%;
+
+  .pi {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $primary;
+  }
+
+   input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.8rem;
+    border: 1px solid #ddd6fe;
+    border-radius: 14px;
+    outline: none;
+    background: #ffffff;
+    color: $secondary;
+    font-weight: 700;
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.08);
+
+    &::placeholder {
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.13);
+    }
   }
 }
 
