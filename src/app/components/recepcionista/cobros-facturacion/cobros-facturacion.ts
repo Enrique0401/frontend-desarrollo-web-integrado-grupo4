@@ -22,24 +22,19 @@ export class CobrosFacturacion implements OnInit {
   private http = inject(HttpClient);
   private urlBase = 'https://backend-desarrollo-web-integrado-grupo4.onrender.com/api';
 
-  // Navegación de pestañas internas
   pestanaActiva: 'citas' | 'historial' = 'citas';
-
   citasDisponibles: any[] = [];
   citasFiltradas: any[] = [];
   pacientes: any[] = [];
   facturas: any[] = [];
   facturasFiltradas: any[] = [];
-
   cargando: boolean = true;
   mostrarFormulario: boolean = false;
   successMensaje: string = '';
   errorMensaje: string = '';
+  filtroBuscador: string = '';
+  filtroHistorial: string = '';
 
-  filtroBuscador: string = ''; // Filtro para citas
-  filtroHistorial: string = ''; // Filtro para facturas
-
-  // Estructura de formulario con detalles dinámicos
   nuevaFactura = {
     citaId: '',
     pacienteId: '',
@@ -159,15 +154,17 @@ export class CobrosFacturacion implements OnInit {
   }
 
   calcularTotales() {
-    let subtotalAcumulado = 0;
+    let totalFinalAcumulado = 0;
+
     this.nuevaFactura.detalles.forEach(item => {
+      // El total de cada ítem ya incluye el IGV dictado por ti
       item.total = Number((item.cantidad * item.precioUnitario).toFixed(2));
-      subtotalAcumulado += item.total;
+      totalFinalAcumulado += item.total;
     });
 
-    this.nuevaFactura.subtotal = Number(subtotalAcumulado.toFixed(2));
-    this.nuevaFactura.impuesto = Number((this.nuevaFactura.subtotal * 0.18).toFixed(2));
-    this.nuevaFactura.total = Number((this.nuevaFactura.subtotal + this.nuevaFactura.impuesto).toFixed(2));
+    this.nuevaFactura.total = Number(totalFinalAcumulado.toFixed(2));
+    this.nuevaFactura.subtotal = Number((this.nuevaFactura.total / 1.18).toFixed(2));
+    this.nuevaFactura.impuesto = Number((this.nuevaFactura.total - this.nuevaFactura.subtotal).toFixed(2));
   }
 
   getNombrePaciente(id: any): string {
@@ -255,22 +252,16 @@ export class CobrosFacturacion implements OnInit {
   }
 
   marcarCitaComoPagada(idCita: number) {
-    const bodyPlano = {
-      id: idCita,
-      estado: 'PAGADA',
-      clinicaId: 1,
-      consultorioId: 1
-    };
+    const body = { estado: 'FINALIZADA' };
 
-    this.http.put(`${this.urlBase}/citas/${idCita}`, bodyPlano, { headers: this.obtenerHeaders() }).subscribe({
+    this.http.patch(`${this.urlBase}/citas/${idCita}/estado`, body, { headers: this.obtenerHeaders() }).subscribe({
       next: () => this.cargarDatos(),
       error: (e) => {
-        console.error('Error al actualizar estado de la cita:', e);
-        this.cargarDatos(); // Recargar de todas formas las tablas
+        console.error('Error al actualizar estado de la cita a FINALIZADA:', e);
+        this.cargarDatos();
       }
     });
   }
-
   mostrarAlerta(msg: string, esExito: boolean) {
     esExito ? this.successMensaje = msg : this.errorMensaje = msg;
     setTimeout(() => { this.successMensaje = ''; this.errorMensaje = ''; }, 4000);
