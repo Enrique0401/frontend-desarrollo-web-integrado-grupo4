@@ -1,0 +1,52 @@
+<div class="medico-layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <button class="logo-box" type="button" (click)="recargar()">
+        <img src="/logo.png" alt="Nova Salud" />
+      </button>
+
+      <h2>Nova Salud</h2>
+      <span>Módulo Médico</span>
+    </div>
+
+    <nav class="menu">
+      <a routerLink="/panel/medico/dashboard" routerLinkActive="active">
+        <span class="pi pi-chart-line"></span>
+        Dashboard
+      </a>
+
+      <a routerLink="/panel/medico/agenda" routerLinkActive="active">
+        <span class="pi pi-calendar"></span>
+        Mi Agenda
+      </a>
+
+      <a routerLink="/panel/medico/historial/0" routerLinkActive="active">
+        <span class="pi pi-folder-open"></span>
+        Historial Clínico
+      </a>
+
+      <a routerLink="/panel/medico/agenda" routerLinkActive="active">
+        <span class="pi pi-heart"></span>
+        Consulta Médica
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <h1>Panel Médico</h1>
+        <p>Gestión de atención, agenda e historial clínico.</p>
+      </div>
+
+      <button class="btn-logout" type="button" (click)="cerrarSesion()">
+        <span class="pi pi-sign-out"></span>
+        Cerrar sesión
+      </button>
+    </header>
+
+    <section class="page-content">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>

@@ -215,11 +215,39 @@ export const routes: Routes = [
       {
         path: 'medico',
         canActivate: [roleGuard],
-        data: { roles: ['MEDICO', 'ENFERMERA'] as Rol[] },
+        data: { roles: ['MEDICO'] as Rol[] },
         loadComponent: () =>
-          import('./components/medico/pantalla-medico/pantalla-medico').then(
-            (m) => m.PantallaMedico,
-          ),
+          import('./components/medico/nav-medico/nav-medico').then((m) => m.NavMedico),
+        children: [
+          {
+            path: '',
+            redirectTo: 'dashboard',
+            pathMatch: 'full',
+          },
+          {
+            path: 'dashboard',
+            loadComponent: () =>
+              import('./components/medico/pantalla-medico/pantalla-medico').then(
+                (m) => m.PantallaMedico,
+              ),
+          },
+          {
+            path: 'agenda',
+            loadComponent: () => import('./components/medico/agenda/agenda').then((m) => m.Agenda),
+          },
+          {
+            path: 'historial/:idPaciente',
+            loadComponent: () =>
+              import('./components/medico/historial-paciente/historial-paciente').then(
+                (m) => m.HistorialPaciente,
+              ),
+          },
+          {
+            path: 'consulta/:idCita',
+            loadComponent: () =>
+              import('./components/medico/consulta/consulta').then((m) => m.Consulta),
+          },
+        ],
       },
 
       //ENFERMERA
