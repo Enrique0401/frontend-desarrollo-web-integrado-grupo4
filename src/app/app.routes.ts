@@ -174,41 +174,41 @@ export const routes: Routes = [
           import('./components/recepcionista/pantalla-recepcionista/pantalla-recepcionista').then(
             (m) => m.PantallaRecepcionista,
           ),
-          children: [
-            {
-              path: '',
-              redirectTo: 'panel-principal',
-              pathMatch: 'full',
-            },
-            {
-              path: 'panel-principal',
-              loadComponent: () =>
-                import('./components/recepcionista/panel-principal/panel-principal').then(
-                    (m) => m.PanelPrincipal,
-                )
-            },
-            {
-              path: 'gestion-citas',
-              loadComponent: () =>
-                import('./components/recepcionista/gestion-citas/gestion-citas').then(
-                    (m) => m.GestionCitas,
-                )
-            },
-            {
-              path: 'faacturacion',
-              loadComponent: () =>
-                import('./components/recepcionista/cobros-facturacion/cobros-facturacion').then(
-                    (m) => m.CobrosFacturacion,
-                )
-            },
-            {
-              path: 'admision',
-              loadComponent: () =>
-                import('./components/recepcionista/admision-pacientes/admision-pacientes').then(
-                    (m) => m.AdmisionPacientes,
-                )
-            }
-          ]
+        children: [
+          {
+            path: '',
+            redirectTo: 'panel-principal',
+            pathMatch: 'full',
+          },
+          {
+            path: 'panel-principal',
+            loadComponent: () =>
+              import('./components/recepcionista/panel-principal/panel-principal').then(
+                (m) => m.PanelPrincipal,
+              ),
+          },
+          {
+            path: 'gestion-citas',
+            loadComponent: () =>
+              import('./components/recepcionista/gestion-citas/gestion-citas').then(
+                (m) => m.GestionCitas,
+              ),
+          },
+          {
+            path: 'faacturacion',
+            loadComponent: () =>
+              import('./components/recepcionista/cobros-facturacion/cobros-facturacion').then(
+                (m) => m.CobrosFacturacion,
+              ),
+          },
+          {
+            path: 'admision',
+            loadComponent: () =>
+              import('./components/recepcionista/admision-pacientes/admision-pacientes').then(
+                (m) => m.AdmisionPacientes,
+              ),
+          },
+        ],
       },
 
       // MÉDICO 
@@ -216,11 +216,39 @@ export const routes: Routes = [
       {
         path: 'medico',
         canActivate: [roleGuard],
-        data: { roles: ['MEDICO', 'ENFERMERA'] as Rol[] },
+        data: { roles: ['MEDICO'] as Rol[] },
         loadComponent: () =>
-          import('./components/medico/pantalla-medico/pantalla-medico').then(
-            (m) => m.PantallaMedico,
-          ),
+          import('./components/medico/nav-medico/nav-medico').then((m) => m.NavMedico),
+        children: [
+          {
+            path: '',
+            redirectTo: 'dashboard',
+            pathMatch: 'full',
+          },
+          {
+            path: 'dashboard',
+            loadComponent: () =>
+              import('./components/medico/pantalla-medico/pantalla-medico').then(
+                (m) => m.PantallaMedico,
+              ),
+          },
+          {
+            path: 'agenda',
+            loadComponent: () => import('./components/medico/agenda/agenda').then((m) => m.Agenda),
+          },
+          {
+            path: 'historial/:idPaciente',
+            loadComponent: () =>
+              import('./components/medico/historial-paciente/historial-paciente').then(
+                (m) => m.HistorialPaciente,
+              ),
+          },
+          {
+            path: 'consulta/:idCita',
+            loadComponent: () =>
+              import('./components/medico/consulta/consulta').then((m) => m.Consulta),
+          },
+        ],
       },
 
       //ENFERMERA
