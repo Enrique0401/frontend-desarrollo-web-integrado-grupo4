@@ -147,31 +147,55 @@
                         </td>
                         <td>
                             <div class="action-buttons" *ngIf="!esCitaBloqueada(cita.estado)">
-                                @if (cita.estado !== 'CONFIRMADA' && cita.estado !== 'COMPLETADA') {
+                                
+                                @if (cita.estado === 'PENDIENTE' || !cita.estado) {
                                 <button type="button" class="btn-action success"
                                     (click)="cambiarEstadoCita(cita.idCita || cita.id, 'CONFIRMADA')"
-                                    [disabled]="esCitaBloqueada(cita.estado)" title="Confirmar Cita">
+                                    title="Confirmar Cita">
                                     <i class="pi pi-check"></i>
                                 </button>
                                 }
+
                                 @if (cita.estado === 'CONFIRMADA') {
                                 <button type="button" class="btn-action orange"
-                                    (click)="cambiarEstadoCita(cita.idCita || cita.id, 'EN_ESPERA')"
+                                    (click)="cambiarEstadoCita(cita.idCita || cita.id, 'EN_ATENCION')"
                                     title="Paciente en Sala">
                                     <i class="pi pi-users"></i>
                                 </button>
                                 }
-                                @if (cita.estado !== 'CANCELADA' && cita.estado !== 'COMPLETADA') {
+
+                                @if (cita.estado === 'EN_ATENCION') {
+                                <button type="button" class="btn-action success"
+                                    (click)="cambiarEstadoCita(cita.idCita || cita.id, 'ATENDIDA')"
+                                    title="Finalizar Atención Médica">
+                                    <i class="pi pi-check-circle"></i>
+                                </button>
+                                }
+
+                                @if (cita.estado === 'ATENDIDA') {
+                                <button type="button" class="btn-action success"
+                                    (click)="irAFacturacion()"
+                                    title="Ir a Cobrar">
+                                    <i class="pi pi-wallet"></i>
+                                </button>
+                                }
+
+                                @if (cita.estado !== 'CANCELADA' && cita.estado !== 'ATENDIDA') {
                                 <button type="button" class="btn-action danger"
                                     (click)="cambiarEstadoCita(cita.idCita || cita.id, 'CANCELADA')"
                                     title="Cancelar Cita">
                                     <i class="pi pi-ban"></i>
                                 </button>
                                 }
+                                
                                 <button type="button" class="btn-action void"
                                     (click)="eliminarCita(cita.idCita || cita.id)" title="Eliminar">
                                     <i class="pi pi-trash"></i>
                                 </button>
+                            </div>
+
+                            <div *ngIf="cita.estado === 'FINALIZADA'" style="color: #27ae60; font-weight: bold; text-align: center;">
+                                <i class="pi pi-verified"></i> Finalizado
                             </div>
                         </td>
                     </tr>
