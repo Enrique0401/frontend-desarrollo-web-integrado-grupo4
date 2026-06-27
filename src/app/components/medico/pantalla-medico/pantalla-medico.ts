@@ -108,22 +108,18 @@ export class PantallaMedico implements OnInit {
     return this.citas().filter((c) => c.fechaHora?.slice(0, 10) === hoy);
   });
 
-  citasHoy = computed(() => this.citasDeHoy().length);
+  citasHoy = computed(() => this.citas().length);
 
   pendientes = computed(
-    () =>
-      this.citasDeHoy().filter((c) => c.estado === 'PENDIENTE' || c.estado === 'CONFIRMADA').length,
+    () => this.citas().filter((c) => c.estado === 'PENDIENTE' || c.estado === 'CONFIRMADA').length,
   );
 
   enAtencion = computed(
-    () =>
-      this.citasDeHoy().filter((c) => c.estado === 'EN_ATENCION' || c.estado === 'ATENDIDA').length,
+    () => this.citas().filter((c) => c.estado === 'EN_ATENCION' || c.estado === 'ATENDIDA').length,
   );
 
   completadas = computed(
-    () =>
-      this.citasDeHoy().filter((c) => c.estado === 'COMPLETADA' || c.estado === 'FINALIZADA')
-        .length,
+    () => this.citas().filter((c) => c.estado === 'COMPLETADA' || c.estado === 'FINALIZADA').length,
   );
 
   atenderCita(cita: any): void {
@@ -135,24 +131,26 @@ export class PantallaMedico implements OnInit {
       return;
     }
 
-    if (cita.estado === 'PENDIENTE' || cita.estado === 'CONFIRMADA') {
-      const citaActualizada = {
-        ...cita,
-        estado: 'EN_ATENCION',
-      };
+    const citaActualizada = {
+      ...cita,
+      estado: 'EN_ATENCION',
+    };
 
-      this.citaService.actualizarCita(idCita, citaActualizada).subscribe({
-        next: () => {
-          this.router.navigate(['/panel/medico/consulta', idCita]);
-        },
-        error: (err) => {
-          console.error('Error al cambiar cita a EN_ATENCION:', err);
-          alert('No se pudo iniciar la atención.');
-        },
-      });
+    this.citaService.actualizarCita(idCita, citaActualizada).subscribe({
+      next: (citaActualizadaBD) => {
+        const citasActualizadas = this.citas().map((c) =>
+          (c.id ?? c.idCita ?? c.id_cita) === idCita ? citaActualizadaBD : c,
+        );
 
-      return;
-    }
+        this.citas.set(citasActualizadas);
+
+        this.router.navigate(['/panel/medico/consulta', idCita]);
+      },
+      error: (err) => {
+        console.error('Error al cambiar cita a EN_ATENCION:', err);
+        alert('No se pudo iniciar la atención.');
+      },
+    });
 
     this.router.navigate(['/panel/medico/consulta', idCita]);
   }

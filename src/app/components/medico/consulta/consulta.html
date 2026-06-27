@@ -1,12 +1,12 @@
 <div class="consulta-header">
   <div>
     <h2>Consulta Médica</h2>
-    <p>Registra la atención clínica del paciente.</p>
+    <p>Registra la atención clínica completa del paciente.</p>
   </div>
 
-  <button class="btn-volver" type="button" (click)="volverDashboard()">
+  <button class="btn-volver" type="button" (click)="volverAgenda()">
     <span class="pi pi-arrow-left"></span>
-    Volver
+    Volver a agenda
   </button>
 </div>
 
@@ -21,7 +21,9 @@
 
       <div class="info-row">
         <span>Paciente</span>
-        <strong>Paciente ID {{ cita()?.pacienteId }}</strong>
+        <strong>
+          {{ cita()?.pacienteNombre }} {{ cita()?.pacienteApellido }}
+        </strong>
       </div>
 
       <div class="info-row">
@@ -41,51 +43,106 @@
     </div>
 
     <div class="card form-card">
-      <h3>Registro de atención</h3>
+      <h3>Registro de atención médica</h3>
 
       <form [formGroup]="form" (ngSubmit)="finalizarConsulta()">
-        <div class="form-group">
+        <div class="form-group full">
+          <label>Anamnesis</label>
+          <textarea formControlName="anamnesis" placeholder="Relato del paciente, síntomas y antecedentes actuales"></textarea>
+          @if (campoInvalido('anamnesis')) {
+            <small>La anamnesis es obligatoria.</small>
+          }
+        </div>
+
+        <div class="form-group full">
+          <label>Examen físico</label>
+          <textarea formControlName="examenFisico" placeholder="Hallazgos del examen físico"></textarea>
+        </div>
+
+        <div class="vitales-grid">
+          <div class="form-group">
+            <label>Presión arterial</label>
+            <input type="text" formControlName="presionArterial" placeholder="120/80" />
+          </div>
+
+          <div class="form-group">
+            <label>Temperatura °C</label>
+            <input type="number" step="0.1" formControlName="temperatura" />
+          </div>
+
+          <div class="form-group">
+            <label>Frecuencia cardíaca</label>
+            <input type="number" formControlName="frecuenciaCardiaca" />
+          </div>
+
+          <div class="form-group">
+            <label>Frecuencia respiratoria</label>
+            <input type="number" formControlName="frecuenciaRespiratoria" />
+          </div>
+
+          <div class="form-group">
+            <label>Peso kg</label>
+            <input type="number" step="0.1" formControlName="peso" />
+          </div>
+
+          <div class="form-group">
+            <label>Talla m</label>
+            <input type="number" step="0.01" formControlName="talla" />
+          </div>
+        </div>
+
+        <div class="form-group full">
           <label>Diagnóstico</label>
-          <textarea
-            formControlName="diagnostico"
-            placeholder="Ingrese el diagnóstico del paciente"
-          ></textarea>
+          <textarea formControlName="diagnostico" placeholder="Ingrese el diagnóstico del paciente"></textarea>
+          @if (campoInvalido('diagnostico')) {
+            <small>El diagnóstico es obligatorio.</small>
+          }
         </div>
 
-        <div class="form-group">
-          <label>Observaciones</label>
-          <textarea
-            formControlName="observaciones"
-            placeholder="Ingrese observaciones clínicas"
-          ></textarea>
-        </div>
-
-        <div class="form-group">
+        <div class="form-group full">
           <label>Tratamiento</label>
-          <textarea
-            formControlName="tratamiento"
-            placeholder="Ingrese el tratamiento indicado"
-          ></textarea>
+          <textarea formControlName="tratamiento" placeholder="Ingrese el tratamiento indicado"></textarea>
+          @if (campoInvalido('tratamiento')) {
+            <small>El tratamiento es obligatorio.</small>
+          }
         </div>
 
-        <div class="form-group">
-          <label>Receta médica</label>
-          <textarea
-            formControlName="receta"
-            placeholder="Ingrese medicamentos o indicaciones"
-          ></textarea>
+        <div class="form-group full">
+          <label>Observaciones</label>
+          <textarea formControlName="observaciones" placeholder="Ingrese observaciones clínicas"></textarea>
         </div>
 
         <div class="actions">
-          <button type="button" class="btn-secondary" (click)="volverDashboard()">Cancelar</button>
+          <button type="button" class="btn-secondary" (click)="volverAgenda()">
+            Cancelar
+          </button>
 
-          <button type="submit" class="btn-primary">
+          <button type="submit" class="btn-primary" [disabled]="guardando()">
             <span class="pi pi-check-circle"></span>
-            Finalizar consulta
+            {{ guardando() ? 'Guardando...' : 'Finalizar consulta' }}
           </button>
         </div>
       </form>
     </div>
+    @if (mostrarModalHistoria()) {
+  <div class="modal-backdrop-custom">
+    <div class="modal-card-custom warning-modal">
+      <div class="warning-icon">
+        <span class="pi pi-exclamation-triangle"></span>
+      </div>
+
+      <h3>Historia clínica no encontrada</h3>
+
+      <p>{{ mensajeModalHistoria() }}</p>
+
+      <div class="modal-actions center">
+        <button type="button" class="btn-primary" (click)="cerrarModalHistoria()">
+          Aceptar
+        </button>
+      </div>
+    </div>
+  </div>
+}
   </div>
 } @else {
   <div class="card">

@@ -1,1 +1,112 @@
-<p>historial-paciente works!</p>
+<div class="historial-header">
+  <div>
+    <h2>Historial Clínico</h2>
+    <p>Consulta las atenciones médicas registradas por paciente.</p>
+  </div>
+</div>
+
+<div class="historial-layout">
+  <div class="card pacientes-card">
+    <div class="card-header">
+      <h3>Pacientes</h3>
+
+      <div class="search-box">
+        <span class="pi pi-search"></span>
+        <input
+          type="text"
+          placeholder="Buscar paciente..."
+          (input)="buscar($event)"
+        />
+      </div>
+    </div>
+
+    <div class="pacientes-list">
+      @for (paciente of pacientesFiltrados(); track paciente.id ?? paciente.idPaciente) {
+        <button
+          type="button"
+          class="paciente-item"
+          [class.active]="(pacienteSeleccionado()?.id ?? pacienteSeleccionado()?.idPaciente) === (paciente.id ?? paciente.idPaciente)"
+          (click)="seleccionarPaciente(paciente)"
+        >
+          <div>
+            <strong>{{ paciente.nombre }} {{ paciente.apellido }}</strong>
+            <span>DNI: {{ paciente.dni || paciente.numeroDocumento || 'No registrado' }}</span>
+          </div>
+        </button>
+      } @empty {
+        <p class="empty">No se encontraron pacientes.</p>
+      }
+    </div>
+  </div>
+
+  <div class="card historial-card">
+    @if (pacienteSeleccionado()) {
+      <div class="patient-summary">
+        <div>
+          <h3>{{ pacienteSeleccionado()?.nombre }} {{ pacienteSeleccionado()?.apellido }}</h3>
+          <p>DNI: {{ pacienteSeleccionado()?.dni || pacienteSeleccionado()?.numeroDocumento || 'No registrado' }}</p>
+        </div>
+
+        <span class="badge-patient">Paciente seleccionado</span>
+      </div>
+
+      <div class="section-title">
+        <h3>Consultas registradas</h3>
+      </div>
+
+      <div class="timeline">
+        @for (consulta of consultas(); track consulta.id) {
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+
+            <div class="timeline-content">
+              <div class="timeline-head">
+                <h4>{{ consulta.fechaConsulta | date: 'dd/MM/yyyy HH:mm':'UTC' }}</h4>
+                <span>Consulta #{{ consulta.id }}</span>
+              </div>
+
+              <div class="detail-grid">
+                <div>
+                  <small>Diagnóstico</small>
+                  <strong>{{ consulta.diagnostico || 'No registrado' }}</strong>
+                </div>
+
+                <div>
+                  <small>Tratamiento</small>
+                  <strong>{{ consulta.tratamiento || 'No registrado' }}</strong>
+                </div>
+
+                <div>
+                  <small>Presión arterial</small>
+                  <strong>{{ consulta.presionArterial || 'No registrado' }}</strong>
+                </div>
+
+                <div>
+                  <small>Temperatura</small>
+                  <strong>{{ consulta.temperatura || 'No registrada' }} °C</strong>
+                </div>
+              </div>
+
+              <div class="observation">
+                <small>Observaciones</small>
+                <p>{{ consulta.observaciones || 'Sin observaciones registradas.' }}</p>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="pi pi-folder-open"></span>
+            <h4>Sin consultas registradas</h4>
+            <p>Este paciente aún no tiene atenciones médicas guardadas.</p>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state large">
+        <span class="pi pi-user"></span>
+        <h3>Selecciona un paciente</h3>
+        <p>Elige un paciente de la lista para visualizar su historial clínico.</p>
+      </div>
+    }
+  </div>
+</div>

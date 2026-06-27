@@ -1,1 +1,91 @@
-<p>agenda works!</p>
+<div class="agenda-header">
+  <div>
+    <h2>Mi Agenda</h2>
+    <p>Revisa y atiende las citas asignadas al Dr. {{ nombreMedico() }}.</p>
+  </div>
+</div>
+
+<div class="card agenda-card">
+  <div class="table-header">
+    <h3>Citas asignadas</h3>
+
+    <div class="filters">
+      <div class="search-box">
+        <span class="pi pi-search"></span>
+        <input
+          type="text"
+          placeholder="Buscar paciente..."
+          (input)="buscar($event)"
+        />
+      </div>
+
+      <input
+        class="date-filter"
+        type="date"
+        (change)="cambiarFecha($event)"
+      />
+
+      <select (change)="cambiarEstado($event)">
+        <option value="TODOS">Todos</option>
+        <option value="PENDIENTE">Pendiente</option>
+        <option value="CONFIRMADA">Confirmada</option>
+        <option value="EN_ATENCION">En atención</option>
+        <option value="ATENDIDA">Atendida</option>
+        <option value="COMPLETADA">Completada</option>
+        <option value="FINALIZADA">Finalizada</option>
+        <option value="CANCELADA">Cancelada</option>
+        <option value="NO_ASISTIO">No asistió</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Paciente</th>
+          <th>Motivo</th>
+          <th>Estado</th>
+          <th class="text-center">Acción</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (cita of citasFiltradas(); track cita.id ?? cita.idCita ?? cita.id_cita) {
+          <tr>
+            <td>{{ cita.fechaHora | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ cita.fechaHora | date: 'HH:mm' }}</td>
+
+            <td>
+              <strong>
+                {{ cita.pacienteNombre }} {{ cita.pacienteApellido }}
+              </strong>
+            </td>
+
+            <td>{{ cita.motivo || 'Sin motivo' }}</td>
+
+            <td>
+              <span class="badge-status">
+                {{ cita.estado }}
+              </span>
+            </td>
+
+            <td class="text-center">
+              <button class="btn-atender" type="button" (click)="irConsulta(cita)">
+                {{ textoBoton(cita) }}
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="text-center empty">
+              No se encontraron citas asignadas.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
