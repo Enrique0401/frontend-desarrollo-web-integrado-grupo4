@@ -13,7 +13,7 @@ import { MedicoService } from '../../../services/medico/medico';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './agregar-personal.html',
-  styleUrl: './agregar-personal.scss'
+  styleUrl: './agregar-personal.scss',
 })
 export class AgregarPersonal implements OnInit {
   cargando = signal(false);
@@ -26,6 +26,7 @@ export class AgregarPersonal implements OnInit {
   form!: FormGroup;
 
   private idEditar: number | null = null;
+  private medicoEditarId: number | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -34,7 +35,7 @@ export class AgregarPersonal implements OnInit {
     private clinicaService: ClinicaService,
     private medicoService: MedicoService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
@@ -64,7 +65,7 @@ export class AgregarPersonal implements OnInit {
       clinicaId: [null, [Validators.required]],
       activo: [true],
       especialidadId: [null],
-      numeroColegiatura: ['']
+      numeroColegiatura: [''],
     });
   }
 
@@ -79,7 +80,7 @@ export class AgregarPersonal implements OnInit {
 
         this.form.patchValue({
           especialidadId: null,
-          numeroColegiatura: ''
+          numeroColegiatura: '',
         });
       }
 
@@ -100,14 +101,14 @@ export class AgregarPersonal implements OnInit {
   cargarClinicas(): void {
     this.clinicaService.obtenerClinicas().subscribe({
       next: (datos) => this.clinicas.set(datos),
-      error: (err) => console.error('Error al cargar clínicas:', err)
+      error: (err) => console.error('Error al cargar clínicas:', err),
     });
   }
 
   cargarEspecialidades(): void {
     this.especialidadService.obtenerEspecialidades().subscribe({
       next: (datos) => this.especialidades.set(datos),
-      error: (err) => console.error('Error al cargar especialidades:', err)
+      error: (err) => console.error('Error al cargar especialidades:', err),
     });
   }
 
@@ -129,10 +130,30 @@ export class AgregarPersonal implements OnInit {
           password: '',
           rol: usuario.rol,
           clinicaId: usuario.clinicaId,
-          activo: usuario.activo
+          activo: usuario.activo,
+        });
+        if (usuario.rol === 'MEDICO') {
+          this.cargarDatosMedico(id);
+        }
+      },
+      error: (err) => console.error('Error al cargar usuario:', err),
+    });
+  }
+  cargarDatosMedico(usuarioId: number): void {
+    this.medicoService.obtenerPorUsuario(usuarioId).subscribe({
+      next: (medico) => {
+        this.medicoEditarId = medico.id;
+
+        this.form.patchValue({
+          especialidadId: medico.especialidadId,
+          numeroColegiatura: medico.numeroColegiatura,
+          clinicaId: medico.clinicaId,
+          activo: medico.activo,
         });
       },
-      error: (err) => console.error('Error al cargar usuario:', err)
+      error: (err) => {
+        console.error(err);
+      },
     });
   }
 
@@ -162,12 +183,41 @@ export class AgregarPersonal implements OnInit {
       telefono: this.form.value.telefono,
       rol: this.form.value.rol,
       activo: this.form.value.activo,
-      clinicaId: this.form.value.clinicaId
+      clinicaId: this.form.value.clinicaId,
     };
 
     if (this.modoEditar() && this.idEditar) {
       this.usuarioService.actualizarUsuario(this.idEditar, usuarioBody).subscribe({
         next: () => {
+          if (this.form.value.rol === 'MEDICO') {
+            const medicoBody = {
+              numeroColegiatura: this.form.value.numeroColegiatura,
+              usuarioId: this.idEditar,
+              especialidadId: this.form.value.especialidadId,
+              clinicaId: this.form.value.clinicaId,
+              activo: this.form.value.activo,
+            };
+
+            this.medicoService.actualizarMedico(this.medicoEditarId!, medicoBody).subscribe({
+              next: () => {
+                this.cargando.set(false);
+                this.exito.set(true);
+
+                setTimeout(() => {
+                  this.router.navigate(['/panel/admin-clinica/personal']);
+                }, 1000);
+              },
+
+              error: (err) => {
+                this.cargando.set(false);
+                console.error(err);
+                alert('No se pudo actualizar el médico.');
+              },
+            });
+
+            return;
+          }
+
           this.cargando.set(false);
           this.exito.set(true);
 
@@ -175,11 +225,12 @@ export class AgregarPersonal implements OnInit {
             this.router.navigate(['/panel/admin-clinica/personal']);
           }, 1000);
         },
+
         error: (err) => {
           this.cargando.set(false);
-          console.error('Error al actualizar personal:', err);
-          alert('No se pudo actualizar el personal.');
-        }
+          console.error(err);
+          alert('No se pudo actualizar el usuario.');
+        },
       });
 
       return;
@@ -193,7 +244,7 @@ export class AgregarPersonal implements OnInit {
             usuarioId: usuarioCreado.id ?? usuarioCreado.idUsuario,
             especialidadId: this.form.value.especialidadId,
             clinicaId: this.form.value.clinicaId,
-            activo: this.form.value.activo
+            activo: this.form.value.activo,
           };
 
           this.medicoService.crearMedico(medicoBody).subscribe({
@@ -209,7 +260,7 @@ export class AgregarPersonal implements OnInit {
               this.cargando.set(false);
               console.error('Usuario creado, pero error al crear médico:', err);
               alert('El usuario se creó, pero no se pudo registrar como médico.');
-            }
+            },
           });
 
           return;
@@ -226,7 +277,7 @@ export class AgregarPersonal implements OnInit {
         this.cargando.set(false);
         console.error('Error al crear personal:', err);
         alert('No se pudo crear el personal.');
-      }
+      },
     });
   }
 

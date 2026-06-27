@@ -153,8 +153,15 @@ export class PantallaAdminClinica implements OnInit {
   );
 
   ultimosTrabajadores = computed(() =>
-    [...this.personal()].reverse().slice(0, 5)
-  );
+  [...this.personal()]
+    .filter(t =>
+      t.rol === 'MEDICO' ||
+      t.rol === 'ENFERMERA' ||
+      t.rol === 'RECEPCIONISTA'
+    )
+    .reverse()
+    .slice(0, 5)
+);
 
   nombreEspecialidad(id: number): string {
     const esp = this.especialidades().find(e => e.id === id || e.idEspecialidad === id);
