@@ -1,9 +1,27 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { Chart, registerables } from 'chart.js';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
 
-Chart.register(...registerables); 
+Chart.register(...registerables);
+
+interface CitaApi {
+  id: number;
+  pacienteId?: number;
+  medicoId?: number;
+  consultorioId?: number;
+  fechaHora?: string;
+  fecha?: string;
+  estado?: string;
+}
+
+interface EstadisticasCitas {
+  total: number;
+  porAtender: number;
+  enAtencion: number;
+  atendidas: number;
+  canceladas: number;
+}
 
 @Component({
   selector: 'app-panel-principal',
@@ -12,244 +30,360 @@ Chart.register(...registerables);
   templateUrl: './panel-principal.html',
   styleUrl: './panel-principal.scss',
 })
-export class PanelPrincipal implements OnInit {
+export class PanelPrincipal implements OnInit, AfterViewInit, OnDestroy {
   private http = inject(HttpClient);
   private urlBase = 'https://backend-desarrollo-web-integrado-grupo4.onrender.com/api';
 
-  estadisticasHoy = { pendientes: 0, atencion: 0, finalizadas: 0, canceladas: 0 };
-  estadisticasGeneral = { pendientes: 0, atencion: 0, finalizadas: 0, canceladas: 0 };
+  @ViewChild('chartHoyCanvas') chartHoyCanvas?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('chartHistoricoCanvas') chartHistoricoCanvas?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('chartMensualCanvas') chartMensualCanvas?: ElementRef<HTMLCanvasElement>;
+
+  cargando = true;
+  error = '';
+
+  citas: CitaApi[] = [];
+
+  estadisticasHoy: EstadisticasCitas = this.crearEstadisticas();
+  estadisticasHistoricas: EstadisticasCitas = this.crearEstadisticas();
 
   etiquetasMeses: string[] = [];
-  datosLineaFinalizadas: number[] = [];
-  datosLineaCanceladas: number[] = [];
+  datosMensualesAtendidas: number[] = [];
+  datosMensualesCanceladas: number[] = [];
 
-  chartHoy: any;
-  chartGeneral: any;
+  private vistaLista = false;
+  private chartHoy?: Chart;
+  private chartHistorico?: Chart;
+  private chartMensual?: Chart;
 
   ngOnInit() {
     this.cargarEstadisticas();
   }
 
+  ngAfterViewInit() {
+    this.vistaLista = true;
+  }
+
+  ngOnDestroy() {
+    this.destruirGraficos();
+  }
+
   private obtenerHeaders(): HttpHeaders {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     let headers = new HttpHeaders();
-    if (token) headers = headers.set('Authorization', 'Bearer ' + token);
+
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
     return headers;
   }
 
+  private crearEstadisticas(): EstadisticasCitas {
+    return {
+      total: 0,
+      porAtender: 0,
+      enAtencion: 0,
+      atendidas: 0,
+      canceladas: 0,
+    };
+  }
+
+  private extraerArray<T>(respuesta: any): T[] {
+    if (Array.isArray(respuesta)) return respuesta;
+    if (respuesta?.content && Array.isArray(respuesta.content)) return respuesta.content;
+    if (respuesta?.data && Array.isArray(respuesta.data)) return respuesta.data;
+    return [];
+  }
+
   cargarEstadisticas() {
-    const headers = this.obtenerHeaders();
-    const self = this; 
+    this.cargando = true;
+    this.error = '';
 
-    this.http.get<any>(this.urlBase + '/citas', { headers }).subscribe({
-      next: function(respuesta) {
-        let citas = [];
-        if (Array.isArray(respuesta)) {
-            citas = respuesta;
-        } else if (respuesta && Array.isArray(respuesta.content)) {
-            citas = respuesta.content;
-        } else if (respuesta && Array.isArray(respuesta.data)) {
-            citas = respuesta.data;
-        }
+    this.http.get<any>(`${this.urlBase}/citas`, { headers: this.obtenerHeaders() }).subscribe({
+      next: (respuesta) => {
+        this.citas = this.extraerArray<CitaApi>(respuesta);
 
-        const hoy = new Date();
-        const diaStr = String(hoy.getDate()).padStart(2, '0');
-        const mesStr = String(hoy.getMonth() + 1).padStart(2, '0');
-        const anioStr = String(hoy.getFullYear());
+        this.estadisticasHoy = this.calcularEstadisticas(
+          this.citas.filter((cita) => this.esDeHoy(cita))
+        );
 
-        let pGen = 0, aGen = 0, fGen = 0, cGen = 0;
-        let pHoy = 0, aHoy = 0, fHoy = 0, cHoy = 0;
+        this.estadisticasHistoricas = this.calcularEstadisticas(this.citas);
+        this.procesarHistoricoMensual(this.citas);
 
-        for(let i = 0; i < citas.length; i++) {
-            const c = citas[i];
-            
-            // Si el estado viene nulo, el sistema asume de frente que es PENDIENTE
-            const estado = (c.estado || 'PENDIENTE').toUpperCase();
-            
-            // TRUCO PARA DOMAR A SPRING BOOT: Procesamos la fecha venga en el formato que venga
-            let fechaCitaStr = '';
-            if (Array.isArray(c.fecha)) {
-                // Si Spring Boot lo mandó como Array [YYYY, MM, DD]
-                fechaCitaStr = c.fecha[0] + '-' + String(c.fecha[1]).padStart(2, '0') + '-' + String(c.fecha[2]).padStart(2, '0');
-            } else if (typeof c.fecha === 'number') {
-                // Si lo mandó como Timestamp
-                fechaCitaStr = new Date(c.fecha).toISOString().split('T')[0];
-            } else {
-                // Si lo mandó como String, reemplazamos barras por guiones por si acaso
-                fechaCitaStr = String(c.fecha || '').replace(/\//g, '-');
-            }
+        this.cargando = false;
 
-            // Suma Histórica (Esta nunca falla porque no depende de la fecha)
-            if (estado === 'PENDIENTE' || estado === 'CONFIRMADA') pGen++;
-            else if (estado === 'EN_ATENCION') aGen++;
-            else if (estado === 'FINALIZADA') fGen++;
-            else if (estado === 'CANCELADA') cGen++;
-
-            // Suma de Hoy: Solo si el string final contiene el año, mes y día actual
-            if (fechaCitaStr.indexOf(anioStr) !== -1 && fechaCitaStr.indexOf(mesStr) !== -1 && fechaCitaStr.indexOf(diaStr) !== -1) {
-                if (estado === 'PENDIENTE' || estado === 'CONFIRMADA') pHoy++;
-                else if (estado === 'EN_ATENCION') aHoy++;
-                else if (estado === 'FINALIZADA') fHoy++;
-                else if (estado === 'CANCELADA') cHoy++;
-            }
-        }
-
-        self.estadisticasGeneral.pendientes = pGen;
-        self.estadisticasGeneral.atencion = aGen;
-        self.estadisticasGeneral.finalizadas = fGen;
-        self.estadisticasGeneral.canceladas = cGen;
-
-        self.estadisticasHoy.pendientes = pHoy;
-        self.estadisticasHoy.atencion = aHoy;
-        self.estadisticasHoy.finalizadas = fHoy;
-        self.estadisticasHoy.canceladas = cHoy;
-
-        self.procesarHistoricoLineas(citas);
-
-        setTimeout(function() {
-            self.renderizarGraficos();
-        }, 200);
+        setTimeout(() => {
+          this.renderizarGraficos();
+        }, 0);
       },
-      error: function(err) {
-        console.error("Error al cargar datos", err);
+      error: (err) => {
+        console.error('Error al cargar citas', err);
+        this.error = 'No se pudieron cargar las estadisticas.';
+        this.cargando = false;
       }
     });
   }
 
-  procesarHistoricoLineas(citas: any[]) {
-      const agrupado: any = {};
-      
-      for(let i = 0; i < citas.length; i++) {
-          const c = citas[i];
-          const estado = (c.estado || '').toUpperCase();
-          const fechaCita = c.fecha || '';
-          let mesClave = 'Mes Actual';
+  private calcularEstadisticas(citas: CitaApi[]): EstadisticasCitas {
+    const estadisticas = this.crearEstadisticas();
+    estadisticas.total = citas.length;
 
-          if (fechaCita.length >= 7) {
-              if (fechaCita.indexOf('-') === 4) {
-                  mesClave = fechaCita.substring(0, 7);
-              } else if (fechaCita.indexOf('/') === 2) {
-                  mesClave = fechaCita.substring(6, 10) + '-' + fechaCita.substring(3, 5);
-              }
-          }
+    citas.forEach((cita) => {
+      const estado = this.normalizarEstado(cita.estado);
 
-          if (!agrupado[mesClave]) {
-              agrupado[mesClave] = { finalizadas: 0, canceladas: 0 };
-          }
-
-          if (estado === 'FINALIZADA') agrupado[mesClave].finalizadas++;
-          if (estado === 'CANCELADA') agrupado[mesClave].canceladas++;
+      if (estado === 'PENDIENTE' || estado === 'CONFIRMADA') {
+        estadisticas.porAtender++;
+      } else if (estado === 'EN_ATENCION') {
+        estadisticas.enAtencion++;
+      } else if (estado === 'ATENDIDA' || estado === 'FINALIZADA' || estado === 'COMPLETADA') {
+        estadisticas.atendidas++;
+      } else if (estado === 'CANCELADA' || estado === 'NO_ASISTIO') {
+        estadisticas.canceladas++;
       }
+    });
 
-      const clavesOrdenadas = Object.keys(agrupado).sort();
-      this.etiquetasMeses = clavesOrdenadas;
-      
-      const arrFin = [];
-      const arrCan = [];
-      for(let i = 0; i < clavesOrdenadas.length; i++) {
-          arrFin.push(agrupado[clavesOrdenadas[i]].finalizadas);
-          arrCan.push(agrupado[clavesOrdenadas[i]].canceladas);
-      }
-      this.datosLineaFinalizadas = arrFin;
-      this.datosLineaCanceladas = arrCan;
+    return estadisticas;
   }
 
-  renderizarGraficos() {
-    const canvasHoy = document.getElementById('chartHoyCanvas') as HTMLCanvasElement;
-    const canvasGeneral = document.getElementById('chartGeneralCanvas') as HTMLCanvasElement;
+  private normalizarEstado(estado?: string): string {
+    return (estado || 'PENDIENTE').toUpperCase();
+  }
 
-    if (!canvasHoy || !canvasGeneral) return;
+  private obtenerFechaCita(cita: CitaApi): Date | null {
+    const valorFecha = cita.fechaHora || cita.fecha;
 
-    if (this.chartHoy) this.chartHoy.destroy();
-    if (this.chartGeneral) this.chartGeneral.destroy();
+    if (!valorFecha) return null;
 
-    const totalHoy = this.estadisticasHoy.pendientes + this.estadisticasHoy.atencion + this.estadisticasHoy.finalizadas + this.estadisticasHoy.canceladas;
-    
-    // TRAMPA 1: Si no hay datos, forzamos un valor ficticio gris para que se vea el anillo
-    const datosDona = totalHoy > 0 
-        ? [this.estadisticasHoy.pendientes, this.estadisticasHoy.atencion, this.estadisticasHoy.finalizadas, this.estadisticasHoy.canceladas] 
-        : [1];
-    const coloresDona = totalHoy > 0 
-        ? ['#f59e0b', '#3b82f6', '#10b981', '#ef4444'] 
-        : ['#e2e8f0'];
-    const etiquetasDona = totalHoy > 0 
-        ? ['Por Atender', 'En Sala', 'Cobradas', 'Canceladas'] 
-        : ['Sin citas registradas hoy'];
+    const fecha = new Date(valorFecha);
+    return Number.isNaN(fecha.getTime()) ? null : fecha;
+  }
 
-    const ctxHoy = canvasHoy.getContext('2d');
-    if (ctxHoy) {
-        this.chartHoy = new Chart(ctxHoy, {
-          type: 'doughnut',
-          data: {
-            labels: etiquetasDona,
-            datasets: [{
-              data: datosDona,
-              backgroundColor: coloresDona,
-              borderWidth: 0,
-              hoverOffset: totalHoy > 0 ? 8 : 0
-            }]
+  private esDeHoy(cita: CitaApi): boolean {
+    const fechaCita = this.obtenerFechaCita(cita);
+    if (!fechaCita) return false;
+
+    const hoy = new Date();
+
+    return (
+      fechaCita.getFullYear() === hoy.getFullYear() &&
+      fechaCita.getMonth() === hoy.getMonth() &&
+      fechaCita.getDate() === hoy.getDate()
+    );
+  }
+
+  private procesarHistoricoMensual(citas: CitaApi[]) {
+    const meses = new Map<string, { atendidas: number; canceladas: number }>();
+
+    citas.forEach((cita) => {
+      const fecha = this.obtenerFechaCita(cita);
+      if (!fecha) return;
+
+      const claveMes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+      const estado = this.normalizarEstado(cita.estado);
+
+      if (!meses.has(claveMes)) {
+        meses.set(claveMes, { atendidas: 0, canceladas: 0 });
+      }
+
+      const registro = meses.get(claveMes)!;
+
+      if (estado === 'ATENDIDA' || estado === 'FINALIZADA' || estado === 'COMPLETADA') {
+        registro.atendidas++;
+      }
+
+      if (estado === 'CANCELADA' || estado === 'NO_ASISTIO') {
+        registro.canceladas++;
+      }
+    });
+
+    const claves = Array.from(meses.keys()).sort();
+
+    this.etiquetasMeses = claves.length ? claves : ['Mes actual'];
+    this.datosMensualesAtendidas = claves.length ? claves.map((mes) => meses.get(mes)!.atendidas) : [0];
+    this.datosMensualesCanceladas = claves.length ? claves.map((mes) => meses.get(mes)!.canceladas) : [0];
+  }
+
+  private renderizarGraficos() {
+    if (!this.vistaLista || this.cargando) return;
+
+    const canvasHoy = this.chartHoyCanvas?.nativeElement;
+    const canvasHistorico = this.chartHistoricoCanvas?.nativeElement;
+    const canvasMensual = this.chartMensualCanvas?.nativeElement;
+
+    if (!canvasHoy || !canvasHistorico || !canvasMensual) return;
+
+    this.destruirGraficos();
+
+    this.chartHoy = new Chart(canvasHoy, this.crearConfigDona('Citas de hoy', this.estadisticasHoy));
+    this.chartHistorico = new Chart(canvasHistorico, this.crearConfigBarras());
+    this.chartMensual = new Chart(canvasMensual, this.crearConfigLinea(canvasMensual));
+  }
+
+  private destruirGraficos() {
+    this.chartHoy?.destroy();
+    this.chartHistorico?.destroy();
+    this.chartMensual?.destroy();
+
+    this.chartHoy = undefined;
+    this.chartHistorico = undefined;
+    this.chartMensual = undefined;
+  }
+
+  private crearConfigDona(titulo: string, data: EstadisticasCitas): ChartConfiguration<'doughnut'> {
+    const valores = [data.porAtender, data.enAtencion, data.atendidas, data.canceladas];
+    const total = valores.reduce((acc, item) => acc + item, 0);
+
+    return {
+      type: 'doughnut',
+      data: {
+        labels: total > 0 ? ['Por atender', 'En atencion', 'Atendidas', 'Canceladas'] : ['Sin citas'],
+        datasets: [
+          {
+            data: total > 0 ? valores : [1],
+            backgroundColor: total > 0
+              ? ['#f59e0b', '#3b82f6', '#10b981', '#ef4444']
+              : ['#e2e8f0'],
+            borderWidth: 0,
+            hoverOffset: total > 0 ? 8 : 0,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '72%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              usePointStyle: true,
+              padding: 18,
+            }
           },
-          options: { 
-            responsive: true, maintainAspectRatio: false, cutout: '80%',
-            plugins: { 
-                legend: { position: 'right', labels: { usePointStyle: true, padding: 20 } },
-                tooltip: { enabled: totalHoy > 0 } // Apagamos el tooltip si es el anillo gris
+          title: {
+            display: false,
+            text: titulo,
+          },
+          tooltip: {
+            enabled: total > 0,
+          }
+        }
+      }
+    };
+  }
+
+  private crearConfigBarras(): ChartConfiguration<'bar'> {
+    return {
+      type: 'bar',
+      data: {
+        labels: ['Por atender', 'En atencion', 'Atendidas', 'Canceladas'],
+        datasets: [
+          {
+            label: 'Citas historicas',
+            data: [
+              this.estadisticasHistoricas.porAtender,
+              this.estadisticasHistoricas.enAtencion,
+              this.estadisticasHistoricas.atendidas,
+              this.estadisticasHistoricas.canceladas,
+            ],
+            backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#ef4444'],
+            borderRadius: 8,
+            maxBarThickness: 54,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1,
+              precision: 0,
             }
           }
-        });
-    }
+        }
+      }
+    };
+  }
 
-    // TRAMPA 2: Si el historial solo tiene un mes, metemos un punto cero para forzar la curva
-    let labelsLinea = this.etiquetasMeses.length > 0 ? this.etiquetasMeses : ['Mes Actual'];
-    let dataFin = this.datosLineaFinalizadas.length > 0 ? this.datosLineaFinalizadas : [0];
-    let dataCan = this.datosLineaCanceladas.length > 0 ? this.datosLineaCanceladas : [0];
+  private crearConfigLinea(canvas: HTMLCanvasElement): ChartConfiguration<'line'> {
+    const ctx = canvas.getContext('2d');
+    const gradienteVerde = ctx?.createLinearGradient(0, 0, 0, 300);
+    gradienteVerde?.addColorStop(0, 'rgba(16, 185, 129, 0.35)');
+    gradienteVerde?.addColorStop(1, 'rgba(16, 185, 129, 0)');
 
-    if (labelsLinea.length === 1) {
-        labelsLinea.unshift('Inicio'); 
-        dataFin.unshift(0);
-        dataCan.unshift(0);
-    }
+    const gradienteRojo = ctx?.createLinearGradient(0, 0, 0, 300);
+    gradienteRojo?.addColorStop(0, 'rgba(239, 68, 68, 0.28)');
+    gradienteRojo?.addColorStop(1, 'rgba(239, 68, 68, 0)');
 
-    const ctxGeneral = canvasGeneral.getContext('2d');
-    if (ctxGeneral) {
-        const gradienteVerde = ctxGeneral.createLinearGradient(0, 0, 0, 350);
-        gradienteVerde.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
-        gradienteVerde.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-
-        const gradienteRojo = ctxGeneral.createLinearGradient(0, 0, 0, 350);
-        gradienteRojo.addColorStop(0, 'rgba(239, 68, 68, 0.3)');
-        gradienteRojo.addColorStop(1, 'rgba(239, 68, 68, 0.0)');
-
-        this.chartGeneral = new Chart(ctxGeneral, {
-          type: 'line',
-          data: {
-            labels: labelsLinea,
-            datasets: [
-                {
-                  label: 'Ingresos Efectivos',
-                  data: dataFin,
-                  borderColor: '#10b981', backgroundColor: gradienteVerde,
-                  borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#10b981',
-                  pointBorderWidth: 2, pointRadius: 4, tension: 0.4, fill: true
-                },
-                {
-                  label: 'Pérdidas de Caja',
-                  data: dataCan,
-                  borderColor: '#ef4444', backgroundColor: gradienteRojo,
-                  borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#ef4444',
-                  pointBorderWidth: 2, pointRadius: 4, tension: 0.4, fill: true
-                }
-            ]
+    return {
+      type: 'line',
+      data: {
+        labels: this.etiquetasMeses,
+        datasets: [
+          {
+            label: 'Atendidas',
+            data: this.datosMensualesAtendidas,
+            borderColor: '#10b981',
+            backgroundColor: gradienteVerde || 'rgba(16, 185, 129, 0.18)',
+            borderWidth: 3,
+            pointRadius: 4,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#10b981',
+            pointBorderWidth: 2,
+            tension: 0.35,
+            fill: true,
           },
-          options: { 
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } } },
-            scales: { 
-                x: { grid: { display: false } },
-                y: { beginAtZero: true, border: { display: false }, ticks: { stepSize: 1, precision: 0 } } 
+          {
+            label: 'Canceladas',
+            data: this.datosMensualesCanceladas,
+            borderColor: '#ef4444',
+            backgroundColor: gradienteRojo || 'rgba(239, 68, 68, 0.14)',
+            borderWidth: 3,
+            pointRadius: 4,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#ef4444',
+            pointBorderWidth: 2,
+            tension: 0.35,
+            fill: true,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              usePointStyle: true,
+              boxWidth: 8,
             }
           }
-        });
-    }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1,
+              precision: 0,
+            }
+          }
+        }
+      }
+    };
   }
 }

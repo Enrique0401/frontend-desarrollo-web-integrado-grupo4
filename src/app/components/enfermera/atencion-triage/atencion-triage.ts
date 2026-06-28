@@ -240,6 +240,10 @@ export class AtencionTriage implements OnInit {
         this.paciente = paciente;
         this.consultaActual = consulta;
         this.mensaje = 'Triage registrado correctamente.';
+
+        setTimeout(() => {
+          this.volverSala();
+        }, 900);
       },
       error: (err) => {
         console.error('Error al guardar triage', err);
