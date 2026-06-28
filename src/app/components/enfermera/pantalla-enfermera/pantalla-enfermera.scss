@@ -196,3 +196,13 @@ $text-muted: #64748b;
         }
     }
 }
+
+.nav-links a.active {
+    background: rgba(20, 184, 166, 0.16);
+    color: #2dd4bf;
+    border-left: 4px solid #2dd4bf;
+}
+
+.triage-link {
+    cursor: default;
+}

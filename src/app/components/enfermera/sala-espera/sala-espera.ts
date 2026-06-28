@@ -2,6 +2,29 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
+
+interface CitaApi {
+  id: number;
+  pacienteId: number;
+  fechaHora: string;
+  estado: string;
+}
+
+interface PacienteApi {
+  id: number;
+  nombre: string;
+  apellido: string;
+  numeroDocumento: string;
+}
+
+interface CitaSalaEspera {
+  id: number;
+  fechaHora: string;
+  pacienteNombre: string;
+  pacienteApellido: string;
+  pacienteNumeroDocumento: string;
+}
 
 @Component({
   selector: 'app-sala-espera',
@@ -15,7 +38,7 @@ export class SalaEspera implements OnInit {
   private router = inject(Router);
   private urlBase = 'https://backend-desarrollo-web-integrado-grupo4.onrender.com/api';
 
-  citasEnEspera: any[] = [];
+  citasEnEspera: CitaSalaEspera[] = [];
   cargando: boolean = true;
 
   ngOnInit() {
@@ -27,20 +50,43 @@ export class SalaEspera implements OnInit {
     return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 
+  private extraerArray<T>(respuesta: any): T[] {
+    if (Array.isArray(respuesta)) return respuesta;
+    if (respuesta?.content && Array.isArray(respuesta.content)) return respuesta.content;
+    if (respuesta?.data && Array.isArray(respuesta.data)) return respuesta.data;
+    return [];
+  }
+
   cargarPacientesEnSala() {
     this.cargando = true;
-    this.http.get<any>(`${this.urlBase}/citas`, { headers: this.obtenerHeaders() }).subscribe({
-      next: (respuesta) => {
 
-        // 1. Le decimos explícitamente a TypeScript que es un array de "any"
-        let citasArray: any[] = [];
+    const headers = this.obtenerHeaders();
 
-        if (Array.isArray(respuesta)) citasArray = respuesta;
-        else if (respuesta && Array.isArray(respuesta.content)) citasArray = respuesta.content;
-        else if (respuesta && Array.isArray(respuesta.data)) citasArray = respuesta.data;
+    forkJoin({
+      citasRespuesta: this.http.get<any>(`${this.urlBase}/citas`, { headers }),
+      pacientesRespuesta: this.http.get<any>(`${this.urlBase}/pacientes`, { headers })
+    }).subscribe({
+      next: ({ citasRespuesta, pacientesRespuesta }) => {
+        const citas = this.extraerArray<CitaApi>(citasRespuesta);
+        const pacientes = this.extraerArray<PacienteApi>(pacientesRespuesta);
 
-        // 2. Le ponemos (c: any) al filter para que el compilador no llore
-        this.citasEnEspera = citasArray.filter((c: any) => (c.estado || '').toUpperCase() === 'CONFIRMADA');
+        const pacientesPorId = new Map(
+          pacientes.map((paciente) => [paciente.id, paciente])
+        );
+
+        this.citasEnEspera = citas
+          .filter((cita) => cita.estado?.toUpperCase() === 'CONFIRMADA')
+          .map((cita) => {
+            const paciente = pacientesPorId.get(cita.pacienteId);
+
+            return {
+              id: cita.id,
+              fechaHora: cita.fechaHora,
+              pacienteNombre: paciente?.nombre ?? '',
+              pacienteApellido: paciente?.apellido ?? '',
+              pacienteNumeroDocumento: paciente?.numeroDocumento ?? ''
+            };
+          });
 
         this.cargando = false;
       },
@@ -52,7 +98,6 @@ export class SalaEspera implements OnInit {
   }
 
   llamarPaciente(citaId: number) {
-    // Redirigimos a la pantalla de triage pasándole el ID de la cita por la URL
-    this.router.navigate(['/panel/enfermera/triage', citaId]);
+    this.router.navigate(['/panel/enfermeria/triage', citaId]);
   }
 }
