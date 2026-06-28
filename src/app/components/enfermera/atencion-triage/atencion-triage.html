@@ -1,1 +1,95 @@
-<p>atencion-triage works!</p>
+<div class="triage-container" *ngIf="citaData">
+    <div class="triage-header">
+        <h2>Ficha de Triage (Cita #{{ citaId }})</h2>
+        <p><strong>Paciente:</strong> {{ citaData.paciente?.usuario?.nombre || 'Desconocido' }} {{
+            citaData.paciente?.usuario?.apellido || '' }}</p>
+    </div>
+
+    <div class="form-grid">
+        <div class="card-seccion">
+            <h3>1. Antecedentes y Datos Generales</h3>
+            <p class="nota">Actualización en la Historia Clínica del paciente.</p>
+
+            <label>Grupo Sanguíneo:
+                <select [(ngModel)]="historiaClinica.grupoSanguineo">
+                    <option value="">Desconocido</option>
+                    <option value="A_POSITIVO">A Positivo (+)</option>
+                    <option value="A_NEGATIVO">A Negativo (-)</option>
+                    <option value="B_POSITIVO">B Positivo (+)</option>
+                    <option value="B_NEGATIVO">B Negativo (-)</option>
+                    <option value="AB_POSITIVO">AB Positivo (+)</option>
+                    <option value="AB_NEGATIVO">AB Negativo (-)</option>
+                    <option value="O_POSITIVO">O Positivo (+)</option>
+                    <option value="O_NEGATIVO">O Negativo (-)</option>
+                </select>
+            </label>
+
+            <label>Alergias Conocidas:
+                <input type="text" [(ngModel)]="historiaClinica.alergias"
+                    placeholder="Ej. Penicilina, Mariscos (Opcional)">
+            </label>
+
+            <div class="row-inputs">
+                <label>Contacto de Emergencia:
+                    <input type="text" [(ngModel)]="historiaClinica.contactoEmergencia">
+                </label>
+                <label>Teléfono Emergencia:
+                    <input type="text" [(ngModel)]="historiaClinica.telefonoEmergencia">
+                </label>
+            </div>
+
+            <label>Antecedentes Personales:
+                <textarea [(ngModel)]="historiaClinica.antecedentesPersonales" rows="2"></textarea>
+            </label>
+
+            <label>Antecedentes Familiares:
+                <textarea [(ngModel)]="historiaClinica.antecedentesFamiliares" rows="2"></textarea>
+            </label>
+        </div>
+
+        <div class="card-seccion signos-vitales">
+            <h3>2. Evaluación Inicial (Signos Vitales)</h3>
+            <p class="nota">Estos datos se guardarán para la consulta de hoy.</p>
+
+            <label class="destacado">Motivo Principal de Atención:
+                <input type="text" [(ngModel)]="triage.motivoAtencion" placeholder="¿Por qué viene hoy el paciente?">
+            </label>
+
+            <div class="grid-vitales">
+                <label>Presión Arterial (mmHg):
+                    <input type="text" [(ngModel)]="triage.presionArterial" placeholder="120/80">
+                </label>
+                <label>Frec. Cardíaca (lpm):
+                    <input type="number" [(ngModel)]="triage.frecuenciaCardiaca" placeholder="80">
+                </label>
+                <label>Frec. Respiratoria (rpm):
+                    <input type="number" [(ngModel)]="triage.frecuenciaRespiratoria" placeholder="16">
+                </label>
+                <label>Temperatura (°C):
+                    <input type="number" [(ngModel)]="triage.temperatura" step="0.1" placeholder="36.5">
+                </label>
+                <label>Peso (kg):
+                    <input type="number" [(ngModel)]="triage.peso" step="0.1" placeholder="70.5">
+                </label>
+                <label>Talla (m):
+                    <input type="number" [(ngModel)]="triage.talla" step="0.01" placeholder="1.75">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="acciones">
+        <button class="btn-cancelar" routerLink="/panel/enfermera/sala">Regresar a Sala</button>
+        <button class="btn-guardar" (click)="finalizarTriage()" [disabled]="guardando">
+            {{ guardando ? 'Registrando...' : 'Finalizar Triage y Enviar al Médico' }}
+        </button>
+    </div>
+</div>
+
+<div class="triage-container vacio" *ngIf="!citaData">
+    <div class="mensaje-vacio">
+        <i class="pi pi-exclamation-triangle"></i>
+        <h2>Ningún Paciente Seleccionado</h2>
+        <p>Para llenar la ficha de Triage, primero debes llamar a un paciente desde la sala de espera.</p>
+    </div>
+</div>
