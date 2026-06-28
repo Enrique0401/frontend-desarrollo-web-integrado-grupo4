@@ -1,6 +1,4 @@
-<p-toast
-  position="center"
-  [breakpoints]="{ '768px': { width: '90vw' } }">
+<p-toast position="center" [breakpoints]="{ '768px': { width: '90vw' } }">
 </p-toast>
 
 <div class="gestion-container">
@@ -47,14 +45,56 @@
             </div>
 
             <div class="form-group">
-                <label>Seleccionar Especialista / Médico <span class="required">*</span></label>
-                <select [(ngModel)]="nuevaCita.medicoId" name="medicoId" required>
-                    <option value="" disabled selected>Elija un médico...</option>
-                    @for (m of medicos; track m.id) {
-                    <option [value]="m.id">Dr(a). {{ m.nombre || m.usuario?.nombre }} {{ m.apellido ||
-                        m.usuario?.apellido }}</option>
+                <label>Especialidad <span class="required">*</span></label>
+                <select [(ngModel)]="nuevaCita.especialidadId" name="especialidadId" required
+                    (change)="onEspecialidadChange()">
+                    <option value="" disabled selected>Elija una especialidad...</option>
+                    @for (e of especialidades; track e.id) {
+                    <option [value]="e.id">{{ e.nombre }}</option>
                     }
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label>Consultorio <span class="required">*</span></label>
+                <select [(ngModel)]="nuevaCita.consultorioId" name="consultorioId" required
+                    (change)="onConsultorioChange()">
+                    <option value="" disabled selected>Elija un consultorio...</option>
+                    @for (c of consultorios; track c.id) {
+                    <option [value]="c.id">
+                        {{ c.nombre || c.numero || c.codigo || ('Consultorio #' + c.id) }}
+                    </option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Duración <span class="required">*</span></label>
+                <select [(ngModel)]="nuevaCita.duracionMinutos" name="duracionMinutos" required
+                    (change)="onHoraChange()">
+                    @for (duracion of duracionesCita; track duracion) {
+                    <option [value]="duracion">{{ duracion }} minutos</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Médico disponible <span class="required">*</span></label>
+                <select [(ngModel)]="nuevaCita.medicoId" name="medicoId" required
+                    [disabled]="medicosDisponibles.length === 0">
+                    <option value="" disabled selected>Elija un médico disponible...</option>
+                    @for (m of medicosDisponibles; track m.id) {
+                    <option [value]="m.id">
+                        Dr(a). {{ m.nombre || m.usuario?.nombre }} {{ m.apellido || m.usuario?.apellido }}
+                    </option>
+                    }
+                </select>
+
+                @if (mensajeDisponibilidad) {
+                <small class="text-info-disponibilidad">
+                    {{ mensajeDisponibilidad }}
+                </small>
+                }
             </div>
 
             <!-- Fecha: [min] bloquea días anteriores a hoy; (change) recalcula la hora mínima -->
@@ -62,12 +102,8 @@
                 <label>Fecha de la Cita <span class="required">*</span></label>
                 <div class="picker-input-wrapper">
                     <i class="pi pi-calendar picker-icon text-primary"></i>
-                    <input type="date"
-                           [(ngModel)]="fechaSeleccionada"
-                           name="fechaSeleccionada"
-                           required
-                           [min]="fechaMinima"
-                           (change)="onFechaChange()">
+                    <input type="date" [(ngModel)]="fechaSeleccionada" name="fechaSeleccionada" required
+                        [min]="fechaMinima" (change)="onFechaChange()">
                 </div>
             </div>
 
@@ -76,11 +112,8 @@
                 <label>Hora de la Cita <span class="required">*</span></label>
                 <div class="picker-input-wrapper">
                     <i class="pi pi-clock picker-icon text-orange"></i>
-                    <input type="time"
-                           [(ngModel)]="horaSeleccionada"
-                           name="horaSeleccionada"
-                           required
-                           [min]="horaMinima">
+                    <input type="time" [(ngModel)]="horaSeleccionada" name="horaSeleccionada" required
+                        [min]="horaMinima">
                 </div>
             </div>
 
@@ -147,7 +180,7 @@
                         </td>
                         <td>
                             <div class="action-buttons" *ngIf="!esCitaBloqueada(cita.estado)">
-                                
+
                                 @if (cita.estado === 'PENDIENTE' || !cita.estado) {
                                 <button type="button" class="btn-action success"
                                     (click)="cambiarEstadoCita(cita.idCita || cita.id, 'CONFIRMADA')"
@@ -173,8 +206,7 @@
                                 }
 
                                 @if (cita.estado === 'ATENDIDA') {
-                                <button type="button" class="btn-action success"
-                                    (click)="irAFacturacion()"
+                                <button type="button" class="btn-action success" (click)="irAFacturacion()"
                                     title="Ir a Cobrar">
                                     <i class="pi pi-wallet"></i>
                                 </button>
@@ -187,14 +219,15 @@
                                     <i class="pi pi-ban"></i>
                                 </button>
                                 }
-                                
+
                                 <button type="button" class="btn-action void"
                                     (click)="eliminarCita(cita.idCita || cita.id)" title="Eliminar">
                                     <i class="pi pi-trash"></i>
                                 </button>
                             </div>
 
-                            <div *ngIf="cita.estado === 'FINALIZADA'" style="color: #27ae60; font-weight: bold; text-align: center;">
+                            <div *ngIf="cita.estado === 'FINALIZADA'"
+                                style="color: #27ae60; font-weight: bold; text-align: center;">
                                 <i class="pi pi-verified"></i> Finalizado
                             </div>
                         </td>
