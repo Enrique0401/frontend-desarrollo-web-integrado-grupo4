@@ -1,0 +1,239 @@
+$primary: #7c3aed;
+$primary-hover: #6d28d9;
+$secondary: #111827;
+$text-muted: #64748b;
+$border: #e2e8f0;
+$surface: #ffffff;
+
+.consulta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.9rem;
+    font-weight: 900;
+    color: $secondary;
+  }
+
+  p {
+    margin: 0;
+    color: $text-muted;
+    font-weight: 600;
+  }
+}
+
+.btn-volver {
+  background: white;
+  color: $primary;
+  border: 1px solid #ddd6fe;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-weight: 900;
+  cursor: pointer;
+
+  &:hover {
+    background: #f5f3ff;
+  }
+}
+
+.consulta-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.6fr;
+  gap: 1.4rem;
+}
+
+.card {
+  background: $surface;
+  border: 1px solid rgba($border, 0.8);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.paciente-card h3,
+.form-card h3 {
+  margin: 0 0 1.2rem;
+  color: $secondary;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.estado-badge {
+  display: inline-block;
+  background: #ede9fe;
+  color: $primary;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 900;
+  margin-bottom: 1rem;
+}
+
+.info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid $border;
+
+  span {
+    color: $text-muted;
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+
+  strong {
+    color: $secondary;
+    font-size: 0.95rem;
+    font-weight: 900;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+
+  label {
+    color: $secondary;
+    font-size: 0.85rem;
+    font-weight: 900;
+    margin-bottom: 0.45rem;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 95px;
+    resize: vertical;
+    border: 1px solid $border;
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+    outline: none;
+    color: $secondary;
+    background: #ffffff;
+    font-family: inherit;
+    font-weight: 600;
+
+    &::placeholder {
+      color: #94a3b8;
+    }
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.13);
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.btn-secondary,
+.btn-primary {
+  border: none;
+  border-radius: 12px;
+  padding: 0.85rem 1.2rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: #475569;
+
+  &:hover {
+    background: #e2e8f0;
+  }
+}
+
+.btn-primary {
+  background: $primary;
+  color: white;
+
+  &:hover {
+    background: $primary-hover;
+  }
+}
+.form-group input {
+  width: 100%;
+  border: 1px solid $border;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  outline: none;
+  color: $secondary;
+  background: #ffffff;
+  font-family: inherit;
+  font-weight: 700;
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.13);
+  }
+}
+.modal-backdrop-custom {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-card-custom {
+  width: 420px;
+  max-width: 90%;
+  background: white;
+  border-radius: 22px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.25);
+
+  h3 {
+    margin: 0.8rem 0 0.5rem;
+    color: $secondary;
+    font-weight: 900;
+  }
+
+  p {
+    color: $text-muted;
+    font-weight: 600;
+  }
+}
+
+.warning-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  border-radius: 18px;
+  background: #fef3c7;
+  color: #d97706;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+.modal-actions.center {
+  justify-content: center;
+}
+
+@media (max-width: 992px) {
+  .consulta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .consulta-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
