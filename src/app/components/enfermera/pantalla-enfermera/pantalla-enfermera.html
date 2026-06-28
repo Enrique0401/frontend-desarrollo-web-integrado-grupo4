@@ -1,1 +1,48 @@
-<p>pantalla-enfermera works!</p>
+<div class="enfermera-layout">
+    <nav class="sidebar">
+        <div class="brand-section">
+            <div class="logo-box">
+                <img src="/logo.png" alt="Logo Nova Salud" class="logo-placeholder">
+            </div>
+            <h2>Nova Salud</h2>
+            <span class="role-badge">ENFERMERÍA</span>
+        </div>
+
+        <ul class="nav-links">
+            <li>
+                <a routerLink="/panel/enfermeria/sala-espera" routerLinkActive="active"
+                    [routerLinkActiveOptions]="{exact: true}">
+                    <i class="pi pi-users"></i> Sala de Espera
+                </a>
+            </li>
+            <li>
+                <a routerLink="/panel/enfermeria/triage/:idCita" routerLinkActive="active"
+                    [routerLinkActiveOptions]="{exact: true}">
+                    <i class="pi pi-heart"></i> Atención y Triage
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="main-area">
+        <header class="top-navbar">
+            <div class="nav-title">
+                <h3>Panel de Control de Enfermería</h3>
+            </div>
+            <button class="btn-logout" (click)="logout()">
+                <i class="pi pi-sign-out"></i> Salir
+            </button>
+        </header>
+
+        <main class="content-wrapper">
+            <div class="dashboard-header">
+                <h2>Hola, {{ nombreEnfermera() }}</h2>
+                <p>Gestiona el triage, registro de signos vitales y la cola de espera desde aquí.</p>
+            </div>
+
+            <div class="dashboard-body">
+                <router-outlet></router-outlet>
+            </div>
+        </main>
+    </div>
+</div>

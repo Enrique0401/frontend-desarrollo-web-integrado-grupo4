@@ -1,1 +1,34 @@
-<p>sala-espera works!</p>
+<div class="sala-espera-container">
+    <h2>Pacientes en Sala de Espera</h2>
+    <p class="subtitulo">Listado de pacientes confirmados pendientes de toma de signos vitales.</p>
+
+    <div *ngIf="cargando" class="loading">Actualizando sala...</div>
+
+    <table class="tabla-enfermeria" *ngIf="!cargando">
+        <thead>
+            <tr>
+                <th>N° Cita</th>
+                <th>Hora</th>
+                <th>Paciente</th>
+                <th>DNI</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let cita of citasEnEspera">
+                <td>#{{ cita.idCita || cita.id }}</td>
+                <td class="hora-resaltada">{{ cita.hora }}</td>
+                <td>{{ cita.paciente?.usuario?.nombre }} {{ cita.paciente?.usuario?.apellido }}</td>
+                <td>{{ cita.paciente?.usuario?.numeroDocumento }}</td>
+                <td>
+                    <button class="btn-llamar" (click)="llamarPaciente(cita.idCita || cita.id)">
+                        Llamar a Triage
+                    </button>
+                </td>
+            </tr>
+            <tr *ngIf="citasEnEspera.length === 0">
+                <td colspan="5" class="tabla-vacia">No hay pacientes esperando en este momento.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

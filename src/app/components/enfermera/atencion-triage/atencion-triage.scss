@@ -1,0 +1,30 @@
+/* Estilos para el estado vacío (cuando entras sin ID) */
+.triage-container.vacio {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    
+    .mensaje-vacio {
+      text-align: center;
+      background: #fff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      border: 1px solid #e2e8f0;
+      max-width: 400px;
+  
+      i { font-size: 3.5rem; color: #f59e0b; margin-bottom: 20px; }
+      h2 { color: #1e293b; margin-bottom: 10px; }
+      p { color: #64748b; margin-bottom: 25px; line-height: 1.5; }
+      
+      .btn-ir-sala {
+        background: #0ea5e9; color: white;
+        border: none; padding: 12px 24px;
+        border-radius: 6px; font-weight: bold;
+        cursor: pointer; transition: 0.3s;
+        
+        &:hover { background: #0284c7; }
+      }
+    }
+  }
