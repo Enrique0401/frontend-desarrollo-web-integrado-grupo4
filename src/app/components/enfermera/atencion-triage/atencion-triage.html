@@ -1,95 +1,157 @@
-<div class="triage-container" *ngIf="citaData">
-    <div class="triage-header">
-        <h2>Ficha de Triage (Cita #{{ citaId }})</h2>
-        <p><strong>Paciente:</strong> {{ citaData.paciente?.usuario?.nombre || 'Desconocido' }} {{
-            citaData.paciente?.usuario?.apellido || '' }}</p>
+<div class="triage-page">
+    <header class="triage-header">
+        <div>
+            <h2>Atencion de Triage</h2>
+            <p>Registro de signos vitales y datos clinicos del paciente.</p>
+        </div>
+    </header>
+
+    <div *ngIf="cargando" class="estado-panel">
+        Cargando informacion del paciente...
     </div>
 
-    <div class="form-grid">
-        <div class="card-seccion">
-            <h3>1. Antecedentes y Datos Generales</h3>
-            <p class="nota">Actualización en la Historia Clínica del paciente.</p>
+    <div *ngIf="error" class="alerta error">
+        {{ error }}
+    </div>
 
-            <label>Grupo Sanguíneo:
-                <select [(ngModel)]="historiaClinica.grupoSanguineo">
-                    <option value="">Desconocido</option>
-                    <option value="A_POSITIVO">A Positivo (+)</option>
-                    <option value="A_NEGATIVO">A Negativo (-)</option>
-                    <option value="B_POSITIVO">B Positivo (+)</option>
-                    <option value="B_NEGATIVO">B Negativo (-)</option>
-                    <option value="AB_POSITIVO">AB Positivo (+)</option>
-                    <option value="AB_NEGATIVO">AB Negativo (-)</option>
-                    <option value="O_POSITIVO">O Positivo (+)</option>
-                    <option value="O_NEGATIVO">O Negativo (-)</option>
-                </select>
-            </label>
+    <div *ngIf="mensaje" class="alerta exito">
+        {{ mensaje }}
+    </div>
 
-            <label>Alergias Conocidas:
-                <input type="text" [(ngModel)]="historiaClinica.alergias"
-                    placeholder="Ej. Penicilina, Mariscos (Opcional)">
-            </label>
-
-            <div class="row-inputs">
-                <label>Contacto de Emergencia:
-                    <input type="text" [(ngModel)]="historiaClinica.contactoEmergencia">
-                </label>
-                <label>Teléfono Emergencia:
-                    <input type="text" [(ngModel)]="historiaClinica.telefonoEmergencia">
-                </label>
+    <ng-container *ngIf="!cargando && paciente && cita">
+        <section class="resumen-paciente">
+            <div>
+                <span>Paciente</span>
+                <strong>{{ paciente.nombre }} {{ paciente.apellido }}</strong>
             </div>
 
-            <label>Antecedentes Personales:
-                <textarea [(ngModel)]="historiaClinica.antecedentesPersonales" rows="2"></textarea>
-            </label>
-
-            <label>Antecedentes Familiares:
-                <textarea [(ngModel)]="historiaClinica.antecedentesFamiliares" rows="2"></textarea>
-            </label>
-        </div>
-
-        <div class="card-seccion signos-vitales">
-            <h3>2. Evaluación Inicial (Signos Vitales)</h3>
-            <p class="nota">Estos datos se guardarán para la consulta de hoy.</p>
-
-            <label class="destacado">Motivo Principal de Atención:
-                <input type="text" [(ngModel)]="triage.motivoAtencion" placeholder="¿Por qué viene hoy el paciente?">
-            </label>
-
-            <div class="grid-vitales">
-                <label>Presión Arterial (mmHg):
-                    <input type="text" [(ngModel)]="triage.presionArterial" placeholder="120/80">
-                </label>
-                <label>Frec. Cardíaca (lpm):
-                    <input type="number" [(ngModel)]="triage.frecuenciaCardiaca" placeholder="80">
-                </label>
-                <label>Frec. Respiratoria (rpm):
-                    <input type="number" [(ngModel)]="triage.frecuenciaRespiratoria" placeholder="16">
-                </label>
-                <label>Temperatura (°C):
-                    <input type="number" [(ngModel)]="triage.temperatura" step="0.1" placeholder="36.5">
-                </label>
-                <label>Peso (kg):
-                    <input type="number" [(ngModel)]="triage.peso" step="0.1" placeholder="70.5">
-                </label>
-                <label>Talla (m):
-                    <input type="number" [(ngModel)]="triage.talla" step="0.01" placeholder="1.75">
-                </label>
+            <div>
+                <span>DNI</span>
+                <strong>{{ paciente.numeroDocumento }}</strong>
             </div>
-        </div>
-    </div>
 
-    <div class="acciones">
-        <button class="btn-cancelar" routerLink="/panel/enfermera/sala">Regresar a Sala</button>
-        <button class="btn-guardar" (click)="finalizarTriage()" [disabled]="guardando">
-            {{ guardando ? 'Registrando...' : 'Finalizar Triage y Enviar al Médico' }}
-        </button>
-    </div>
-</div>
+            <div>
+                <span>Cita</span>
+                <strong>#{{ cita.id }}</strong>
+            </div>
 
-<div class="triage-container vacio" *ngIf="!citaData">
-    <div class="mensaje-vacio">
-        <i class="pi pi-exclamation-triangle"></i>
-        <h2>Ningún Paciente Seleccionado</h2>
-        <p>Para llenar la ficha de Triage, primero debes llamar a un paciente desde la sala de espera.</p>
-    </div>
+            <div>
+                <span>Historia clinica</span>
+                <strong>#{{ historiaClinica?.id }}</strong>
+            </div>
+
+            <div>
+                <span>Fecha</span>
+                <strong>{{ cita.fechaHora | date:'short' }}</strong>
+            </div>
+        </section>
+
+        <form [formGroup]="form" (ngSubmit)="guardarTriage()" class="triage-form">
+            <section class="form-section">
+                <h3>Signos vitales</h3>
+
+                <div class="form-grid">
+                    <label>
+                        Frecuencia cardiaca
+                        <input type="number" formControlName="frecuenciaCardiaca" placeholder="Ej. 80">
+                        <small *ngIf="campoInvalido('frecuenciaCardiaca')">Valor requerido entre 0 y 300</small>
+                    </label>
+
+                    <label>
+                        Frecuencia respiratoria
+                        <input type="number" formControlName="frecuenciaRespiratoria" placeholder="Ej. 18">
+                        <small *ngIf="campoInvalido('frecuenciaRespiratoria')">Valor requerido entre 0 y 100</small>
+                    </label>
+
+                    <label>
+                        Presion arterial
+                        <input type="text" formControlName="presionArterial" placeholder="Ej. 120/80">
+                        <small *ngIf="campoInvalido('presionArterial')">Campo obligatorio</small>
+                    </label>
+
+                    <label>
+                        Temperatura
+                        <input type="number" step="0.1" formControlName="temperatura" placeholder="Ej. 36.8">
+                        <small *ngIf="campoInvalido('temperatura')">Valor requerido entre 30 y 45</small>
+                    </label>
+
+                    <label>
+                        Peso
+                        <input type="number" step="0.1" formControlName="peso" placeholder="Ej. 70.5">
+                        <small *ngIf="campoInvalido('peso')">Valor requerido entre 0 y 500</small>
+                    </label>
+
+                    <label>
+                        Talla
+                        <input type="number" step="0.01" formControlName="talla" placeholder="Ej. 1.70">
+                        <small *ngIf="campoInvalido('talla')">Valor requerido entre 0 y 3</small>
+                    </label>
+
+                    <label>
+                        Fecha de consulta
+                        <input type="datetime-local" formControlName="fechaConsulta">
+                    </label>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <h3>Datos clinicos del paciente</h3>
+
+                <div class="form-grid">
+                    <label>
+                        Tipo de sangre
+                        <select formControlName="grupoSanguineo">
+                            <option value="">Seleccionar</option>
+                            <option *ngFor="let grupo of grupoSanguineoOpciones" [value]="grupo.value">
+                                {{ grupo.label }}
+                            </option>
+                        </select>
+                        <small *ngIf="campoInvalido('grupoSanguineo')">Campo obligatorio</small>
+                    </label>
+
+                    <label>
+                        Contacto de emergencia
+                        <input type="text" formControlName="contactoEmergencia" placeholder="Ej. Maria Castro">
+                        <small *ngIf="campoInvalido('contactoEmergencia')">Campo obligatorio</small>
+                    </label>
+
+                    <label>
+                        Telefono de emergencia
+                        <input type="tel" inputmode="numeric" maxlength="9" formControlName="telefonoEmergencia"
+                            placeholder="Ej. 987654321">
+                        <small *ngIf="campoInvalido('telefonoEmergencia')">
+                            Debe iniciar con 9 y tener exactamente 9 digitos
+                        </small>
+                    </label>
+                </div>
+
+                <div class="text-grid">
+                    <label>
+                        Alergias
+                        <textarea rows="4" formControlName="alergias"></textarea>
+                    </label>
+
+                    <label>
+                        Antecedentes personales
+                        <textarea rows="4" formControlName="antecedentesPersonales"></textarea>
+                    </label>
+
+                    <label>
+                        Antecedentes familiares
+                        <textarea rows="4" formControlName="antecedentesFamiliares"></textarea>
+                    </label>
+                </div>
+            </section>
+
+            <div class="acciones">
+                <button type="button" class="btn-secundario" (click)="volverSala()">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="btn-principal" [disabled]="guardando">
+                    {{ guardando ? 'Guardando...' : 'Guardar triage' }}
+                </button>
+            </div>
+        </form>
+    </ng-container>
 </div>

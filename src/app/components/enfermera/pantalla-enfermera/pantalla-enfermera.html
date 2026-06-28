@@ -11,14 +11,17 @@
         <ul class="nav-links">
             <li>
                 <a routerLink="/panel/enfermeria/sala-espera" routerLinkActive="active"
-                    [routerLinkActiveOptions]="{exact: true}">
-                    <i class="pi pi-users"></i> Sala de Espera
+                    [routerLinkActiveOptions]="{ exact: true }">
+                    <i class="pi pi-users"></i>
+                    <span>Sala de Espera</span>
                 </a>
             </li>
+
             <li>
-                <a routerLink="/panel/enfermeria/triage/:idCita" routerLinkActive="active"
-                    [routerLinkActiveOptions]="{exact: true}">
-                    <i class="pi pi-heart"></i> Atención y Triage
+                <a class="triage-link" [class.active]="estaEnTriage()"
+                    [attr.aria-current]="estaEnTriage() ? 'page' : null" tabindex="-1">
+                    <i class="pi pi-heart"></i>
+                    <span>Atención y Triage</span>
                 </a>
             </li>
         </ul>
@@ -29,8 +32,10 @@
             <div class="nav-title">
                 <h3>Panel de Control de Enfermería</h3>
             </div>
+
             <button class="btn-logout" (click)="logout()">
-                <i class="pi pi-sign-out"></i> Salir
+                <i class="pi pi-sign-out"></i>
+                Salir
             </button>
         </header>
 

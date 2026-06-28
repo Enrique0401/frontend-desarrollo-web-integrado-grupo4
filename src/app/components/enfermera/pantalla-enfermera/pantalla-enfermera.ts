@@ -22,7 +22,7 @@ export class PantallaEnfermera implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    public router: Router
   ) {}
 
   ngOnInit(): void {
@@ -34,6 +34,10 @@ export class PantallaEnfermera implements OnInit {
         this.router.navigate(['/iniciar-sesion']);
       }
     });
+  }
+
+  estaEnTriage(): boolean {
+    return this.router.url.includes('/panel/enfermeria/triage');
   }
 
   logout(): void {
