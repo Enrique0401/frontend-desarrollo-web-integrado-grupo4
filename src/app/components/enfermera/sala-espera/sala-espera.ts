@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 
 interface CitaApi {
   id: number;
@@ -16,6 +16,10 @@ interface PacienteApi {
   nombre: string;
   apellido: string;
   numeroDocumento: string;
+}
+
+interface ConsultaMedicaApi {
+  id?: number;
 }
 
 interface CitaSalaEspera {
@@ -39,7 +43,7 @@ export class SalaEspera implements OnInit {
   private urlBase = 'https://backend-desarrollo-web-integrado-grupo4.onrender.com/api';
 
   citasEnEspera: CitaSalaEspera[] = [];
-  cargando: boolean = true;
+  cargando = true;
 
   ngOnInit() {
     this.cargarPacientesEnSala();
@@ -65,33 +69,54 @@ export class SalaEspera implements OnInit {
     forkJoin({
       citasRespuesta: this.http.get<any>(`${this.urlBase}/citas`, { headers }),
       pacientesRespuesta: this.http.get<any>(`${this.urlBase}/pacientes`, { headers })
-    }).subscribe({
-      next: ({ citasRespuesta, pacientesRespuesta }) => {
-        const citas = this.extraerArray<CitaApi>(citasRespuesta);
+    }).pipe(
+      switchMap(({ citasRespuesta, pacientesRespuesta }) => {
+        const citasConfirmadas = this.extraerArray<CitaApi>(citasRespuesta)
+          .filter((cita) => cita.estado?.toUpperCase() === 'CONFIRMADA');
+
         const pacientes = this.extraerArray<PacienteApi>(pacientesRespuesta);
 
         const pacientesPorId = new Map(
           pacientes.map((paciente) => [paciente.id, paciente])
         );
 
-        this.citasEnEspera = citas
-          .filter((cita) => cita.estado?.toUpperCase() === 'CONFIRMADA')
-          .map((cita) => {
-            const paciente = pacientesPorId.get(cita.pacienteId);
+        if (citasConfirmadas.length === 0) {
+          return of([]);
+        }
 
-            return {
-              id: cita.id,
-              fechaHora: cita.fechaHora,
-              pacienteNombre: paciente?.nombre ?? '',
-              pacienteApellido: paciente?.apellido ?? '',
-              pacienteNumeroDocumento: paciente?.numeroDocumento ?? ''
-            };
-          });
+        const verificaciones = citasConfirmadas.map((cita) =>
+          this.http.get<ConsultaMedicaApi>(`${this.urlBase}/consulta-medica/cita/${cita.id}`, { headers }).pipe(
+            map((consulta) => ({ cita, consulta })),
+            catchError(() => of({ cita, consulta: null }))
+          )
+        );
 
+        return forkJoin(verificaciones).pipe(
+          map((resultados) =>
+            resultados
+              .filter(({ consulta }) => !consulta?.id)
+              .map(({ cita }) => {
+                const paciente = pacientesPorId.get(cita.pacienteId);
+
+                return {
+                  id: cita.id,
+                  fechaHora: cita.fechaHora,
+                  pacienteNombre: paciente?.nombre ?? '',
+                  pacienteApellido: paciente?.apellido ?? '',
+                  pacienteNumeroDocumento: paciente?.numeroDocumento ?? ''
+                };
+              })
+          )
+        );
+      })
+    ).subscribe({
+      next: (citas) => {
+        this.citasEnEspera = citas;
         this.cargando = false;
       },
       error: (err) => {
         console.error('Error al cargar la sala de espera', err);
+        this.citasEnEspera = [];
         this.cargando = false;
       }
     });
