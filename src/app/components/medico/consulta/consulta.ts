@@ -20,6 +20,8 @@ export class Consulta implements OnInit {
 
   cargando = signal(false);
   guardando = signal(false);
+  mostrarModalHistoria = signal(false);
+  mensajeModalHistoria = signal('');
 
   form!: FormGroup;
 
@@ -74,6 +76,29 @@ export class Consulta implements OnInit {
       next: (cita) => {
         this.cita.set(cita);
 
+        const idCita = cita.id ?? cita.idCita ?? cita.id_cita;
+
+        this.consultaService.obtenerPorCita(idCita).subscribe({
+          next: (consultaExistente) => {
+            this.form.patchValue({
+              anamnesis: consultaExistente.anamnesis,
+              examenFisico: consultaExistente.examenFisico,
+              diagnostico: consultaExistente.diagnostico,
+              tratamiento: consultaExistente.tratamiento,
+              observaciones: consultaExistente.observaciones,
+              presionArterial: consultaExistente.presionArterial,
+              temperatura: consultaExistente.temperatura,
+              frecuenciaCardiaca: consultaExistente.frecuenciaCardiaca,
+              frecuenciaRespiratoria: consultaExistente.frecuenciaRespiratoria,
+              peso: consultaExistente.peso,
+              talla: consultaExistente.talla,
+            });
+          },
+          error: () => {
+            console.log('No hay consulta médica registrada para esta cita.');
+          },
+        });
+
         this.historiaClinicaService.obtenerPorPaciente(cita.pacienteId).subscribe({
           next: (historia) => {
             this.historiaClinica.set(historia);
@@ -93,8 +118,6 @@ export class Consulta implements OnInit {
       },
     });
   }
-  mostrarModalHistoria = signal(false);
-  mensajeModalHistoria = signal('');
   finalizarConsulta(): void {
   if (this.form.invalid) {
     this.form.markAllAsTouched();
@@ -140,8 +163,7 @@ export class Consulta implements OnInit {
         next: () => this.completarCita(citaActual),
         error: (err) => {
           this.guardando.set(false);
-          console.error('Error al actualizar consulta médica:', err);
-          alert('No se pudo actualizar la consulta médica.');
+          console.error(err);
         },
       });
     },
@@ -150,32 +172,31 @@ export class Consulta implements OnInit {
         next: () => this.completarCita(citaActual),
         error: (err) => {
           this.guardando.set(false);
-          console.error('Error al guardar consulta médica:', err);
-          alert('No se pudo guardar la consulta médica.');
+          console.error(err);
         },
       });
     },
   });
 }
-completarCita(citaActual: any): void {
-  const citaActualizada = {
-    ...citaActual,
-    estado: 'COMPLETADA',
-    notas: this.form.value.observaciones || citaActual.notas,
-  };
+  completarCita(citaActual: any): void {
+    const citaActualizada = {
+      ...citaActual,
+      estado: 'COMPLETADA',
+      notas: this.form.value.observaciones || citaActual.notas,
+    };
 
-  this.citaService.actualizarCita(this.idCita, citaActualizada).subscribe({
-    next: () => {
-      this.guardando.set(false);
-      this.router.navigate(['/panel/medico/agenda']);
-    },
-    error: (err) => {
-      this.guardando.set(false);
-      console.error('Consulta guardada, pero error al completar cita:', err);
-      alert('La consulta se guardó, pero no se pudo completar la cita.');
-    },
-  });
-}
+    this.citaService.actualizarCita(this.idCita, citaActualizada).subscribe({
+      next: () => {
+        this.guardando.set(false);
+        this.router.navigate(['/panel/medico/agenda']);
+      },
+      error: (err) => {
+        this.guardando.set(false);
+        console.error('Consulta guardada, pero error al completar cita:', err);
+        alert('La consulta se guardó, pero no se pudo completar la cita.');
+      },
+    });
+  }
 
   volverAgenda(): void {
     this.router.navigate(['/panel/medico/agenda']);
