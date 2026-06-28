@@ -124,7 +124,6 @@ export class RegistroComponent implements OnInit {
         const mensajeError = err.error?.message || err.error?.mensaje || '';
         const errorString = JSON.stringify(err).toLowerCase();
 
-        // 🔥 CORRECCIÓN: Detectamos si realmente es un duplicado o un error interno de Base de Datos
         const esDuplicado = err.status === 409 || errorString.includes('duplicate entry') || errorString.includes('unique');
 
         if (esDuplicado) {
@@ -139,8 +138,7 @@ export class RegistroComponent implements OnInit {
           this.errorMensaje.set(`Ese usuario ya existe. Prueba con: ${sugerencias.join(', ')}`);
 
         } else if (err.status === 500) {
-          // 🔥 SI MYSQL RECHAZA LOS DATOS, AHORA TE AVISARÁ CORRECTAMENTE
-          this.errorMensaje.set('🚨 Error 500: ¡MySQL rechazó los datos! Asegúrate de haber ejecutado los ALTER TABLE para actualizar los ENUM en tu BD.');
+          this.errorMensaje.set('Error 500: ¡MySQL rechazó los datos! Asegúrate de haber ejecutado los ALTER TABLE para actualizar los ENUM en tu BD.');
         } else {
           this.errorMensaje.set(mensajeError || 'Error inesperado al registrar.');
         }
