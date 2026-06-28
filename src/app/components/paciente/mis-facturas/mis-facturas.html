@@ -1,1 +1,142 @@
-<p>mis-facturas works!</p>
+<div class="facturas-page">
+    <header class="facturas-header">
+        <div>
+            <h2>Mis Facturas</h2>
+            <p>Consulta tus comprobantes, estados de pago y detalles facturados.</p>
+        </div>
+
+        <button type="button" class="btn-actualizar" (click)="cargarFacturas()" [disabled]="cargando">
+            {{ cargando ? 'Actualizando...' : 'Actualizar' }}
+        </button>
+    </header>
+
+    <div *ngIf="cargando" class="estado-panel">
+        Cargando facturas...
+    </div>
+
+    <div *ngIf="error" class="alerta-error">
+        {{ error }}
+    </div>
+
+    <ng-container *ngIf="!cargando && !error">
+        <section class="resumen-grid">
+            <article class="resumen-card">
+                <span>Total facturas</span>
+                <strong>{{ facturas.length }}</strong>
+            </article>
+
+            <article class="resumen-card pendiente">
+                <span>Monto pendiente</span>
+                <strong>{{ totalPendiente() | currency:'PEN':'symbol':'1.2-2' }}</strong>
+            </article>
+
+            <article class="resumen-card">
+                <span>Paciente</span>
+                <strong>{{ paciente?.nombre }} {{ paciente?.apellido }}</strong>
+            </article>
+        </section>
+
+        <section class="facturas-card" *ngIf="facturas.length > 0; else sinFacturas">
+            <div class="tabla-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Factura</th>
+                            <th>Emision</th>
+                            <th>Pago</th>
+                            <th>Metodo</th>
+                            <th>Estado</th>
+                            <th>Total</th>
+                            <th>Detalle</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <ng-container *ngFor="let factura of facturas">
+                            <tr>
+                                <td>
+                                    <strong>{{ factura.numeroFactura }}</strong>
+                                    <small *ngIf="factura.citaId">Cita #{{ factura.citaId }}</small>
+                                </td>
+
+                                <td>{{ factura.fechaEmision | date:'short' }}</td>
+
+                                <td>
+                                    <span *ngIf="factura.fechaPago; else sinPago">
+                                        {{ factura.fechaPago | date:'short' }}
+                                    </span>
+                                    <ng-template #sinPago>Sin pago</ng-template>
+                                </td>
+
+                                <td>{{ metodoPagoTexto(factura.metodoPago) }}</td>
+
+                                <td>
+                                    <span class="estado" [ngClass]="factura.estado.toLowerCase()">
+                                        {{ estadoTexto(factura.estado) }}
+                                    </span>
+                                </td>
+
+                                <td class="total">
+                                    {{ factura.total | currency:'PEN':'symbol':'1.2-2' }}
+                                </td>
+
+                                <td>
+                                    <button type="button" class="btn-detalle" (click)="alternarDetalle(factura.id)">
+                                        {{ estaAbierta(factura.id) ? 'Ocultar' : 'Ver' }}
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <tr class="detalle-row" *ngIf="estaAbierta(factura.id)">
+                                <td colspan="7">
+                                    <div class="detalle-box">
+                                        <div class="totales">
+                                            <span>Subtotal: <strong>{{ factura.subtotal |
+                                                    currency:'PEN':'symbol':'1.2-2' }}</strong></span>
+                                            <span>IGV: <strong>{{ factura.impuesto | currency:'PEN':'symbol':'1.2-2'
+                                                    }}</strong></span>
+                                            <span>Total: <strong>{{ factura.total | currency:'PEN':'symbol':'1.2-2'
+                                                    }}</strong></span>
+                                        </div>
+
+                                        <table class="detalle-table" *ngIf="factura.detalles?.length; else sinDetalle">
+                                            <thead>
+                                                <tr>
+                                                    <th>Descripcion</th>
+                                                    <th>Cantidad</th>
+                                                    <th>Precio unitario</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                <tr *ngFor="let detalle of factura.detalles">
+                                                    <td>{{ detalle.descripcion }}</td>
+                                                    <td>{{ detalle.cantidad }}</td>
+                                                    <td>{{ detalle.precioUnitario | currency:'PEN':'symbol':'1.2-2' }}
+                                                    </td>
+                                                    <td>{{ detalle.total | currency:'PEN':'symbol':'1.2-2' }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <ng-template #sinDetalle>
+                                            <p class="sin-detalle">Esta factura no tiene detalles registrados.</p>
+                                        </ng-template>
+                                    </div>
+                                </td>
+                            </tr>
+                        </ng-container>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <ng-template #sinFacturas>
+            <div class="empty-state">
+                <h3>No tienes facturas registradas</h3>
+                <p>Cuando se emita una factura asociada a tu atencion, aparecera aqui.</p>
+            </div>
+        </ng-template>
+    </ng-container>
+</div>

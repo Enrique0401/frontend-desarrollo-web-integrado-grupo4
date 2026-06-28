@@ -1,0 +1,271 @@
+:host {
+    display: block;
+    min-height: 100%;
+    background: #f4f7fb;
+    color: #17233c;
+}
+
+.facturas-page {
+    padding: 30px;
+}
+
+.facturas-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-start;
+    margin-bottom: 24px;
+
+    h2 {
+        margin: 0 0 6px;
+        color: #0f2544;
+        font-size: 32px;
+        font-weight: 800;
+    }
+
+    p {
+        margin: 0;
+        color: #64748b;
+        font-size: 15px;
+    }
+}
+
+.btn-actualizar,
+.btn-detalle {
+    border: none;
+    border-radius: 8px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.btn-actualizar {
+    padding: 11px 16px;
+    background: #0ea5e9;
+    color: #ffffff;
+
+    &:hover {
+        background: #0284c7;
+        transform: translateY(-1px);
+    }
+
+    &:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+        transform: none;
+    }
+}
+
+.estado-panel,
+.alerta-error,
+.empty-state {
+    padding: 22px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 24px rgba(18, 38, 63, 0.06);
+}
+
+.estado-panel {
+    color: #64748b;
+    font-weight: 700;
+}
+
+.alerta-error {
+    color: #b91c1c;
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.resumen-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.resumen-card {
+    padding: 22px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 24px rgba(18, 38, 63, 0.06);
+
+    span {
+        display: block;
+        margin-bottom: 8px;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    strong {
+        color: #0f2544;
+        font-size: 24px;
+    }
+
+    &.pendiente {
+        border-color: #fde68a;
+        background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+    }
+}
+
+.facturas-card {
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 24px rgba(18, 38, 63, 0.06);
+    overflow: hidden;
+}
+
+.tabla-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    min-width: 920px;
+    border-collapse: collapse;
+}
+
+th {
+    padding: 16px 18px;
+    background: #f8fafc;
+    color: #334155;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+td {
+    padding: 18px;
+    color: #17233c;
+    border-bottom: 1px solid #edf2f7;
+    vertical-align: middle;
+
+    small {
+        display: block;
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 12px;
+    }
+}
+
+.total {
+    font-weight: 800;
+    color: #0f2544;
+}
+
+.estado {
+    display: inline-flex;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 800;
+
+    &.pendiente {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    &.pagada {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    &.anulada {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+}
+
+.btn-detalle {
+    padding: 8px 12px;
+    background: #e0f2fe;
+    color: #0369a1;
+
+    &:hover {
+        background: #bae6fd;
+    }
+}
+
+.detalle-row td {
+    background: #f8fafc;
+}
+
+.detalle-box {
+    padding: 18px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+
+.totales {
+    display: flex;
+    justify-content: flex-end;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    color: #475569;
+
+    strong {
+        color: #0f2544;
+    }
+}
+
+.detalle-table {
+    min-width: 680px;
+
+    th {
+        background: #ffffff;
+    }
+
+    td {
+        padding: 14px 18px;
+    }
+}
+
+.sin-detalle {
+    margin: 0;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.empty-state {
+    text-align: center;
+
+    h3 {
+        margin: 0 0 8px;
+        color: #0f2544;
+        font-size: 22px;
+    }
+
+    p {
+        margin: 0;
+        color: #64748b;
+    }
+}
+
+@media (max-width: 760px) {
+    .facturas-page {
+        padding: 20px;
+    }
+
+    .facturas-header,
+    .totales {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .resumen-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-actualizar {
+        width: 100%;
+    }
+}

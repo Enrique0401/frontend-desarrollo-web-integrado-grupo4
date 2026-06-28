@@ -310,13 +310,13 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./components/paciente/mis-citas/mis-citas').then((m) => m.MisCitas),
           },
-          {
+          /* {
             path: 'historial-clinico',
             loadComponent: () =>
               import('./components/paciente/mi-historia-clinica/mi-historia-clinica').then(
                 (m) => m.MiHistoriaClinica,
               ),
-          },
+          }, */
           {
             path: 'recetas',
             loadComponent: () =>
