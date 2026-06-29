@@ -1,23 +1,65 @@
 <div class="medicos-grid">
   @for (especialidad of especialidades; track especialidad.id) {
-    <div class="custom-card">
-
+    <button
+      type="button"
+      class="custom-card"
+      (click)="abrirDetalle(especialidad)"
+      [attr.aria-label]="'Ver más información de ' + especialidad.nombre"
+    >
       <div class="card-header">
-        <img
-          [src]="especialidad.imagen"
-          [alt]="especialidad.nombre">
+        <img [src]="especialidad.imagen" [alt]="especialidad.nombre">
+        <span class="card-overlay">
+          <i class="pi pi-plus-circle"></i>
+          Ver más
+        </span>
       </div>
 
       <div class="card-body">
-        <div class="card-title">
-          {{ especialidad.nombre }}
-        </div>
-
+        <div class="card-title">{{ especialidad.nombre }}</div>
         <div class="card-content">
           <p>{{ especialidad.descripcion }}</p>
         </div>
+        <span class="card-link">Haz clic para más información <i class="pi pi-arrow-right"></i></span>
       </div>
-
-    </div>
+    </button>
   }
 </div>
+
+@if (especialidadSeleccionada) {
+  <div class="modal-overlay" (click)="cerrarDetalle()" role="dialog" aria-modal="true">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" (click)="cerrarDetalle()" aria-label="Cerrar">
+        <i class="pi pi-times"></i>
+      </button>
+
+      <div class="modal-header">
+        <img [src]="especialidadSeleccionada.imagen" [alt]="especialidadSeleccionada.nombre">
+        <div class="modal-header-text">
+          <h2>{{ especialidadSeleccionada.nombre }}</h2>
+          <p>{{ especialidadSeleccionada.descripcion }}</p>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <h3>Acerca de esta especialidad</h3>
+        <p>{{ especialidadSeleccionada.informacionDetallada }}</p>
+
+        <h3>Servicios disponibles</h3>
+        <ul>
+          @for (servicio of especialidadSeleccionada.servicios; track servicio) {
+            <li><i class="pi pi-check"></i> {{ servicio }}</li>
+          }
+        </ul>
+      </div>
+
+      <div class="modal-footer">
+        <a routerLink="/contacto" class="btn-contacto" (click)="cerrarDetalle()">
+          <i class="pi pi-calendar"></i> Solicitar cita
+        </a>
+        <a href="https://wa.me/51934638457" target="_blank" rel="noopener" class="btn-whatsapp">
+          <i class="pi pi-whatsapp"></i> WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+}

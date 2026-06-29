@@ -1,31 +1,197 @@
 .medicos-layout {
-    min-height: 100vh;
-    background-color: #f4fcff;
-    display: flex;
-    flex-direction: column;
-}
-
-.medicos-layout {
-    min-height: 100vh;
-    background-color: #f4fcff;
-    display: flex;
-    flex-direction: column;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Montserrat', sans-serif;
+  color: #334155;
 }
 
 .contenido-principal {
-    flex: 1;
-    padding-top: 7rem;
+  flex: 1;
 }
 
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
 
-.medicos-layout {
-    min-height: 100vh;
-    background-color: #f4fcff;
-    display: flex;
+.section-header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 2.5rem;
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1a202c;
+    margin: 0.5rem 0 0.8rem;
+  }
+
+  p {
+    font-size: 1.05rem;
+    color: #64748b;
+    line-height: 1.7;
+    margin: 0;
+  }
+}
+
+.section-tag {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #26B8B5;
+  background: rgba(38, 184, 181, 0.1);
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+}
+
+.hero-section {
+  background: linear-gradient(rgba(30, 41, 59, 0.85), rgba(38, 184, 181, 0.75)),
+    url('https://img.freepik.com/foto-gratis/doctor-hablando-paciente_23-2148864521.jpg') center/cover no-repeat;
+  padding: 5rem 2rem 4rem;
+  text-align: center;
+  color: white;
+
+  .hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+
+      span {
+        color: #a5f3fc;
+      }
+    }
+
+    p {
+      font-size: 1.15rem;
+      line-height: 1.7;
+      opacity: 0.95;
+    }
+  }
+}
+
+.intro-section {
+  padding: 3rem 2rem 1rem;
+}
+
+.intro-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.intro-card {
+  background: white;
+  padding: 2rem 1.5rem;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  border-top: 4px solid #26B8B5;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+
+  i {
+    font-size: 2rem;
+    color: #26B8B5;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 0.6rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+
+.especialidades-section {
+  padding: 2rem 0 4rem;
+}
+
+.cta-section {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  padding: 3rem 0;
+  margin-bottom: 0;
+}
+
+.cta-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.cta-text {
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 0.5rem;
+  }
+
+  p {
+    font-size: 1rem;
+    color: #94a3b8;
+    margin: 0;
+    line-height: 1.6;
+  }
+}
+
+.btn-cta {
+  display: inline-block;
+  background: #26B8B5;
+  color: white;
+  padding: 0.9rem 2rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: #1EA8A9;
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 992px) {
+  .intro-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-inner {
     flex-direction: column;
+    text-align: center;
+  }
 }
 
-.contenido-principal {
-    flex: 1;
-    padding-top: 2.5rem; 
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 7rem 1.5rem 4rem;
+
+    .hero-content h1 {
+      font-size: 2.2rem;
+    }
+  }
 }

@@ -1,23 +1,155 @@
-<div class="hero-container">
-    
-    <div class="navbar-top">
-        <app-navegacion-general></app-navegacion-general>
-    </div>
-
-    <img src="https://cdn.pixabay.com/photo/2016/11/08/05/29/operation-1807543_1280.jpg" alt="Fondo" class="hero-bg" />
+<div class="landing-layout">
+  <section class="hero-container">
+    <img
+      src="https://cdn.pixabay.com/photo/2016/11/08/05/29/operation-1807543_1280.jpg"
+      alt="Equipo médico Nova Salud"
+      class="hero-bg"
+    />
+    <div class="hero-overlay"></div>
 
     <div class="hero-content">
-        <h2 class="hero-subtitle">Grupo Médico</h2>
-        <h1 class="hero-title">Nova Salud</h1>
-        
-        <div class="hero-divider"></div>
-        
-        <p class="hero-description">Deja tu salud en nuestras manos</p>
+      <span class="hero-badge">Centro Médico Integral</span>
+      <h2 class="hero-subtitle">Grupo Médico</h2>
+      <h1 class="hero-title">Nova <span>Salud</span></h1>
+      <div class="hero-divider"></div>
+      <p class="hero-description">
+        Atención médica de excelencia con tecnología de vanguardia y un equipo humano
+        comprometido con tu bienestar en cada etapa de la vida.
+      </p>
 
-        <div class="hero-buttons">
-            <a href="/conocenos"><p-button label="QUIENES SOMOS" styleClass="btn-outline"></p-button></a>
-            <a href="/personal-medico"><p-button label="ESPECIALIDADES" styleClass="btn-solid"></p-button></a>
-        </div>
+      <div class="hero-buttons">
+        <a routerLink="/conocenos" class="btn btn-outline">QUIÉNES SOMOS</a>
+        <a routerLink="/personal-medico" class="btn btn-solid">VER ESPECIALIDADES</a>
+      </div>
+
+      <div class="hero-stats">
+        @for (stat of estadisticas; track stat.label) {
+          <div class="stat-item">
+            <strong>{{ stat.valor }}</strong>
+            <span>{{ stat.label }}</span>
+          </div>
+        }
+      </div>
     </div>
+  </section>
 
+  <section class="servicios-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Nuestros servicios</span>
+        <h2>Atención integral para toda tu familia</h2>
+        <p>Contamos con infraestructura moderna y especialistas certificados para brindarte diagnósticos precisos y tratamientos efectivos.</p>
+      </div>
+
+      <div class="servicios-grid">
+        @for (servicio of servicios; track servicio.titulo) {
+          <div class="servicio-card">
+            <div class="servicio-icon">
+              <i [class]="servicio.icono"></i>
+            </div>
+            <h3>{{ servicio.titulo }}</h3>
+            <p>{{ servicio.descripcion }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="porque-section bg-light">
+    <div class="container porque-grid">
+      <div class="porque-texto">
+        <span class="section-tag">¿Por qué elegirnos?</span>
+        <h2>Tu salud en las mejores manos</h2>
+        <p>En Nova Salud combinamos experiencia clínica, equipos de última generación y un enfoque centrado en el paciente para ofrecerte una experiencia de atención excepcional.</p>
+
+        <ul class="beneficios-lista">
+          @for (beneficio of beneficios; track beneficio) {
+            <li>
+              <i class="pi pi-check-circle"></i>
+              <span>{{ beneficio }}</span>
+            </li>
+          }
+        </ul>
+
+        <a routerLink="/conocenos" class="btn btn-teal">Conoce nuestra historia</a>
+      </div>
+
+      <div class="porque-imagen">
+        <img
+          src="https://img.freepik.com/foto-gratis/equipo-medicos-hospital_1303-22839.jpg"
+          alt="Equipo médico Nova Salud"
+        />
+        <div class="experiencia-badge">
+          <strong>15+</strong>
+          <span>Años de experiencia</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="especialidades-preview">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Especialidades médicas</span>
+        <h2>Expertos en cada área de la salud</h2>
+        <p>Más de 20 especialidades disponibles para atender tus necesidades con el más alto nivel profesional.</p>
+      </div>
+
+      <div class="preview-grid">
+        @for (esp of especialidadesDestacadas; track esp.nombre) {
+          <div class="preview-card">
+            <i [class]="esp.icono"></i>
+            <h4>{{ esp.nombre }}</h4>
+            <p>{{ esp.descripcion }}</p>
+          </div>
+        }
+      </div>
+
+      <div class="section-cta">
+        <a routerLink="/personal-medico" class="btn btn-solid">Explorar todas las especialidades</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="testimonios-section bg-light">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Testimonios</span>
+        <h2>Lo que dicen nuestros pacientes</h2>
+        <p>La confianza de miles de familias respalda nuestro compromiso con la calidad y el trato humano.</p>
+      </div>
+
+      <div class="testimonios-grid">
+        @for (testimonio of testimonios; track testimonio.nombre) {
+          <div class="testimonio-card">
+            <div class="testimonio-stars">
+              @for (star of [1, 2, 3, 4, 5]; track star) {
+                <i class="pi pi-star-fill"></i>
+              }
+            </div>
+            <p class="testimonio-texto">"{{ testimonio.texto }}"</p>
+            <div class="testimonio-autor">
+              <strong>{{ testimonio.nombre }}</strong>
+              <span>{{ testimonio.especialidad }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-banner">
+    <div class="container cta-content">
+      <div>
+        <h2>¿Necesitas agendar una cita?</h2>
+        <p>Contáctanos hoy y recibe la atención que mereces. Emergencias disponibles las 24 horas.</p>
+      </div>
+      <div class="cta-buttons">
+        <a routerLink="/contacto" class="btn btn-white">Contactar ahora</a>
+        <a href="https://wa.me/51934638457" target="_blank" rel="noopener" class="btn btn-outline-white">
+          <i class="pi pi-whatsapp"></i> WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
 </div>

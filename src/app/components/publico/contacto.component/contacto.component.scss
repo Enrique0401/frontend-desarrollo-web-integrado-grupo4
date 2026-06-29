@@ -54,7 +54,7 @@
 .hero-section {
     background: linear-gradient(rgba(30, 41, 59, 0.8), rgba(38, 184, 181, 0.8)),
         url('https://img.freepik.com/foto-gratis/recepcion-hospital-moderno_1048-5815.jpg') center/cover no-repeat;
-    padding: 7rem 2rem;
+    padding: 5rem 2rem;
     text-align: center;
     color: white;
 
@@ -182,6 +182,40 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     animation: fadeInRight 1s ease-out 0.5s both;
     min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    background: white;
+
+    .mapa-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #e2e8f0;
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin: 0 0 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+
+            i {
+                color: #26B8B5;
+            }
+        }
+
+        p {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin: 0;
+            line-height: 1.5;
+        }
+    }
+
+    iframe {
+        flex: 1;
+        min-height: 350px;
+    }
 }
 
 @media (max-width: 992px) {
@@ -211,5 +245,145 @@
 
     .container {
         padding: 3rem 1.5rem;
+    }
+
+    .faq-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .canales-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.bg-light {
+    background-color: #ffffff;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+
+    h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1a202c;
+        margin: 0.5rem 0 0;
+    }
+}
+
+.section-tag {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #26B8B5;
+    background: rgba(38, 184, 181, 0.1);
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+}
+
+.canales-section {
+    padding: 4rem 0;
+}
+
+.canales-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+
+.canal-card {
+    background: #f8fafc;
+    padding: 2rem 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+
+    &:hover {
+        transform: translateY(-4px);
+        border-color: #26B8B5;
+        box-shadow: 0 8px 25px rgba(38, 184, 181, 0.1);
+
+        i {
+            color: #26B8B5;
+        }
+    }
+
+    i {
+        font-size: 2rem;
+        color: #94a3b8;
+        margin-bottom: 1rem;
+        display: block;
+        transition: color 0.3s ease;
+    }
+
+    h4 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1a202c;
+        margin: 0 0 0.5rem;
+    }
+
+    p {
+        font-size: 0.88rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin: 0;
+    }
+}
+
+.faq-section {
+    padding-bottom: 5rem;
+}
+
+.faq-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.faq-item {
+    background: white;
+    padding: 1.8rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    border-left: 4px solid #26B8B5;
+    transition: transform 0.3s ease;
+
+    &:hover {
+        transform: translateY(-3px);
+    }
+
+    h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1a202c;
+        margin: 0 0 0.8rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        line-height: 1.4;
+
+        i {
+            color: #26B8B5;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+    }
+
+    p {
+        font-size: 0.92rem;
+        color: #64748b;
+        line-height: 1.7;
+        margin: 0;
+    }
+}
+
+@media (max-width: 992px) {
+    .canales-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }

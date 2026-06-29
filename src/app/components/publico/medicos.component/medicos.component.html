@@ -1,9 +1,51 @@
 <div class="medicos-layout">
-    <app-navegacion-general></app-navegacion-general>
-    
-    <main class="contenido-principal">
-        <app-medicos-card></app-medicos-card>
-    </main>
+  <main class="contenido-principal">
+    <section class="hero-section">
+      <div class="hero-content">
+        <h1>Nuestras <span>Especialidades</span></h1>
+        <p>Contamos con un equipo multidisciplinario de especialistas certificados, listos para brindarte atención médica de la más alta calidad en cada área de la salud.</p>
+      </div>
+    </section>
 
-    <app-flecha></app-flecha>
+    <section class="intro-section container">
+      <div class="intro-grid">
+        <div class="intro-card">
+          <i class="pi pi-verified"></i>
+          <h3>Médicos certificados</h3>
+          <p>Profesionales con formación continua y experiencia comprobada en sus respectivas áreas.</p>
+        </div>
+        <div class="intro-card">
+          <i class="pi pi-cog"></i>
+          <h3>Tecnología avanzada</h3>
+          <p>Equipos de diagnóstico de última generación para resultados precisos y oportunos.</p>
+        </div>
+        <div class="intro-card">
+          <i class="pi pi-heart"></i>
+          <h3>Atención personalizada</h3>
+          <p>Cada paciente recibe un plan de tratamiento adaptado a sus necesidades específicas.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="especialidades-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">20 especialidades</span>
+          <h2>Encuentra al especialista que necesitas</h2>
+          <p>Explora nuestras áreas médicas y descubre cómo podemos ayudarte a cuidar tu salud y la de tu familia.</p>
+        </div>
+        <app-medicos-card></app-medicos-card>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <div class="container cta-inner">
+        <div class="cta-text">
+          <h3>¿No encuentras la especialidad que buscas?</h3>
+          <p>Contáctanos y te orientaremos hacia el servicio médico adecuado para tu situación.</p>
+        </div>
+        <a routerLink="/contacto" class="btn-cta">Solicitar información</a>
+      </div>
+    </section>
+  </main>
 </div>
