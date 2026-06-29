@@ -9,6 +9,30 @@ function passwordsIgualesValidator(control: AbstractControl): ValidationErrors |
   return password === confirmar ? null : { passwordsNoCoinciden: true };
 }
 
+function fechaNacimientoValidator(control: AbstractControl): ValidationErrors | null {
+  const valor = control.value;
+
+  if (!valor) return null;
+
+  const fechaNacimiento = new Date(`${valor}T00:00:00`);
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  if (fechaNacimiento > hoy) {
+    return { fechaFutura: true };
+  }
+
+  return null;
+}
+
+function obtenerFechaHoyInput(): string {
+  const hoy = new Date();
+  const yyyy = hoy.getFullYear();
+  const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+  const dd = String(hoy.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 @Component({
   selector: 'app-registro',
   standalone: true,
@@ -21,12 +45,15 @@ export class RegistroComponent implements OnInit {
   protected readonly errorMensaje = signal<string | null>(null);
   protected readonly exito = signal(false);
   protected readonly mostrarPassword = signal(false);
+  protected readonly fechaMaximaNacimiento = obtenerFechaHoyInput();
 
   private fb = new FormBuilder();
+
   protected readonly form = this.fb.group(
     {
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       apellido: ['', [Validators.required, Validators.minLength(2)]],
+      fechaNacimiento: ['', [Validators.required, fechaNacimientoValidator]],
       tipoDocumento: ['DNI', [Validators.required]],
       numeroDocumento: ['', [Validators.required]],
       genero: ['OTRO', [Validators.required]],
@@ -57,6 +84,7 @@ export class RegistroComponent implements OnInit {
 
     this.form.get('seguroMedico')?.valueChanges.subscribe(seguro => {
       const numSeguroCtrl = this.form.get('numeroSeguro');
+
       if (seguro === 'NINGUNO' || !seguro) {
         numSeguroCtrl?.disable();
         numSeguroCtrl?.clearValidators();
@@ -65,12 +93,14 @@ export class RegistroComponent implements OnInit {
         numSeguroCtrl?.enable();
         numSeguroCtrl?.setValidators([Validators.required, Validators.minLength(3)]);
       }
+
       numSeguroCtrl?.updateValueAndValidity();
     });
   }
 
   private actualizarValidadoresDocumento(tipo: string): void {
     const controlDoc = this.form.get('numeroDocumento');
+
     if (tipo === 'DNI') {
       controlDoc?.setValidators([Validators.required, Validators.pattern('^[0-9]{8}$')]);
     } else if (tipo === 'PASAPORTE') {
@@ -78,6 +108,7 @@ export class RegistroComponent implements OnInit {
     } else {
       controlDoc?.setValidators([Validators.required, Validators.pattern('^[a-zA-Z0-9]{9}$')]);
     }
+
     controlDoc?.updateValueAndValidity();
   }
 
@@ -86,7 +117,8 @@ export class RegistroComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.cargando()) { return; }
+    if (this.cargando()) return;
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -100,6 +132,7 @@ export class RegistroComponent implements OnInit {
     const nuevoPaciente = {
       nombre: formValues.nombre!,
       apellido: formValues.apellido!,
+      fechaNacimiento: formValues.fechaNacimiento!,
       tipoDocumento: formValues.tipoDocumento!,
       numeroDocumento: formValues.numeroDocumento!,
       genero: formValues.genero!,
@@ -124,7 +157,10 @@ export class RegistroComponent implements OnInit {
         const mensajeError = err.error?.message || err.error?.mensaje || '';
         const errorString = JSON.stringify(err).toLowerCase();
 
-        const esDuplicado = err.status === 409 || errorString.includes('duplicate entry') || errorString.includes('unique');
+        const esDuplicado =
+          err.status === 409 ||
+          errorString.includes('duplicate entry') ||
+          errorString.includes('unique');
 
         if (esDuplicado) {
           this.form.controls.username.setErrors({ ocupado: true });
@@ -136,9 +172,8 @@ export class RegistroComponent implements OnInit {
           const sugerencias = [`${nom}${ape}${rnd1}`, `${nom}.${ape}`, `${ape}${nom}${rnd2}`];
 
           this.errorMensaje.set(`Ese usuario ya existe. Prueba con: ${sugerencias.join(', ')}`);
-
         } else if (err.status === 500) {
-          this.errorMensaje.set('Error 500: ¡MySQL rechazó los datos! Asegúrate de haber ejecutado los ALTER TABLE para actualizar los ENUM en tu BD.');
+          this.errorMensaje.set('Error 500: MySQL rechazó los datos. Verifica que el backend acepte fechaNacimiento.');
         } else {
           this.errorMensaje.set(mensajeError || 'Error inesperado al registrar.');
         }
