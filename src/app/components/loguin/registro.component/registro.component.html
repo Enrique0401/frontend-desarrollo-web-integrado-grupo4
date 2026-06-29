@@ -12,217 +12,219 @@
       <p class="login-form-panel__desc">Completa tus datos para registrarte</p>
 
       @if (exito()) {
-        <div class="alert alert-success py-2 small">
-          ¡Cuenta creada con éxito! Redirigiendo al inicio de sesión...
-        </div>
+      <div class="alert alert-success py-2 small">
+        ¡Cuenta creada con éxito! Redirigiendo al inicio de sesión...
+      </div>
       } @else {
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
 
-          <div class="row">
-            <div class="col-6 mb-3">
-              <label class="form-label">Nombre</label>
-              <div class="input-icon-group" [class.is-invalid]="campoInvalido('nombre')">
-                <span class="pi pi-id-card"></span>
-                <input type="text" class="form-control" formControlName="nombre" placeholder="Nombre" />
-              </div>
-              @if (campoInvalido('nombre')) {
-                <div class="error-text">Obligatorio (mín. 2 caracteres)</div>
-              }
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label">Nombre</label>
+            <div class="input-icon-group" [class.is-invalid]="campoInvalido('nombre')">
+              <span class="pi pi-id-card"></span>
+              <input type="text" class="form-control" formControlName="nombre" placeholder="Nombre" />
             </div>
-
-            <div class="col-6 mb-3">
-              <label class="form-label">Apellido</label>
-              <div class="input-icon-group" [class.is-invalid]="campoInvalido('apellido')">
-                <span class="pi pi-id-card"></span>
-                <input type="text" class="form-control" formControlName="apellido" placeholder="Apellido" />
-              </div>
-              @if (campoInvalido('apellido')) {
-                <div class="error-text">Obligatorio (mín. 2 caracteres)</div>
-              }
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-4 mb-3">
-              <label class="form-label">Documento</label>
-              <div class="input-icon-group">
-                <span class="pi pi-id-card"></span>
-                <select class="form-control" formControlName="tipoDocumento" style="appearance: auto; background: transparent;">
-                  <option value="DNI">DNI</option>
-                  <option value="PASAPORTE">Pasaporte</option>
-                  <option value="CARNET_EXTRANJERIA">Carnet de Extranjería</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-8 mb-3">
-              <label class="form-label">Número</label>
-              <div class="input-icon-group" [class.is-invalid]="campoInvalido('numeroDocumento')">
-                <span class="pi pi-hashtag"></span>
-                <input 
-                  type="text" 
-                  class="form-control" 
-                  formControlName="numeroDocumento" 
-                  [placeholder]="form.get('tipoDocumento')?.value === 'DNI' ? '8 números' : 'Ej: A12345678'" 
-                  maxlength="9" 
-                  style="text-transform: uppercase;"
-                />
-              </div>
-              @if (campoInvalido('numeroDocumento')) {
-                <div class="error-text">
-                  @if (form.get('tipoDocumento')?.value === 'DNI') {
-                    El DNI debe tener exactamente 8 números.
-                  } @else if (form.get('tipoDocumento')?.value === 'PASAPORTE') {
-                    El Pasaporte requiere 1 letra y 8 números.
-                  } @else {
-                    El Carnet debe tener 9 caracteres alfanuméricos.
-                  }
-                </div>
-              }
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-5 mb-3">
-              <label class="form-label">Seguro Médico</label>
-              <div class="input-icon-group">
-                <span class="pi pi-heart"></span>
-                <select class="form-control" formControlName="seguroMedico" style="appearance: auto; background: transparent;">
-                  <option value="NINGUNO">Ninguno</option>
-                  <option value="ESSALUD">EsSalud</option>
-                  <option value="SIS">SIS</option>
-                  <option value="EPS">EPS</option>
-                  <option value="PRIVADO">Privado</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-7 mb-3">
-              <label class="form-label">Número de Seguro</label>
-              <div class="input-icon-group" [class.is-invalid]="campoInvalido('numeroSeguro')">
-                <span class="pi pi-hashtag"></span>
-                <input type="text" class="form-control" formControlName="numeroSeguro" placeholder="N° de póliza o afiliación" />
-              </div>
-              @if (campoInvalido('numeroSeguro')) {
-                <div class="error-text">Requerido si tienes seguro.</div>
-              }
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Correo electrónico</label>
-            <div class="input-icon-group" [class.is-invalid]="campoInvalido('correo')">
-              <span class="pi pi-envelope"></span>
-              <input type="email" class="form-control" formControlName="correo" placeholder="ejemplo@correo.com" autocomplete="email" />
-            </div>
-            @if (campoInvalido('correo')) {
-              <div class="error-text">Ingresa un correo válido</div>
+            @if (campoInvalido('nombre')) {
+            <div class="error-text">Obligatorio, mínimo 2 caracteres.</div>
             }
           </div>
 
-          <div class="row">
-            <div class="col-5 mb-3">
-              <label class="form-label">Género</label>
-              <div class="input-icon-group">
-                <span class="pi pi-users"></span>
-                <select class="form-control" formControlName="genero" style="appearance: auto; background: transparent;">
-                  <option value="MASCULINO">Masculino</option>
-                  <option value="FEMENINO">Femenino</option>
-                  <option value="OTRO">Otro</option>
-                </select>
-              </div>
+          <div class="col-6 mb-3">
+            <label class="form-label">Apellido</label>
+            <div class="input-icon-group" [class.is-invalid]="campoInvalido('apellido')">
+              <span class="pi pi-id-card"></span>
+              <input type="text" class="form-control" formControlName="apellido" placeholder="Apellido" />
             </div>
-
-            <div class="col-7 mb-3">
-              <label class="form-label">Teléfono</label>
-              <div class="input-icon-group" [class.is-invalid]="campoInvalido('telefono')">
-                <span class="pi pi-phone"></span>
-                <input type="tel" class="form-control" formControlName="telefono" placeholder="Ej: 987654321" />
-              </div>
-              @if (campoInvalido('telefono')) {
-                <div class="error-text">9 dígitos y empezar por 9.</div>
-              }
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Usuario</label>
-            <div class="input-icon-group" [class.is-invalid]="campoInvalido('username') || form.controls.username.hasError('ocupado')">
-              <span class="pi pi-user"></span>
-              <input type="text" class="form-control" formControlName="username" placeholder="Elige un nombre de usuario" autocomplete="username" />
-            </div>
-            @if (form.controls.username.hasError('required') && form.controls.username.touched) {
-              <div class="error-text">Obligatorio (mín. 3 caracteres)</div>
-            }
-            @if (form.controls.username.hasError('ocupado')) {
-              <div class="error-text">¡Hey, ese usuario ya tiene dueño! Intenta con otro nombre de usuario</div>
+            @if (campoInvalido('apellido')) {
+            <div class="error-text">Obligatorio, mínimo 2 caracteres.</div>
             }
           </div>
+        </div>
 
-          <div class="row">
-            <div class="col-6 mb-3">
-              <label class="form-label">Contraseña</label>
-              <div class="input-icon-group" [class.is-invalid]="campoInvalido('password')">
-                <span class="pi pi-lock"></span>
-                <input
-                  [type]="mostrarPassword() ? 'text' : 'password'"
-                  class="form-control"
-                  formControlName="password"
-                  placeholder="Contraseña"
-                  autocomplete="new-password"
-                />
-                <span
-                  class="pi toggle-eye"
-                  [class.pi-eye]="!mostrarPassword()"
-                  [class.pi-eye-slash]="mostrarPassword()"
-                  (click)="togglePassword()"
-                ></span>
-              </div>
-              @if (campoInvalido('password')) {
-                <div class="error-text">Mínimo 4 caracteres</div>
-              }
-            </div>
-
-            <div class="col-6 mb-3">
-              <label class="form-label">Confirmar</label>
-              <div class="input-icon-group" [class.is-invalid]="passwordsNoCoinciden">
-                <span class="pi pi-lock"></span>
-                <input
-                  [type]="mostrarPassword() ? 'text' : 'password'"
-                  class="form-control"
-                  formControlName="confirmarPassword"
-                  placeholder="Repite tu contraseña"
-                  autocomplete="new-password"
-                />
-              </div>
-              @if (passwordsNoCoinciden) {
-                <div class="error-text">Las contraseñas no coinciden</div>
-              }
+        <div class="row">
+          <div class="col-5 mb-3">
+            <label class="form-label">Género</label>
+            <div class="input-icon-group">
+              <span class="pi pi-users"></span>
+              <select class="form-control" formControlName="genero" style="appearance: auto; background: transparent;">
+                <option value="MASCULINO">Masculino</option>
+                <option value="FEMENINO">Femenino</option>
+                <option value="OTRO">Otro</option>
+              </select>
             </div>
           </div>
 
-          @if (errorMensaje()) {
-            <div class="alert alert-danger py-2 small">{{ errorMensaje() }}</div>
+          <div class="col-7 mb-3">
+            <label class="form-label">Fecha de nacimiento</label>
+            <div class="input-icon-group" [class.is-invalid]="campoInvalido('fechaNacimiento')">
+              <span class="pi pi-calendar"></span>
+              <input type="date" class="form-control" formControlName="fechaNacimiento" [max]="fechaMaximaNacimiento" />
+            </div>
+            @if (form.controls.fechaNacimiento.hasError('required') && form.controls.fechaNacimiento.touched) {
+            <div class="error-text">La fecha de nacimiento es obligatoria.</div>
+            }
+            @if (form.controls.fechaNacimiento.hasError('fechaFutura') && form.controls.fechaNacimiento.touched) {
+            <div class="error-text">La fecha de nacimiento no puede ser futura.</div>
+            }
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-4 mb-3">
+            <label class="form-label">Documento</label>
+            <div class="input-icon-group">
+              <span class="pi pi-id-card"></span>
+              <select class="form-control" formControlName="tipoDocumento"
+                style="appearance: auto; background: transparent;">
+                <option value="DNI">DNI</option>
+                <option value="PASAPORTE">Pasaporte</option>
+                <option value="CARNET_EXTRANJERIA">Carnet de Extranjería</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="col-8 mb-3">
+            <label class="form-label">Número</label>
+            <div class="input-icon-group" [class.is-invalid]="campoInvalido('numeroDocumento')">
+              <span class="pi pi-hashtag"></span>
+              <input type="text" class="form-control" formControlName="numeroDocumento"
+                [placeholder]="form.get('tipoDocumento')?.value === 'DNI' ? '8 números' : 'Ej: A12345678'" maxlength="9"
+                style="text-transform: uppercase;" />
+            </div>
+            @if (campoInvalido('numeroDocumento')) {
+            <div class="error-text">
+              @if (form.get('tipoDocumento')?.value === 'DNI') {
+              El DNI debe tener exactamente 8 números.
+              } @else if (form.get('tipoDocumento')?.value === 'PASAPORTE') {
+              El Pasaporte requiere 1 letra y 8 números.
+              } @else {
+              El Carnet debe tener 9 caracteres alfanuméricos.
+              }
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-5 mb-3">
+            <label class="form-label">Seguro Médico</label>
+            <div class="input-icon-group">
+              <span class="pi pi-heart"></span>
+              <select class="form-control" formControlName="seguroMedico"
+                style="appearance: auto; background: transparent;">
+                <option value="NINGUNO">Ninguno</option>
+                <option value="ESSALUD">EsSalud</option>
+                <option value="SIS">SIS</option>
+                <option value="EPS">EPS</option>
+                <option value="PRIVADO">Privado</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="col-7 mb-3">
+            <label class="form-label">Número de Seguro</label>
+            <div class="input-icon-group" [class.is-invalid]="campoInvalido('numeroSeguro')">
+              <span class="pi pi-hashtag"></span>
+              <input type="text" class="form-control" formControlName="numeroSeguro"
+                placeholder="N° de póliza o afiliación" />
+            </div>
+            @if (campoInvalido('numeroSeguro')) {
+            <div class="error-text">Requerido si tienes seguro.</div>
+            }
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Correo electrónico</label>
+          <div class="input-icon-group" [class.is-invalid]="campoInvalido('correo')">
+            <span class="pi pi-envelope"></span>
+            <input type="email" class="form-control" formControlName="correo" placeholder="ejemplo@correo.com"
+              autocomplete="email" />
+          </div>
+          @if (campoInvalido('correo')) {
+          <div class="error-text">Ingresa un correo válido.</div>
           }
+        </div>
 
-          <button type="submit" class="btn-submit" [disabled]="cargando()">
-            @if (cargando()) {
-              <span class="spinner-border spinner-border-sm me-2"></span>
-              Creando cuenta...
-            } @else {
-              Registrarme
+        <div class="mb-3">
+          <label class="form-label">Teléfono</label>
+          <div class="input-icon-group" [class.is-invalid]="campoInvalido('telefono')">
+            <span class="pi pi-phone"></span>
+            <input type="tel" class="form-control" formControlName="telefono" placeholder="Ej: 987654321"
+              maxlength="9" />
+          </div>
+          @if (campoInvalido('telefono')) {
+          <div class="error-text">Debe tener 9 dígitos y empezar por 9.</div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Usuario</label>
+          <div class="input-icon-group"
+            [class.is-invalid]="campoInvalido('username') || form.controls.username.hasError('ocupado')">
+            <span class="pi pi-user"></span>
+            <input type="text" class="form-control" formControlName="username" placeholder="Elige un nombre de usuario"
+              autocomplete="username" />
+          </div>
+          @if (form.controls.username.hasError('required') && form.controls.username.touched) {
+          <div class="error-text">Obligatorio, mínimo 3 caracteres.</div>
+          }
+          @if (form.controls.username.hasError('ocupado')) {
+          <div class="error-text">Ese usuario ya existe. Intenta con otro nombre de usuario.</div>
+          }
+        </div>
+
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label">Contraseña</label>
+            <div class="input-icon-group" [class.is-invalid]="campoInvalido('password')">
+              <span class="pi pi-lock"></span>
+              <input [type]="mostrarPassword() ? 'text' : 'password'" class="form-control" formControlName="password"
+                placeholder="Contraseña" autocomplete="new-password" />
+              <span class="pi toggle-eye" [class.pi-eye]="!mostrarPassword()" [class.pi-eye-slash]="mostrarPassword()"
+                (click)="togglePassword()"></span>
+            </div>
+            @if (campoInvalido('password')) {
+            <div class="error-text">Mínimo 4 caracteres.</div>
             }
-          </button>
+          </div>
 
-          <p class="register-text">
-            ¿Ya tienes cuenta?
-            <a routerLink="/iniciar-sesion">Inicia sesión aquí</a>
-          </p>
+          <div class="col-6 mb-3">
+            <label class="form-label">Confirmar</label>
+            <div class="input-icon-group" [class.is-invalid]="passwordsNoCoinciden">
+              <span class="pi pi-lock"></span>
+              <input [type]="mostrarPassword() ? 'text' : 'password'" class="form-control"
+                formControlName="confirmarPassword" placeholder="Repite tu contraseña" autocomplete="new-password" />
+            </div>
+            @if (passwordsNoCoinciden) {
+            <div class="error-text">Las contraseñas no coinciden.</div>
+            }
+          </div>
+        </div>
 
-          <p class="back-text">
-            <a routerLink="/">← Volver al inicio</a>
-          </p>
-        </form>
+        @if (errorMensaje()) {
+        <div class="alert alert-danger py-2 small">{{ errorMensaje() }}</div>
+        }
+
+        <button type="submit" class="btn-submit" [disabled]="cargando()">
+          @if (cargando()) {
+          <span class="spinner-border spinner-border-sm me-2"></span>
+          Creando cuenta...
+          } @else {
+          Registrarme
+          }
+        </button>
+
+        <p class="register-text">
+          ¿Ya tienes cuenta?
+          <a routerLink="/iniciar-sesion">Inicia sesión aquí</a>
+        </p>
+
+        <p class="back-text">
+          <a routerLink="/">← Volver al inicio</a>
+        </p>
+      </form>
       }
     </div>
   </div>
