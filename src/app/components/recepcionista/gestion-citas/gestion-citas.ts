@@ -23,22 +23,22 @@ export class GestionCitas implements OnInit {
   especialidades: any[] = [];
   consultorios: any[] = [];
   horarios: any[] = [];
-
   medicosBaseEspecialidad: any[] = [];
   medicosDisponibles: any[] = [];
-
   filtroPaciente = '';
   cargando = true;
   mostrarFormulario = false;
-
   clinicaId: number | null = null;
   mensajeDisponibilidad = '';
-
   duracionesCita = [15, 30, 45, 60, 75, 90, 105, 120];
   fechaMinima = '';
   horaMinima = '';
   fechaSeleccionada = '';
   horaSeleccionada = '';
+  horariosMedicoSeleccionado: any[] = [];
+  slotsMedicoSeleccionado: any[] = [];
+  cargandoHorariosMedico = false;
+  mensajeHorariosMedico = '';
 
   nuevaCita = {
     pacienteId: '',
@@ -243,16 +243,19 @@ export class GestionCitas implements OnInit {
     this.nuevaCita.medicoId = '';
     this.actualizarHoraMinima();
     this.actualizarMedicosDisponibles();
+    this.cargarHorariosMedicoSeleccionado();
   }
 
   onHoraChange() {
     this.nuevaCita.medicoId = '';
     this.actualizarMedicosDisponibles();
+    this.generarSlotsMedicoSeleccionado();
   }
 
   onConsultorioChange() {
     this.nuevaCita.medicoId = '';
     this.actualizarMedicosDisponibles();
+    this.generarSlotsMedicoSeleccionado();
   }
 
   actualizarMedicosDisponibles() {
@@ -745,4 +748,182 @@ export class GestionCitas implements OnInit {
 
     return `${yyyy}-${mm}-${dd}T${hh}:${min}:00`;
   }
+
+  onMedicoChange() {
+    this.cargarHorariosMedicoSeleccionado();
+  }
+
+  cargarHorariosMedicoSeleccionado() {
+    const medicoId = Number(this.nuevaCita.medicoId);
+
+    this.horariosMedicoSeleccionado = [];
+    this.slotsMedicoSeleccionado = [];
+    this.mensajeHorariosMedico = '';
+
+    if (!medicoId) return;
+
+    this.cargandoHorariosMedico = true;
+
+    this.http.get<any[]>(
+      `${this.urlBase}/horarios/medico/${medicoId}`,
+      { headers: this.obtenerHeaders() }
+    ).subscribe({
+      next: (respuesta) => {
+        const horarios = this.obtenerArray(respuesta);
+
+        this.horariosMedicoSeleccionado = horarios
+          .filter((h) => this.horarioEstaActivo(h))
+          .filter((h) => {
+            const clinicaHorarioId = Number(h.clinicaId ?? h.clinica?.id ?? h.idClinica);
+            return !clinicaHorarioId || !this.clinicaId || clinicaHorarioId === this.clinicaId;
+          })
+          .sort((a, b) => {
+            const diaA = this.ordenDiaSemana(a.diaSemana ?? a.dia_semana);
+            const diaB = this.ordenDiaSemana(b.diaSemana ?? b.dia_semana);
+
+            if (diaA !== diaB) return diaA - diaB;
+
+            const horaA = this.extraerHoraComoMinutos(a.horaInicio ?? a.hora_inicio) ?? 0;
+            const horaB = this.extraerHoraComoMinutos(b.horaInicio ?? b.hora_inicio) ?? 0;
+
+            return horaA - horaB;
+          });
+
+        if (this.horariosMedicoSeleccionado.length === 0) {
+          this.mensajeHorariosMedico = 'Este médico no tiene horarios registrados.';
+        }
+
+        this.generarSlotsMedicoSeleccionado();
+        this.cargandoHorariosMedico = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar horarios del médico:', err);
+        this.mensajeHorariosMedico = 'No se pudieron cargar los horarios del médico.';
+        this.cargandoHorariosMedico = false;
+      }
+    });
+  }
+
+  generarSlotsMedicoSeleccionado() {
+    this.slotsMedicoSeleccionado = [];
+
+    const medicoId = Number(this.nuevaCita.medicoId);
+
+    if (!medicoId || !this.fechaSeleccionada || this.horariosMedicoSeleccionado.length === 0) {
+      return;
+    }
+
+    const diaSeleccionado = this.obtenerDiaSemanaBackend(this.fechaSeleccionada);
+    const duracion = Number(this.nuevaCita.duracionMinutos) || 30;
+
+    const horariosDelDia = this.horariosMedicoSeleccionado.filter((h) => {
+      const diaHorario = String(h.diaSemana ?? h.dia_semana ?? '').toUpperCase();
+      return diaHorario === diaSeleccionado;
+    });
+
+    horariosDelDia.forEach((horario) => {
+      const inicioHorario = this.extraerHoraComoMinutos(horario.horaInicio ?? horario.hora_inicio);
+      const finHorario = this.extraerHoraComoMinutos(horario.horaFin ?? horario.hora_fin);
+
+      if (inicioHorario === null || finHorario === null) return;
+
+      for (let inicio = inicioHorario; inicio + duracion <= finHorario; inicio += duracion) {
+        const fin = inicio + duracion;
+        const citaOcupada = this.buscarCitaCruzadaMedico(medicoId, inicio, fin);
+
+        this.slotsMedicoSeleccionado.push({
+          horaInicio: this.formatearMinutosHora(inicio),
+          horaFin: this.formatearMinutosHora(fin),
+          ocupado: !!citaOcupada,
+          citaId: citaOcupada ? (citaOcupada.id || citaOcupada.idCita) : null,
+          paciente: citaOcupada ? this.getNombrePaciente(citaOcupada.pacienteId || citaOcupada.paciente?.id) : null,
+          estado: citaOcupada ? citaOcupada.estado : null
+        });
+      }
+    });
+
+    if (horariosDelDia.length === 0) {
+      this.mensajeHorariosMedico = `El médico seleccionado no atiende el día ${diaSeleccionado}.`;
+    } else if (this.slotsMedicoSeleccionado.length === 0) {
+      this.mensajeHorariosMedico = 'No hay bloques disponibles para la duración seleccionada.';
+    } else {
+      this.mensajeHorariosMedico = '';
+    }
+  }
+
+  private buscarCitaCruzadaMedico(medicoId: number, inicioSlot: number, finSlot: number): any | null {
+    return this.citas.find((cita) => {
+      const estado = (cita.estado || '').toUpperCase();
+
+      if (estado === 'CANCELADA' || estado === 'NO_ASISTIO') return false;
+
+      const medicoCitaId = Number(cita.medicoId ?? cita.medico?.id ?? cita.idMedico);
+
+      if (medicoCitaId !== Number(medicoId)) return false;
+
+      const fechaCita = new Date(cita.fechaHora || cita.fechaCita || cita.fecha);
+
+      if (Number.isNaN(fechaCita.getTime())) return false;
+
+      if (!this.esMismaFecha(fechaCita, this.fechaSeleccionada)) return false;
+
+      const inicioCita = fechaCita.getHours() * 60 + fechaCita.getMinutes();
+
+      let finCita: number;
+
+      if (cita.fechaFin) {
+        const fechaFin = new Date(cita.fechaFin);
+        finCita = fechaFin.getHours() * 60 + fechaFin.getMinutes();
+      } else {
+        finCita = inicioCita + Number(this.nuevaCita.duracionMinutos || 30);
+      }
+
+      return inicioSlot < finCita && finSlot > inicioCita;
+    }) || null;
+  }
+
+  private esMismaFecha(fecha: Date, fechaTexto: string): boolean {
+    const seleccionada = new Date(`${fechaTexto}T00:00:00`);
+
+    return fecha.getFullYear() === seleccionada.getFullYear() &&
+      fecha.getMonth() === seleccionada.getMonth() &&
+      fecha.getDate() === seleccionada.getDate();
+  }
+
+  private formatearMinutosHora(minutosTotales: number): string {
+    const horas = Math.floor(minutosTotales / 60);
+    const minutos = minutosTotales % 60;
+
+    return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`;
+  }
+
+  private ordenDiaSemana(dia: string): number {
+    const orden: Record<string, number> = {
+      MONDAY: 1,
+      TUESDAY: 2,
+      WEDNESDAY: 3,
+      THURSDAY: 4,
+      FRIDAY: 5,
+      SATURDAY: 6,
+      SUNDAY: 7
+    };
+
+    return orden[String(dia || '').toUpperCase()] ?? 99;
+  }
+
+  traducirDiaSemana(dia: string): string {
+    const dias: Record<string, string> = {
+      MONDAY: 'Lunes',
+      TUESDAY: 'Martes',
+      WEDNESDAY: 'Miércoles',
+      THURSDAY: 'Jueves',
+      FRIDAY: 'Viernes',
+      SATURDAY: 'Sábado',
+      SUNDAY: 'Domingo'
+    };
+
+    return dias[String(dia || '').toUpperCase()] || dia;
+  }
+
+  
 }
