@@ -498,17 +498,128 @@ $text-orange: #ea580c;
 
 
 .fila-completada {
-    background: rgba(22,163,74,.10);
+    background: rgba(22, 163, 74, .10);
 
-    &:hover{
-        background: rgba(22,163,74,.16);
+    &:hover {
+        background: rgba(22, 163, 74, .16);
     }
 }
 
 .fila-no-asistio {
-    background: rgba(100,116,139,.14);
+    background: rgba(100, 116, 139, .14);
 
-    &:hover{
-        background: rgba(100,116,139,.20);
+    &:hover {
+        background: rgba(100, 116, 139, .20);
+    }
+}
+
+.horarios-medico-panel {
+    grid-column: 1 / -1;
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    background: #f8fbff;
+}
+
+.horarios-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+
+    h4 {
+        margin: 0 0 0.25rem;
+        color: #0f2544;
+        font-weight: 800;
+    }
+
+    p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+}
+
+.horarios-estado {
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    &.advertencia {
+        background: #fff7ed;
+        color: #c2410c;
+    }
+}
+
+.tabla-horarios-wrapper {
+    overflow-x: auto;
+}
+
+.tabla-horarios {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+
+    th,
+    td {
+        padding: 0.85rem;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+        font-size: 0.92rem;
+    }
+
+    th {
+        background: #eef6ff;
+        color: #0f2544;
+        font-weight: 800;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+}
+
+.slots-section {
+    margin-top: 1.25rem;
+
+    h4 {
+        margin: 0 0 0.75rem;
+        color: #0f2544;
+        font-weight: 800;
+    }
+}
+
+.slot-libre {
+    background: #f0fdf4;
+}
+
+.slot-ocupado {
+    background: #fef2f2;
+}
+
+.badge-slot {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+
+    &.libre {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    &.ocupado {
+        background: #fee2e2;
+        color: #991b1b;
     }
 }
