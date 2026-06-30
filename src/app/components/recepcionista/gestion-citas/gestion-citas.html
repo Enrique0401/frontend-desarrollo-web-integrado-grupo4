@@ -2,11 +2,11 @@
 </p-toast>
 
 <div class="gestion-container">
-
     <div class="action-bar">
         <div class="search-box">
             <h3><i class="pi pi-calendar-plus text-primary"></i> Control de Agenda Médica</h3>
         </div>
+
         <button type="button" class="btn-primary" (click)="mostrarFormulario = !mostrarFormulario">
             <i class="pi" [ngClass]="mostrarFormulario ? 'pi-times' : 'pi-plus'"></i>
             {{ mostrarFormulario ? 'Cancelar Registro' : 'Agendar Nueva Cita' }}
@@ -18,29 +18,30 @@
         <div class="form-header">
             <h4>Formulario de Asignación de Citas</h4>
         </div>
-        <form (ngSubmit)="registrarCita()" class="grid-form">
 
+        <form (ngSubmit)="registrarCita()" class="grid-form">
             <div class="form-group select-search-group">
                 <label>Seleccionar Paciente <span class="required">*</span></label>
 
                 <div class="input-with-icon">
                     <i class="pi pi-search"></i>
                     <input type="text" [(ngModel)]="filtroPaciente" name="filtroPaciente" (input)="filtrarPacientes()"
-                        placeholder="Escriba aquí el DNI o Nombre para buscar..." autocomplete="off"
+                        placeholder="Escriba aquí el DNI o nombre para buscar..." autocomplete="off"
                         class="input-filtro">
                 </div>
 
                 <select [(ngModel)]="nuevaCita.pacienteId" name="pacienteId" required class="select-paciente">
-                    <option value="" disabled selected>Elija un paciente de la lista de abajo...</option>
+                    <option value="" disabled selected>Elija un paciente de la lista...</option>
                     @for (p of pacientesFiltrados; track p.id) {
                     <option [value]="p.id">
-                        {{ p.nombre || p.usuario?.nombre }} {{ p.apellido || p.usuario?.apellido }} - DNI: {{
-                        p.numeroDocumento || p.dni || p.usuario?.numeroDocumento || 'N/A' }}
+                        {{ p.nombre || p.usuario?.nombre }} {{ p.apellido || p.usuario?.apellido }} - DNI:
+                        {{ p.numeroDocumento || p.dni || p.usuario?.numeroDocumento || 'N/A' }}
                     </option>
                     }
                 </select>
+
                 @if (pacientesFiltrados.length === 0) {
-                <small class="text-error">No se encontró ningún paciente con esos datos en el sistema.</small>
+                <small class="text-error">No se encontró ningún paciente con esos datos.</small>
                 }
             </div>
 
@@ -90,94 +91,6 @@
                     }
                 </select>
 
-                @if (nuevaCita.medicoId) {
-                <div class="horarios-medico-panel full-width">
-                    <div class="horarios-header">
-                        <div>
-                            <h4>Horarios del médico seleccionado</h4>
-                            <p>Consulta semanal y disponibilidad según la fecha seleccionada.</p>
-                        </div>
-                    </div>
-
-                    @if (cargandoHorariosMedico) {
-                    <div class="horarios-estado">
-                        Cargando horarios del médico...
-                    </div>
-                    }
-
-                    @if (!cargandoHorariosMedico && mensajeHorariosMedico) {
-                    <div class="horarios-estado advertencia">
-                        {{ mensajeHorariosMedico }}
-                    </div>
-                    }
-
-                    @if (!cargandoHorariosMedico && horariosMedicoSeleccionado.length > 0) {
-                    <div class="tabla-horarios-wrapper">
-                        <table class="tabla-horarios">
-                            <thead>
-                                <tr>
-                                    <th>Día</th>
-                                    <th>Hora inicio</th>
-                                    <th>Hora fin</th>
-                                    <th>Duración turno</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (horario of horariosMedicoSeleccionado; track horario.id) {
-                                <tr>
-                                    <td>{{ traducirDiaSemana(horario.diaSemana || horario.dia_semana) }}</td>
-                                    <td>{{ horario.horaInicio || horario.hora_inicio }}</td>
-                                    <td>{{ horario.horaFin || horario.hora_fin }}</td>
-                                    <td>{{ horario.duracionTurnoMinutos || horario.duracion_turno_minutos || '-' }} min
-                                    </td>
-                                </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                    }
-
-                    @if (fechaSeleccionada && slotsMedicoSeleccionado.length > 0) {
-                    <div class="slots-section">
-                        <h4>Disponibilidad para la fecha seleccionada</h4>
-
-                        <table class="tabla-horarios">
-                            <thead>
-                                <tr>
-                                    <th>Inicio</th>
-                                    <th>Fin</th>
-                                    <th>Estado</th>
-                                    <th>Detalle</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (slot of slotsMedicoSeleccionado; track slot.horaInicio) {
-                                <tr [class.slot-ocupado]="slot.ocupado" [class.slot-libre]="!slot.ocupado">
-                                    <td>{{ slot.horaInicio }}</td>
-                                    <td>{{ slot.horaFin }}</td>
-                                    <td>
-                                        @if (slot.ocupado) {
-                                        <span class="badge-slot ocupado">Ocupado</span>
-                                        } @else {
-                                        <span class="badge-slot libre">Disponible</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (slot.ocupado) {
-                                        Cita #{{ slot.citaId }} - {{ slot.paciente }} - {{ slot.estado }}
-                                        } @else {
-                                        Puede asignarse en este horario
-                                        }
-                                    </td>
-                                </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                    }
-                </div>
-                }
-
                 @if (mensajeDisponibilidad) {
                 <small class="text-info-disponibilidad">
                     {{ mensajeDisponibilidad }}
@@ -185,7 +98,143 @@
                 }
             </div>
 
-            <!-- Fecha: [min] bloquea días anteriores a hoy; (change) recalcula la hora mínima -->
+            <div class="horarios-medico-panel full-width">
+                <div class="horarios-header">
+                    <div>
+                        <h4>Agenda del médico</h4>
+
+                        @if (nuevaCita.medicoId) {
+                        <p>Horarios y disponibilidad del médico seleccionado.</p>
+                        } @else {
+                        <p>Selecciona un médico para visualizar su agenda.</p>
+                        }
+                    </div>
+                </div>
+
+                @if (!nuevaCita.medicoId) {
+                <div class="agenda-empty">
+                    <i class="pi pi-calendar-clock"></i>
+                    <strong>No hay médico seleccionado</strong>
+                    <span>La agenda se cargará automáticamente al elegir un médico.</span>
+                </div>
+                }
+
+                @if (nuevaCita.medicoId && cargandoHorariosMedico) {
+                <div class="agenda-empty">
+                    <i class="pi pi-spin pi-spinner"></i>
+                    <strong>Cargando horarios</strong>
+                    <span>Consultando la agenda del médico seleccionado...</span>
+                </div>
+                }
+
+                @if (nuevaCita.medicoId && !cargandoHorariosMedico) {
+                <div class="agenda-grid">
+                    <div class="agenda-box">
+                        <div class="agenda-box-title">
+                            <span>Horario semanal</span>
+                            <small>{{ horariosMedicoSeleccionado.length }} registros</small>
+                        </div>
+
+                        <div class="agenda-scroll">
+                            <table class="tabla-horarios compacta">
+                                <thead>
+                                    <tr>
+                                        <th>Día</th>
+                                        <th>Inicio</th>
+                                        <th>Fin</th>
+                                        <th>Turno</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (horario of horariosMedicoSeleccionado; track horario.id) {
+                                    <tr>
+                                        <td>{{ traducirDiaSemana(horario.diaSemana || horario.dia_semana) }}</td>
+                                        <td>{{ horario.horaInicio || horario.hora_inicio }}</td>
+                                        <td>{{ horario.horaFin || horario.hora_fin }}</td>
+                                        <td>{{ horario.duracionTurnoMinutos || horario.duracion_turno_minutos || '-' }}
+                                            min</td>
+                                    </tr>
+                                    } @empty {
+                                    <tr>
+                                        <td colspan="4" class="tabla-vacia-mini">Sin horarios registrados.</td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="agenda-box">
+                        <div class="agenda-box-title">
+                            <span>Disponibilidad por fecha</span>
+                            <small>
+                                @if (fechaSeleccionada) {
+                                {{ fechaSeleccionada }}
+                                } @else {
+                                Selecciona fecha
+                                }
+                            </small>
+                        </div>
+
+                        <div class="agenda-scroll">
+                            <table class="tabla-horarios compacta">
+                                <thead>
+                                    <tr>
+                                        <th>Inicio</th>
+                                        <th>Fin</th>
+                                        <th>Estado</th>
+                                        <th>Detalle</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (!fechaSeleccionada) {
+                                    <tr>
+                                        <td colspan="4" class="tabla-vacia-mini">
+                                            Selecciona una fecha para ver espacios disponibles.
+                                        </td>
+                                    </tr>
+                                    } @else {
+                                    @for (slot of slotsMedicoSeleccionado; track slot.horaInicio) {
+                                    <tr [class.slot-ocupado]="slot.ocupado" [class.slot-libre]="!slot.ocupado">
+                                        <td>{{ slot.horaInicio }}</td>
+                                        <td>{{ slot.horaFin }}</td>
+                                        <td>
+                                            @if (slot.ocupado) {
+                                            <span class="badge-slot ocupado">Ocupado</span>
+                                            } @else {
+                                            <span class="badge-slot libre">Libre</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (slot.ocupado) {
+                                            Cita #{{ slot.citaId }} - {{ slot.paciente }}
+                                            } @else {
+                                            Disponible
+                                            }
+                                        </td>
+                                    </tr>
+                                    } @empty {
+                                    <tr>
+                                        <td colspan="4" class="tabla-vacia-mini">
+                                            No hay bloques para la fecha seleccionada.
+                                        </td>
+                                    </tr>
+                                    }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                @if (mensajeHorariosMedico) {
+                <div class="horarios-estado advertencia">
+                    {{ mensajeHorariosMedico }}
+                </div>
+                }
+                }
+            </div>
+
             <div class="form-group style-picker-container">
                 <label>Fecha de la Cita <span class="required">*</span></label>
                 <div class="picker-input-wrapper">
@@ -195,7 +244,6 @@
                 </div>
             </div>
 
-            <!-- Hora: [min] bloquea horas pasadas cuando la fecha elegida es hoy -->
             <div class="form-group style-picker-container">
                 <label>Hora de la Cita <span class="required">*</span></label>
                 <div class="picker-input-wrapper">
@@ -220,7 +268,9 @@
             </div>
 
             <div class="form-actions full-width">
-                <button type="submit" class="btn-submit"><i class="pi pi-save"></i> Guardar en Agenda</button>
+                <button type="submit" class="btn-submit">
+                    <i class="pi pi-save"></i> Guardar en Agenda
+                </button>
             </div>
         </form>
     </div>
@@ -250,10 +300,9 @@
                     <tr [ngClass]="{
                         'fila-completada': cita.estado === 'COMPLETADA',
                         'fila-no-asistio': cita.estado === 'NO_ASISTIO',
-                        'fila-cancelada':  cita.estado === 'CANCELADA'
-                      }">
+                        'fila-cancelada': cita.estado === 'CANCELADA'
+                    }">
                         <td><b>#{{ cita.idCita || cita.id }}</b></td>
-
                         <td>{{ getNombrePaciente(cita.pacienteId) }}</td>
                         <td>{{ getNombreMedico(cita.medicoId) }}</td>
 
@@ -261,14 +310,15 @@
                             <i class="pi pi-clock"></i>
                             {{ formatearFechaHora(cita.fechaHora || cita.fechaCita) }}
                         </td>
+
                         <td>
                             <span class="badge-estado" [ngClass]="(cita.estado || 'PENDIENTE').toLowerCase()">
                                 {{ cita.estado || 'PENDIENTE' }}
                             </span>
                         </td>
+
                         <td>
                             <div class="action-buttons" *ngIf="!esCitaBloqueada(cita.estado)">
-
                                 @if (cita.estado === 'PENDIENTE' || !cita.estado) {
                                 <button type="button" class="btn-action success"
                                     (click)="cambiarEstadoCita(cita.idCita || cita.id, 'CONFIRMADA')"
@@ -314,8 +364,7 @@
                                 </button>
                             </div>
 
-                            <div *ngIf="cita.estado === 'FINALIZADA'"
-                                style="color: #27ae60; font-weight: bold; text-align: center;">
+                            <div *ngIf="cita.estado === 'FINALIZADA'" class="estado-finalizado">
                                 <i class="pi pi-verified"></i> Finalizado
                             </div>
                         </td>
