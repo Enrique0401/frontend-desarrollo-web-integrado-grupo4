@@ -20,12 +20,13 @@ import { DetalleRecetaService } from '../../../services/detalle-receta/detalle-r
 export class Consulta implements OnInit {
   cita = signal<any | null>(null);
   historiaClinica = signal<any | null>(null);
+
   medicamentos = signal<any[]>([]);
-  medicamentosFiltrados = signal<any[]>([]);
   medicamentosSeleccionados = signal<any[]>([]);
 
   cargando = signal(false);
   guardando = signal(false);
+
   mostrarModalHistoria = signal(false);
   mensajeModalHistoria = signal('');
 
@@ -72,10 +73,14 @@ export class Consulta implements OnInit {
       frecuenciaRespiratoria: [18, [Validators.required]],
       peso: [70, [Validators.required]],
       talla: [1.7, [Validators.required]],
+
+      medicamentoId: [null],
+      dosis: [''],
+      frecuencia: [''],
+      duracion: [''],
+      instrucciones: [''],
+      indicacionesGenerales: ['']
     });
-  }
-  cerrarModalHistoria(): void {
-    this.mostrarModalHistoria.set(false);
   }
 
   cargarCita(): void {
@@ -84,6 +89,10 @@ export class Consulta implements OnInit {
     this.citaService.obtenerCitaPorId(this.idCita).subscribe({
       next: (cita) => {
         this.cita.set(cita);
+
+        if (cita.especialidadId) {
+          this.cargarMedicamentos(cita.especialidadId);
+        }
 
         const idCita = cita.id ?? cita.idCita ?? cita.id_cita;
 
@@ -127,6 +136,61 @@ export class Consulta implements OnInit {
       },
     });
   }
+
+  cargarMedicamentos(especialidadId: number): void {
+    this.medicamentoService.obtenerPorEspecialidad(especialidadId).subscribe({
+      next: (datos) => this.medicamentos.set(datos),
+      error: (err) => console.error('Error al cargar medicamentos:', err)
+    });
+  }
+
+  agregarMedicamento(): void {
+    const medicamentoId = Number(this.form.value.medicamentoId);
+
+    if (!medicamentoId) {
+      alert('Seleccione un medicamento.');
+      return;
+    }
+
+    const medicamento = this.medicamentos().find(
+      m => (m.id ?? m.idMedicamento) === medicamentoId
+    );
+
+    if (!medicamento) {
+      alert('Medicamento no encontrado.');
+      return;
+    }
+
+    const item = {
+      medicamentoId: medicamento.id ?? medicamento.idMedicamento,
+      nombreComercial: medicamento.nombreComercial,
+      nombreGenerico: medicamento.nombreGenerico,
+      presentacion: medicamento.presentacion,
+      concentracion: medicamento.concentracion,
+      viaAdministracion: medicamento.viaAdministracion,
+      dosis: this.form.value.dosis,
+      frecuencia: this.form.value.frecuencia,
+      duracion: this.form.value.duracion,
+      instrucciones: this.form.value.instrucciones
+    };
+
+    this.medicamentosSeleccionados.update(lista => [...lista, item]);
+
+    this.form.patchValue({
+      medicamentoId: null,
+      dosis: '',
+      frecuencia: '',
+      duracion: '',
+      instrucciones: ''
+    });
+  }
+
+  quitarMedicamento(index: number): void {
+    this.medicamentosSeleccionados.update(lista =>
+      lista.filter((_, i) => i !== index)
+    );
+  }
+
   finalizarConsulta(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -169,24 +233,78 @@ export class Consulta implements OnInit {
     this.consultaService.obtenerPorCita(idCita).subscribe({
       next: (consultaExistente) => {
         this.consultaService.actualizarConsulta(consultaExistente.id, consultaBody).subscribe({
-          next: () => this.completarCita(citaActual),
+          next: (consultaActualizada) => this.guardarRecetaYCompletar(consultaActualizada, citaActual),
           error: (err) => {
             this.guardando.set(false);
-            console.error(err);
+            console.error('Error al actualizar consulta:', err);
           },
         });
       },
       error: () => {
         this.consultaService.guardarConsulta(consultaBody).subscribe({
-          next: () => this.completarCita(citaActual),
+          next: (consultaCreada) => this.guardarRecetaYCompletar(consultaCreada, citaActual),
           error: (err) => {
             this.guardando.set(false);
-            console.error(err);
+            console.error('Error al guardar consulta:', err);
           },
         });
       },
     });
   }
+
+  guardarRecetaYCompletar(consulta: any, citaActual: any): void {
+    const medicamentos = this.medicamentosSeleccionados();
+
+    if (medicamentos.length === 0) {
+      this.completarCita(citaActual);
+      return;
+    }
+
+    const recetaBody = {
+      consultaMedicaId: consulta.id,
+      medicoId: citaActual.medicoId,
+      pacienteId: citaActual.pacienteId,
+      indicaciones: this.form.value.indicacionesGenerales || 'Seguir indicaciones médicas.'
+    };
+
+    this.recetaService.crearReceta(recetaBody).subscribe({
+      next: (recetaCreada) => {
+        let completados = 0;
+
+        medicamentos.forEach((med) => {
+          const detalleBody = {
+            recetaId: recetaCreada.id,
+            medicamentoId: med.medicamentoId,
+            dosis: med.dosis,
+            frecuencia: med.frecuencia,
+            duracion: med.duracion,
+            instrucciones: med.instrucciones
+          };
+
+          this.detalleRecetaService.crearDetalle(detalleBody).subscribe({
+            next: () => {
+              completados++;
+
+              if (completados === medicamentos.length) {
+                this.completarCita(citaActual);
+              }
+            },
+            error: (err) => {
+              this.guardando.set(false);
+              console.error('Error al guardar detalle de receta:', err);
+              alert('La consulta se guardó, pero hubo error al guardar un medicamento.');
+            }
+          });
+        });
+      },
+      error: (err) => {
+        this.guardando.set(false);
+        console.error('Error al crear receta:', err);
+        alert('La consulta se guardó, pero no se pudo crear la receta.');
+      }
+    });
+  }
+
   completarCita(citaActual: any): void {
     const citaActualizada = {
       ...citaActual,
@@ -205,6 +323,10 @@ export class Consulta implements OnInit {
         alert('La consulta se guardó, pero no se pudo completar la cita.');
       },
     });
+  }
+
+  cerrarModalHistoria(): void {
+    this.mostrarModalHistoria.set(false);
   }
 
   volverAgenda(): void {

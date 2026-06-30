@@ -21,9 +21,7 @@
 
       <div class="info-row">
         <span>Paciente</span>
-        <strong>
-          {{ cita()?.pacienteNombre }} {{ cita()?.pacienteApellido }}
-        </strong>
+        <strong> {{ cita()?.pacienteNombre }} {{ cita()?.pacienteApellido }} </strong>
       </div>
 
       <div class="info-row">
@@ -48,7 +46,10 @@
       <form [formGroup]="form" (ngSubmit)="finalizarConsulta()">
         <div class="form-group full">
           <label>Anamnesis</label>
-          <textarea formControlName="anamnesis" placeholder="Relato del paciente, síntomas y antecedentes actuales"></textarea>
+          <textarea
+            formControlName="anamnesis"
+            placeholder="Relato del paciente, síntomas y antecedentes actuales"
+          ></textarea>
           @if (campoInvalido('anamnesis')) {
             <small>La anamnesis es obligatoria.</small>
           }
@@ -56,7 +57,10 @@
 
         <div class="form-group full">
           <label>Examen físico</label>
-          <textarea formControlName="examenFisico" placeholder="Hallazgos del examen físico"></textarea>
+          <textarea
+            formControlName="examenFisico"
+            placeholder="Hallazgos del examen físico"
+          ></textarea>
         </div>
 
         <div class="vitales-grid">
@@ -93,7 +97,10 @@
 
         <div class="form-group full">
           <label>Diagnóstico</label>
-          <textarea formControlName="diagnostico" placeholder="Ingrese el diagnóstico del paciente"></textarea>
+          <textarea
+            formControlName="diagnostico"
+            placeholder="Ingrese el diagnóstico del paciente"
+          ></textarea>
           @if (campoInvalido('diagnostico')) {
             <small>El diagnóstico es obligatorio.</small>
           }
@@ -101,7 +108,10 @@
 
         <div class="form-group full">
           <label>Tratamiento</label>
-          <textarea formControlName="tratamiento" placeholder="Ingrese el tratamiento indicado"></textarea>
+          <textarea
+            formControlName="tratamiento"
+            placeholder="Ingrese el tratamiento indicado"
+          ></textarea>
           @if (campoInvalido('tratamiento')) {
             <small>El tratamiento es obligatorio.</small>
           }
@@ -109,13 +119,88 @@
 
         <div class="form-group full">
           <label>Observaciones</label>
-          <textarea formControlName="observaciones" placeholder="Ingrese observaciones clínicas"></textarea>
+          <textarea
+            formControlName="observaciones"
+            placeholder="Ingrese observaciones clínicas"
+          ></textarea>
         </div>
+        <div class="receta-section">
+          <h3>Receta médica</h3>
 
-        <div class="actions">
-          <button type="button" class="btn-secondary" (click)="volverAgenda()">
-            Cancelar
+          <div class="receta-grid">
+            <div class="form-group">
+              <label>Medicamento</label>
+              <select formControlName="medicamentoId">
+                <option [ngValue]="null">Seleccione medicamento</option>
+
+                @for (med of medicamentos(); track med.id ?? med.idMedicamento) {
+                  <option [ngValue]="med.id ?? med.idMedicamento">
+                    {{ med.nombreComercial }} - {{ med.concentracion }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Dosis</label>
+              <input type="text" formControlName="dosis" placeholder="Ej: 1 tableta" />
+            </div>
+
+            <div class="form-group">
+              <label>Frecuencia</label>
+              <input type="text" formControlName="frecuencia" placeholder="Ej: cada 8 horas" />
+            </div>
+
+            <div class="form-group">
+              <label>Duración</label>
+              <input type="text" formControlName="duracion" placeholder="Ej: 5 días" />
+            </div>
+
+            <div class="form-group full">
+              <label>Instrucciones</label>
+              <textarea
+                formControlName="instrucciones"
+                placeholder="Ej: tomar después de los alimentos"
+              ></textarea>
+            </div>
+          </div>
+
+          <button type="button" class="btn-add-medicine" (click)="agregarMedicamento()">
+            <span class="pi pi-plus"></span>
+            Agregar medicamento
           </button>
+
+          @if (medicamentosSeleccionados().length > 0) {
+            <div class="medicamentos-list">
+              @for (med of medicamentosSeleccionados(); track $index) {
+                <div class="medicamento-item">
+                  <div>
+                    <strong>{{ med.nombreComercial }}</strong>
+                    <span
+                      >{{ med.nombreGenerico }} | {{ med.dosis }} | {{ med.frecuencia }} |
+                      {{ med.duracion }}</span
+                    >
+                    <p>{{ med.instrucciones }}</p>
+                  </div>
+
+                  <button type="button" (click)="quitarMedicamento($index)">
+                    <span class="pi pi-trash"></span>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <div class="form-group full">
+            <label>Indicaciones generales</label>
+            <textarea
+              formControlName="indicacionesGenerales"
+              placeholder="Indicaciones generales para el paciente"
+            ></textarea>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn-secondary" (click)="volverAgenda()">Cancelar</button>
 
           <button type="submit" class="btn-primary" [disabled]="guardando()">
             <span class="pi pi-check-circle"></span>
@@ -125,24 +210,24 @@
       </form>
     </div>
     @if (mostrarModalHistoria()) {
-  <div class="modal-backdrop-custom">
-    <div class="modal-card-custom warning-modal">
-      <div class="warning-icon">
-        <span class="pi pi-exclamation-triangle"></span>
+      <div class="modal-backdrop-custom">
+        <div class="modal-card-custom warning-modal">
+          <div class="warning-icon">
+            <span class="pi pi-exclamation-triangle"></span>
+          </div>
+
+          <h3>Historia clínica no encontrada</h3>
+
+          <p>{{ mensajeModalHistoria() }}</p>
+
+          <div class="modal-actions center">
+            <button type="button" class="btn-primary" (click)="cerrarModalHistoria()">
+              Aceptar
+            </button>
+          </div>
+        </div>
       </div>
-
-      <h3>Historia clínica no encontrada</h3>
-
-      <p>{{ mensajeModalHistoria() }}</p>
-
-      <div class="modal-actions center">
-        <button type="button" class="btn-primary" (click)="cerrarModalHistoria()">
-          Aceptar
-        </button>
-      </div>
-    </div>
-  </div>
-}
+    }
   </div>
 } @else {
   <div class="card">
