@@ -86,8 +86,17 @@ export class GestionCitas implements OnInit {
     }
   }
 
-  irAFacturacion() {
-    this.router.navigate(['/panel/recepcion/facturacion']);
+  irAFacturacion(cita?: any) {
+    const idCita = cita ? Number(cita.idCita || cita.id) : null;
+
+    if (!idCita) {
+      this.router.navigate(['/panel/recepcion/facturacion']);
+      return;
+    }
+
+    this.router.navigate(['/panel/recepcion/facturacion'], {
+      queryParams: { citaId: idCita }
+    });
   }
 
   cargarDatosEstructurales() {

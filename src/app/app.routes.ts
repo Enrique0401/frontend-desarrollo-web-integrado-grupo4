@@ -195,7 +195,7 @@ export const routes: Routes = [
               )
           },
           {
-            path: 'faacturacion',
+            path: 'facturacion',
             loadComponent: () =>
               import('./components/recepcionista/cobros-facturacion/cobros-facturacion').then(
                 (m) => m.CobrosFacturacion,
