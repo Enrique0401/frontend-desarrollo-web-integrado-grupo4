@@ -2,17 +2,30 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
+import { forkJoin } from 'rxjs';
 
 Chart.register(...registerables);
 
 interface CitaApi {
-  id: number;
+  id?: number;
+  idCita?: number;
   pacienteId?: number;
   medicoId?: number;
   consultorioId?: number;
   fechaHora?: string;
+  fechaFin?: string;
   fecha?: string;
   estado?: string;
+}
+
+interface FacturaApi {
+  id?: number;
+  citaId?: number;
+  pacienteId?: number;
+  total?: number;
+  estado?: string;
+  fechaEmision?: string;
+  fechaPago?: string;
 }
 
 interface EstadisticasCitas {
@@ -34,25 +47,33 @@ export class PanelPrincipal implements OnInit, AfterViewInit, OnDestroy {
   private http = inject(HttpClient);
   private urlBase = 'https://backend-desarrollo-web-integrado-grupo4.onrender.com/api';
 
-  @ViewChild('chartHoyCanvas') chartHoyCanvas?: ElementRef<HTMLCanvasElement>;
-  @ViewChild('chartHistoricoCanvas') chartHistoricoCanvas?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('chartGeneralCanvas') chartGeneralCanvas?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('chartEstadosCanvas') chartEstadosCanvas?: ElementRef<HTMLCanvasElement>;
   @ViewChild('chartMensualCanvas') chartMensualCanvas?: ElementRef<HTMLCanvasElement>;
 
   cargando = true;
   error = '';
 
   citas: CitaApi[] = [];
+  facturas: FacturaApi[] = [];
 
   estadisticasHoy: EstadisticasCitas = this.crearEstadisticas();
   estadisticasHistoricas: EstadisticasCitas = this.crearEstadisticas();
 
+  pendientesCobro = 0;
+  facturasPendientes = 0;
+  facturasPagadas = 0;
+  ingresosHoy = 0;
+  ingresosTotales = 0;
+
   etiquetasMeses: string[] = [];
   datosMensualesAtendidas: number[] = [];
   datosMensualesCanceladas: number[] = [];
+  datosMensualesFacturadas: number[] = [];
 
   private vistaLista = false;
-  private chartHoy?: Chart;
-  private chartHistorico?: Chart;
+  private chartGeneral?: Chart;
+  private chartEstados?: Chart;
   private chartMensual?: Chart;
 
   ngOnInit() {
@@ -61,10 +82,55 @@ export class PanelPrincipal implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.vistaLista = true;
+    this.intentarRenderizarGraficos();
   }
 
   ngOnDestroy() {
     this.destruirGraficos();
+  }
+
+  cargarEstadisticas() {
+    this.cargando = true;
+    this.error = '';
+
+    const headers = this.obtenerHeaders();
+
+    forkJoin({
+      citas: this.http.get<any>(`${this.urlBase}/citas`, { headers }),
+      facturas: this.http.get<any>(`${this.urlBase}/facturas`, { headers })
+    }).subscribe({
+      next: ({ citas, facturas }) => {
+        this.citas = this.extraerArray<CitaApi>(citas);
+        this.facturas = this.extraerArray<FacturaApi>(facturas);
+
+        const citasHoy = this.citas.filter((cita) => this.esDeHoy(this.obtenerFechaCita(cita)));
+
+        this.estadisticasHoy = this.calcularEstadisticas(citasHoy);
+        this.estadisticasHistoricas = this.calcularEstadisticas(this.citas);
+
+        this.pendientesCobro = this.calcularPendientesCobro();
+        this.facturasPendientes = this.facturas.filter((f) => this.normalizarEstado(f.estado) === 'PENDIENTE').length;
+        this.facturasPagadas = this.facturas.filter((f) => this.normalizarEstado(f.estado) === 'PAGADA').length;
+
+        this.ingresosHoy = this.facturas
+          .filter((f) => this.normalizarEstado(f.estado) === 'PAGADA' && this.esDeHoy(this.obtenerFechaFactura(f)))
+          .reduce((acc, f) => acc + Number(f.total || 0), 0);
+
+        this.ingresosTotales = this.facturas
+          .filter((f) => this.normalizarEstado(f.estado) === 'PAGADA')
+          .reduce((acc, f) => acc + Number(f.total || 0), 0);
+
+        this.procesarHistoricoMensual();
+
+        this.cargando = false;
+        this.intentarRenderizarGraficos();
+      },
+      error: (err) => {
+        console.error('Error al cargar dashboard de recepción', err);
+        this.error = 'No se pudieron cargar las estadísticas del dashboard.';
+        this.cargando = false;
+      }
+    });
   }
 
   private obtenerHeaders(): HttpHeaders {
@@ -95,35 +161,6 @@ export class PanelPrincipal implements OnInit, AfterViewInit, OnDestroy {
     return [];
   }
 
-  cargarEstadisticas() {
-    this.cargando = true;
-    this.error = '';
-
-    this.http.get<any>(`${this.urlBase}/citas`, { headers: this.obtenerHeaders() }).subscribe({
-      next: (respuesta) => {
-        this.citas = this.extraerArray<CitaApi>(respuesta);
-
-        this.estadisticasHoy = this.calcularEstadisticas(
-          this.citas.filter((cita) => this.esDeHoy(cita))
-        );
-
-        this.estadisticasHistoricas = this.calcularEstadisticas(this.citas);
-        this.procesarHistoricoMensual(this.citas);
-
-        this.cargando = false;
-
-        setTimeout(() => {
-          this.renderizarGraficos();
-        }, 0);
-      },
-      error: (err) => {
-        console.error('Error al cargar citas', err);
-        this.error = 'No se pudieron cargar las estadisticas.';
-        this.cargando = false;
-      }
-    });
-  }
-
   private calcularEstadisticas(citas: CitaApi[]): EstadisticasCitas {
     const estadisticas = this.crearEstadisticas();
     estadisticas.total = citas.length;
@@ -145,44 +182,67 @@ export class PanelPrincipal implements OnInit, AfterViewInit, OnDestroy {
     return estadisticas;
   }
 
+  private calcularPendientesCobro(): number {
+    return this.citas.filter((cita) => {
+      const estado = this.normalizarEstado(cita.estado);
+      const citaId = this.obtenerCitaId(cita);
+
+      const yaTieneFactura = this.facturas.some((factura) =>
+        Number(factura.citaId) === citaId
+      );
+
+      return estado === 'ATENDIDA' && !yaTieneFactura;
+    }).length;
+  }
+
   private normalizarEstado(estado?: string): string {
     return (estado || 'PENDIENTE').toUpperCase();
   }
 
+  private obtenerCitaId(cita: CitaApi): number {
+    return Number(cita.id || cita.idCita || 0);
+  }
+
   private obtenerFechaCita(cita: CitaApi): Date | null {
     const valorFecha = cita.fechaHora || cita.fecha;
+    return this.convertirFecha(valorFecha);
+  }
 
-    if (!valorFecha) return null;
+  private obtenerFechaFactura(factura: FacturaApi): Date | null {
+    return this.convertirFecha(factura.fechaPago || factura.fechaEmision);
+  }
 
-    const fecha = new Date(valorFecha);
+  private convertirFecha(valor?: string): Date | null {
+    if (!valor) return null;
+
+    const fecha = new Date(valor);
     return Number.isNaN(fecha.getTime()) ? null : fecha;
   }
 
-  private esDeHoy(cita: CitaApi): boolean {
-    const fechaCita = this.obtenerFechaCita(cita);
-    if (!fechaCita) return false;
+  private esDeHoy(fecha: Date | null): boolean {
+    if (!fecha) return false;
 
     const hoy = new Date();
 
     return (
-      fechaCita.getFullYear() === hoy.getFullYear() &&
-      fechaCita.getMonth() === hoy.getMonth() &&
-      fechaCita.getDate() === hoy.getDate()
+      fecha.getFullYear() === hoy.getFullYear() &&
+      fecha.getMonth() === hoy.getMonth() &&
+      fecha.getDate() === hoy.getDate()
     );
   }
 
-  private procesarHistoricoMensual(citas: CitaApi[]) {
-    const meses = new Map<string, { atendidas: number; canceladas: number }>();
+  private procesarHistoricoMensual() {
+    const meses = new Map<string, { atendidas: number; canceladas: number; facturadas: number }>();
 
-    citas.forEach((cita) => {
+    this.citas.forEach((cita) => {
       const fecha = this.obtenerFechaCita(cita);
       if (!fecha) return;
 
-      const claveMes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+      const claveMes = this.obtenerClaveMes(fecha);
       const estado = this.normalizarEstado(cita.estado);
 
       if (!meses.has(claveMes)) {
-        meses.set(claveMes, { atendidas: 0, canceladas: 0 });
+        meses.set(claveMes, { atendidas: 0, canceladas: 0, facturadas: 0 });
       }
 
       const registro = meses.get(claveMes)!;
@@ -196,55 +256,158 @@ export class PanelPrincipal implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
+    this.facturas.forEach((factura) => {
+      if (this.normalizarEstado(factura.estado) !== 'PAGADA') return;
+
+      const fecha = this.obtenerFechaFactura(factura);
+      if (!fecha) return;
+
+      const claveMes = this.obtenerClaveMes(fecha);
+
+      if (!meses.has(claveMes)) {
+        meses.set(claveMes, { atendidas: 0, canceladas: 0, facturadas: 0 });
+      }
+
+      meses.get(claveMes)!.facturadas++;
+    });
+
     const claves = Array.from(meses.keys()).sort();
 
     this.etiquetasMeses = claves.length ? claves : ['Mes actual'];
     this.datosMensualesAtendidas = claves.length ? claves.map((mes) => meses.get(mes)!.atendidas) : [0];
     this.datosMensualesCanceladas = claves.length ? claves.map((mes) => meses.get(mes)!.canceladas) : [0];
+    this.datosMensualesFacturadas = claves.length ? claves.map((mes) => meses.get(mes)!.facturadas) : [0];
+  }
+
+  private obtenerClaveMes(fecha: Date): string {
+    return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  private intentarRenderizarGraficos() {
+    setTimeout(() => {
+      this.renderizarGraficos();
+    }, 80);
   }
 
   private renderizarGraficos() {
     if (!this.vistaLista || this.cargando) return;
 
-    const canvasHoy = this.chartHoyCanvas?.nativeElement;
-    const canvasHistorico = this.chartHistoricoCanvas?.nativeElement;
+    const canvasGeneral = this.chartGeneralCanvas?.nativeElement;
+    const canvasEstados = this.chartEstadosCanvas?.nativeElement;
     const canvasMensual = this.chartMensualCanvas?.nativeElement;
 
-    if (!canvasHoy || !canvasHistorico || !canvasMensual) return;
+    if (!canvasGeneral || !canvasEstados || !canvasMensual) return;
 
     this.destruirGraficos();
 
-    this.chartHoy = new Chart(canvasHoy, this.crearConfigDona('Citas de hoy', this.estadisticasHoy));
-    this.chartHistorico = new Chart(canvasHistorico, this.crearConfigBarras());
-    this.chartMensual = new Chart(canvasMensual, this.crearConfigLinea(canvasMensual));
+    this.chartGeneral = new Chart(canvasGeneral, this.crearConfigGeneral());
+    this.chartEstados = new Chart(canvasEstados, this.crearConfigEstados());
+    this.chartMensual = new Chart(canvasMensual, this.crearConfigMensual(canvasMensual));
   }
 
   private destruirGraficos() {
-    this.chartHoy?.destroy();
-    this.chartHistorico?.destroy();
+    this.chartGeneral?.destroy();
+    this.chartEstados?.destroy();
     this.chartMensual?.destroy();
 
-    this.chartHoy = undefined;
-    this.chartHistorico = undefined;
+    this.chartGeneral = undefined;
+    this.chartEstados = undefined;
     this.chartMensual = undefined;
   }
 
-  private crearConfigDona(titulo: string, data: EstadisticasCitas): ChartConfiguration<'doughnut'> {
-    const valores = [data.porAtender, data.enAtencion, data.atendidas, data.canceladas];
-    const total = valores.reduce((acc, item) => acc + item, 0);
+  private crearConfigGeneral(): ChartConfiguration<'bar'> {
+    return {
+      type: 'bar',
+      data: {
+        labels: ['Citas hoy', 'Por atender', 'En atención', 'Atendidas', 'Pend. cobro', 'Fact. pendientes'],
+        datasets: [
+          {
+            label: 'Resumen de recepción',
+            data: [
+              this.estadisticasHoy.total,
+              this.estadisticasHoy.porAtender,
+              this.estadisticasHoy.enAtencion,
+              this.estadisticasHoy.atendidas,
+              this.pendientesCobro,
+              this.facturasPendientes
+            ],
+            backgroundColor: [
+              'rgba(38, 184, 181, 0.75)',
+              'rgba(245, 158, 11, 0.75)',
+              'rgba(59, 130, 246, 0.75)',
+              'rgba(34, 197, 94, 0.75)',
+              'rgba(168, 85, 247, 0.75)',
+              'rgba(239, 68, 68, 0.70)'
+            ],
+            borderColor: ['#26b8b5', '#f59e0b', '#3b82f6', '#22c55e', '#a855f7', '#ef4444'],
+            borderWidth: 1,
+            borderRadius: 12,
+            barThickness: 44
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              color: '#334155',
+              font: { size: 13, weight: 'bold' }
+            }
+          },
+          tooltip: {
+            backgroundColor: '#1a202c',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            padding: 12,
+            cornerRadius: 10
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: '#64748b',
+              font: { weight: 'bold' }
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: '#eef2f7' },
+            ticks: {
+              color: '#64748b',
+              precision: 0
+            }
+          }
+        }
+      }
+    };
+  }
+
+  private crearConfigEstados(): ChartConfiguration<'doughnut'> {
+    const valores = [
+      this.estadisticasHistoricas.porAtender,
+      this.estadisticasHistoricas.enAtencion,
+      this.estadisticasHistoricas.atendidas,
+      this.estadisticasHistoricas.canceladas
+    ];
+
+    const total = valores.reduce((acc, valor) => acc + valor, 0);
 
     return {
       type: 'doughnut',
       data: {
-        labels: total > 0 ? ['Por atender', 'En atencion', 'Atendidas', 'Canceladas'] : ['Sin citas'],
+        labels: total > 0 ? ['Por atender', 'En atención', 'Atendidas', 'Canceladas'] : ['Sin citas'],
         datasets: [
           {
             data: total > 0 ? valores : [1],
             backgroundColor: total > 0
-              ? ['#f59e0b', '#3b82f6', '#10b981', '#ef4444']
+              ? ['#f59e0b', '#3b82f6', '#22c55e', '#ef4444']
               : ['#e2e8f0'],
             borderWidth: 0,
-            hoverOffset: total > 0 ? 8 : 0,
+            hoverOffset: total > 0 ? 8 : 0
           }
         ]
       },
@@ -258,73 +421,37 @@ export class PanelPrincipal implements OnInit, AfterViewInit, OnDestroy {
             labels: {
               usePointStyle: true,
               padding: 18,
+              color: '#334155',
+              font: { weight: 'bold' }
             }
-          },
-          title: {
-            display: false,
-            text: titulo,
           },
           tooltip: {
             enabled: total > 0,
+            backgroundColor: '#1a202c',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            padding: 12,
+            cornerRadius: 10
           }
         }
       }
     };
   }
 
-  private crearConfigBarras(): ChartConfiguration<'bar'> {
-    return {
-      type: 'bar',
-      data: {
-        labels: ['Por atender', 'En atencion', 'Atendidas', 'Canceladas'],
-        datasets: [
-          {
-            label: 'Citas historicas',
-            data: [
-              this.estadisticasHistoricas.porAtender,
-              this.estadisticasHistoricas.enAtencion,
-              this.estadisticasHistoricas.atendidas,
-              this.estadisticasHistoricas.canceladas,
-            ],
-            backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#ef4444'],
-            borderRadius: 8,
-            maxBarThickness: 54,
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          }
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-          },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              stepSize: 1,
-              precision: 0,
-            }
-          }
-        }
-      }
-    };
-  }
-
-  private crearConfigLinea(canvas: HTMLCanvasElement): ChartConfiguration<'line'> {
+  private crearConfigMensual(canvas: HTMLCanvasElement): ChartConfiguration<'line'> {
     const ctx = canvas.getContext('2d');
-    const gradienteVerde = ctx?.createLinearGradient(0, 0, 0, 300);
-    gradienteVerde?.addColorStop(0, 'rgba(16, 185, 129, 0.35)');
-    gradienteVerde?.addColorStop(1, 'rgba(16, 185, 129, 0)');
 
-    const gradienteRojo = ctx?.createLinearGradient(0, 0, 0, 300);
-    gradienteRojo?.addColorStop(0, 'rgba(239, 68, 68, 0.28)');
+    const gradienteVerde = ctx?.createLinearGradient(0, 0, 0, 320);
+    gradienteVerde?.addColorStop(0, 'rgba(34, 197, 94, 0.32)');
+    gradienteVerde?.addColorStop(1, 'rgba(34, 197, 94, 0)');
+
+    const gradienteRojo = ctx?.createLinearGradient(0, 0, 0, 320);
+    gradienteRojo?.addColorStop(0, 'rgba(239, 68, 68, 0.25)');
     gradienteRojo?.addColorStop(1, 'rgba(239, 68, 68, 0)');
+
+    const gradienteTeal = ctx?.createLinearGradient(0, 0, 0, 320);
+    gradienteTeal?.addColorStop(0, 'rgba(38, 184, 181, 0.28)');
+    gradienteTeal?.addColorStop(1, 'rgba(38, 184, 181, 0)');
 
     return {
       type: 'line',
@@ -334,15 +461,15 @@ export class PanelPrincipal implements OnInit, AfterViewInit, OnDestroy {
           {
             label: 'Atendidas',
             data: this.datosMensualesAtendidas,
-            borderColor: '#10b981',
-            backgroundColor: gradienteVerde || 'rgba(16, 185, 129, 0.18)',
+            borderColor: '#22c55e',
+            backgroundColor: gradienteVerde || 'rgba(34, 197, 94, 0.18)',
             borderWidth: 3,
             pointRadius: 4,
             pointBackgroundColor: '#ffffff',
-            pointBorderColor: '#10b981',
+            pointBorderColor: '#22c55e',
             pointBorderWidth: 2,
             tension: 0.35,
-            fill: true,
+            fill: true
           },
           {
             label: 'Canceladas',
@@ -355,7 +482,20 @@ export class PanelPrincipal implements OnInit, AfterViewInit, OnDestroy {
             pointBorderColor: '#ef4444',
             pointBorderWidth: 2,
             tension: 0.35,
-            fill: true,
+            fill: true
+          },
+          {
+            label: 'Facturas pagadas',
+            data: this.datosMensualesFacturadas,
+            borderColor: '#26b8b5',
+            backgroundColor: gradienteTeal || 'rgba(38, 184, 181, 0.14)',
+            borderWidth: 3,
+            pointRadius: 4,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#26b8b5',
+            pointBorderWidth: 2,
+            tension: 0.35,
+            fill: true
           }
         ]
       },
@@ -368,18 +508,29 @@ export class PanelPrincipal implements OnInit, AfterViewInit, OnDestroy {
             labels: {
               usePointStyle: true,
               boxWidth: 8,
+              color: '#334155',
+              font: { weight: 'bold' }
             }
+          },
+          tooltip: {
+            backgroundColor: '#1a202c',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            padding: 12,
+            cornerRadius: 10
           }
         },
         scales: {
           x: {
             grid: { display: false },
+            ticks: { color: '#64748b' }
           },
           y: {
             beginAtZero: true,
+            grid: { color: '#eef2f7' },
             ticks: {
-              stepSize: 1,
               precision: 0,
+              color: '#64748b'
             }
           }
         }
