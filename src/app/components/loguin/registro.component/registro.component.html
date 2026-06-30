@@ -89,17 +89,18 @@
             <div class="input-icon-group" [class.is-invalid]="campoInvalido('numeroDocumento')">
               <span class="pi pi-hashtag"></span>
               <input type="text" class="form-control" formControlName="numeroDocumento"
-                [placeholder]="form.get('tipoDocumento')?.value === 'DNI' ? '8 números' : 'Ej: A12345678'" maxlength="9"
-                style="text-transform: uppercase;" />
+                [placeholder]="placeholderDocumento" [attr.maxlength]="maxLengthDocumento" autocomplete="off"
+                inputmode="numeric" style="text-transform: uppercase;" (keydown)="bloquearNumeroDocumento($event)"
+                (input)="limitarNumeroDocumento()" />
             </div>
             @if (campoInvalido('numeroDocumento')) {
             <div class="error-text">
               @if (form.get('tipoDocumento')?.value === 'DNI') {
               El DNI debe tener exactamente 8 números.
               } @else if (form.get('tipoDocumento')?.value === 'PASAPORTE') {
-              El Pasaporte requiere 1 letra y 8 números.
+              El pasaporte debe tener 1 letra seguida de 8 números. Ejemplo: A12345678.
               } @else {
-              El Carnet debe tener 9 caracteres alfanuméricos.
+              El Carnet de Extranjería debe tener exactamente 9 números.
               }
             </div>
             }
@@ -127,10 +128,13 @@
             <div class="input-icon-group" [class.is-invalid]="campoInvalido('numeroSeguro')">
               <span class="pi pi-hashtag"></span>
               <input type="text" class="form-control" formControlName="numeroSeguro"
-                placeholder="N° de póliza o afiliación" />
+                placeholder="N° de póliza o afiliación" maxlength="25" (keydown)="bloquearNumeroSeguro($event)"
+                (input)="limitarNumeroSeguro()" />
             </div>
             @if (campoInvalido('numeroSeguro')) {
-            <div class="error-text">Requerido si tienes seguro.</div>
+            <div class="error-text">
+              Requerido si tienes seguro. Máximo 25 caracteres.
+            </div>
             }
           </div>
         </div>
@@ -151,11 +155,11 @@
           <label class="form-label">Teléfono</label>
           <div class="input-icon-group" [class.is-invalid]="campoInvalido('telefono')">
             <span class="pi pi-phone"></span>
-            <input type="tel" class="form-control" formControlName="telefono" placeholder="Ej: 987654321"
-              maxlength="9" />
+            <input type="text" class="form-control" formControlName="telefono" placeholder="Ej: 987654321" maxlength="9"
+              inputmode="numeric" autocomplete="tel" (keydown)="bloquearTelefono($event)" (input)="limitarTelefono()" />
           </div>
           @if (campoInvalido('telefono')) {
-          <div class="error-text">Debe tener 9 dígitos y empezar por 9.</div>
+          <div class="error-text">Debe tener exactamente 9 dígitos y empezar por 9.</div>
           }
         </div>
 
