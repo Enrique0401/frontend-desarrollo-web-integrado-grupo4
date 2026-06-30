@@ -3,6 +3,8 @@ import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, Validati
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth';
 
+type TipoDocumento = 'DNI' | 'PASAPORTE' | 'CARNET_EXTRANJERIA';
+
 function passwordsIgualesValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
   const confirmar = control.get('confirmarPassword')?.value;
@@ -11,18 +13,13 @@ function passwordsIgualesValidator(control: AbstractControl): ValidationErrors |
 
 function fechaNacimientoValidator(control: AbstractControl): ValidationErrors | null {
   const valor = control.value;
-
   if (!valor) return null;
 
   const fechaNacimiento = new Date(`${valor}T00:00:00`);
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
 
-  if (fechaNacimiento > hoy) {
-    return { fechaFutura: true };
-  }
-
-  return null;
+  return fechaNacimiento > hoy ? { fechaFutura: true } : null;
 }
 
 function obtenerFechaHoyInput(): string {
@@ -55,10 +52,10 @@ export class RegistroComponent implements OnInit {
       apellido: ['', [Validators.required, Validators.minLength(2)]],
       fechaNacimiento: ['', [Validators.required, fechaNacimientoValidator]],
       tipoDocumento: ['DNI', [Validators.required]],
-      numeroDocumento: ['', [Validators.required]],
+      numeroDocumento: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
       genero: ['OTRO', [Validators.required]],
       seguroMedico: ['NINGUNO', [Validators.required]],
-      numeroSeguro: [{ value: '', disabled: true }],
+      numeroSeguro: [{ value: '', disabled: true }, [Validators.maxLength(25)]],
       correo: ['', [Validators.required, Validators.email]],
       telefono: ['', [Validators.required, Validators.pattern('^9[0-9]{8}$')]],
       username: ['', [Validators.required, Validators.minLength(3)]],
@@ -77,7 +74,7 @@ export class RegistroComponent implements OnInit {
     this.actualizarValidadoresDocumento('DNI');
 
     this.form.get('tipoDocumento')?.valueChanges.subscribe(tipo => {
-      this.actualizarValidadoresDocumento(tipo || 'DNI');
+      this.actualizarValidadoresDocumento((tipo || 'DNI') as TipoDocumento);
       this.form.get('numeroDocumento')?.setValue('');
       this.form.get('numeroDocumento')?.markAsUntouched();
     });
@@ -91,33 +88,179 @@ export class RegistroComponent implements OnInit {
         numSeguroCtrl?.setValue('');
       } else {
         numSeguroCtrl?.enable();
-        numSeguroCtrl?.setValidators([Validators.required, Validators.minLength(3)]);
+        numSeguroCtrl?.setValidators([
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(25)
+        ]);
       }
 
       numSeguroCtrl?.updateValueAndValidity();
     });
   }
 
-  private actualizarValidadoresDocumento(tipo: string): void {
+  private actualizarValidadoresDocumento(tipo: TipoDocumento): void {
     const controlDoc = this.form.get('numeroDocumento');
 
     if (tipo === 'DNI') {
-      controlDoc?.setValidators([Validators.required, Validators.pattern('^[0-9]{8}$')]);
+      controlDoc?.setValidators([
+        Validators.required,
+        Validators.pattern('^[0-9]{8}$')
+      ]);
     } else if (tipo === 'PASAPORTE') {
-      controlDoc?.setValidators([Validators.required, Validators.pattern('^[a-zA-Z][0-9]{8}$')]);
+      controlDoc?.setValidators([
+        Validators.required,
+        Validators.pattern('^[A-Z][0-9]{8}$')
+      ]);
     } else {
-      controlDoc?.setValidators([Validators.required, Validators.pattern('^[a-zA-Z0-9]{9}$')]);
+      controlDoc?.setValidators([
+        Validators.required,
+        Validators.pattern('^[0-9]{9}$')
+      ]);
     }
 
     controlDoc?.updateValueAndValidity();
+  }
+
+  get maxLengthDocumento(): number {
+    const tipo = this.form.get('tipoDocumento')?.value as TipoDocumento;
+
+    if (tipo === 'DNI') return 8;
+    if (tipo === 'PASAPORTE') return 9;
+    return 9;
+  }
+
+  get placeholderDocumento(): string {
+    const tipo = this.form.get('tipoDocumento')?.value as TipoDocumento;
+
+    if (tipo === 'DNI') return '8 números';
+    if (tipo === 'PASAPORTE') return 'Ej: A12345678';
+    return '9 números';
   }
 
   togglePassword(): void {
     this.mostrarPassword.update((v) => !v);
   }
 
+  limitarTelefono(): void {
+    const control = this.form.get('telefono');
+    const valor = String(control?.value || '').replace(/\D/g, '').slice(0, 9);
+    control?.setValue(valor, { emitEvent: false });
+  }
+
+  limitarNumeroSeguro(): void {
+    const control = this.form.get('numeroSeguro');
+    const valor = String(control?.value || '').slice(0, 25);
+    control?.setValue(valor, { emitEvent: false });
+  }
+
+  limitarNumeroDocumento(): void {
+    const control = this.form.get('numeroDocumento');
+    const tipo = this.form.get('tipoDocumento')?.value as TipoDocumento;
+    let valor = String(control?.value || '').toUpperCase();
+
+    if (tipo === 'DNI') {
+      valor = valor.replace(/\D/g, '').slice(0, 8);
+    } else if (tipo === 'PASAPORTE') {
+      const primeraLetra = valor.slice(0, 1).replace(/[^A-Z]/g, '');
+      const numeros = valor.slice(1).replace(/\D/g, '').slice(0, 8);
+      valor = `${primeraLetra}${numeros}`.slice(0, 9);
+    } else {
+      valor = valor.replace(/\D/g, '').slice(0, 9);
+    }
+
+    control?.setValue(valor, { emitEvent: false });
+  }
+
+  bloquearTelefono(event: KeyboardEvent): void {
+    this.bloquearSiNoEsNumero(event);
+  }
+
+  bloquearNumeroSeguro(event: KeyboardEvent): void {
+    const permitido = this.esTeclaControl(event);
+    if (permitido) return;
+
+    const input = event.target as HTMLInputElement;
+    const tieneSeleccion = input.selectionStart !== input.selectionEnd;
+
+    if (input.value.length >= 25 && !tieneSeleccion) {
+      event.preventDefault();
+    }
+  }
+
+  bloquearNumeroDocumento(event: KeyboardEvent): void {
+    if (this.esTeclaControl(event)) return;
+
+    const tipo = this.form.get('tipoDocumento')?.value as TipoDocumento;
+    const input = event.target as HTMLInputElement;
+    const tecla = event.key;
+    const tieneSeleccion = input.selectionStart !== input.selectionEnd;
+
+    if (input.value.length >= this.maxLengthDocumento && !tieneSeleccion) {
+      event.preventDefault();
+      return;
+    }
+
+    if (tipo === 'DNI' || tipo === 'CARNET_EXTRANJERIA') {
+      if (!/^[0-9]$/.test(tecla)) {
+        event.preventDefault();
+      }
+      return;
+    }
+
+    if (tipo === 'PASAPORTE') {
+      const posicion = input.selectionStart ?? input.value.length;
+
+      if (posicion === 0) {
+        if (!/^[a-zA-Z]$/.test(tecla)) {
+          event.preventDefault();
+        }
+      } else if (!/^[0-9]$/.test(tecla)) {
+        event.preventDefault();
+      }
+    }
+  }
+
+  private bloquearSiNoEsNumero(event: KeyboardEvent): void {
+    if (this.esTeclaControl(event)) return;
+
+    const input = event.target as HTMLInputElement;
+    const tieneSeleccion = input.selectionStart !== input.selectionEnd;
+
+    if (input.value.length >= 9 && !tieneSeleccion) {
+      event.preventDefault();
+      return;
+    }
+
+    if (!/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  private esTeclaControl(event: KeyboardEvent): boolean {
+    const teclasPermitidas = [
+      'Backspace',
+      'Delete',
+      'Tab',
+      'Escape',
+      'Enter',
+      'ArrowLeft',
+      'ArrowRight',
+      'ArrowUp',
+      'ArrowDown',
+      'Home',
+      'End'
+    ];
+
+    return teclasPermitidas.includes(event.key) || event.ctrlKey || event.metaKey;
+  }
+
   onSubmit(): void {
     if (this.cargando()) return;
+
+    this.limitarTelefono();
+    this.limitarNumeroDocumento();
+    this.limitarNumeroSeguro();
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -173,7 +316,7 @@ export class RegistroComponent implements OnInit {
 
           this.errorMensaje.set(`Ese usuario ya existe. Prueba con: ${sugerencias.join(', ')}`);
         } else if (err.status === 500) {
-          this.errorMensaje.set('Error 500: MySQL rechazó los datos. Verifica que el backend acepte fechaNacimiento.');
+          this.errorMensaje.set('Error 500: MySQL rechazó los datos. Verifica que el backend acepte los campos enviados.');
         } else {
           this.errorMensaje.set(mensajeError || 'Error inesperado al registrar.');
         }
