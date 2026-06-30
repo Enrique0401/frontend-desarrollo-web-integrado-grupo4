@@ -90,11 +90,11 @@ export class GestionCitas implements OnInit {
     const idCita = cita ? Number(cita.idCita || cita.id) : null;
 
     if (!idCita) {
-      this.router.navigate(['/panel/recepcion/facturacion']);
+      this.router.navigate(['/panel/recepcion/faacturacion']);
       return;
     }
 
-    this.router.navigate(['/panel/recepcion/facturacion'], {
+    this.router.navigate(['/panel/recepcion/faacturacion'], {
       queryParams: { citaId: idCita }
     });
   }
