@@ -6,6 +6,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CitaService } from '../../../services/cita/cita';
 import { ConsultaService } from '../../../services/consulta/consulta';
 import { HistoriaClinicaService } from '../../../services/historia-clinica/historia-clinica';
+import { MedicamentoService } from '../../../services/medicamento/medicamento';
+import { RecetaService } from '../../../services/receta/receta';
+import { DetalleRecetaService } from '../../../services/detalle-receta/detalle-receta';
 
 @Component({
   selector: 'app-consulta',
@@ -17,6 +20,9 @@ import { HistoriaClinicaService } from '../../../services/historia-clinica/histo
 export class Consulta implements OnInit {
   cita = signal<any | null>(null);
   historiaClinica = signal<any | null>(null);
+  medicamentos = signal<any[]>([]);
+  medicamentosFiltrados = signal<any[]>([]);
+  medicamentosSeleccionados = signal<any[]>([]);
 
   cargando = signal(false);
   guardando = signal(false);
@@ -34,6 +40,9 @@ export class Consulta implements OnInit {
     private citaService: CitaService,
     private consultaService: ConsultaService,
     private historiaClinicaService: HistoriaClinicaService,
+    private medicamentoService: MedicamentoService,
+    private recetaService: RecetaService,
+    private detalleRecetaService: DetalleRecetaService,
   ) {}
 
   ngOnInit(): void {
@@ -119,65 +128,65 @@ export class Consulta implements OnInit {
     });
   }
   finalizarConsulta(): void {
-  if (this.form.invalid) {
-    this.form.markAllAsTouched();
-    return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const citaActual = this.cita();
+    const historia = this.historiaClinica();
+
+    if (!citaActual || !historia) {
+      alert('Faltan datos de la cita o historia clínica.');
+      return;
+    }
+
+    this.guardando.set(true);
+
+    const idCita = citaActual.id ?? citaActual.idCita ?? citaActual.id_cita;
+
+    const consultaBody = {
+      historiaClinicaId: historia.id ?? historia.idHistoriaClinica,
+      pacienteId: citaActual.pacienteId,
+      medicoId: citaActual.medicoId,
+      citaId: idCita,
+      clinicaId: citaActual.clinicaId,
+
+      anamnesis: this.form.value.anamnesis,
+      examenFisico: this.form.value.examenFisico,
+      diagnostico: this.form.value.diagnostico,
+      tratamiento: this.form.value.tratamiento,
+      observaciones: this.form.value.observaciones,
+
+      presionArterial: this.form.value.presionArterial,
+      temperatura: Number(this.form.value.temperatura),
+      frecuenciaCardiaca: Number(this.form.value.frecuenciaCardiaca),
+      frecuenciaRespiratoria: Number(this.form.value.frecuenciaRespiratoria),
+      peso: Number(this.form.value.peso),
+      talla: Number(this.form.value.talla),
+    };
+
+    this.consultaService.obtenerPorCita(idCita).subscribe({
+      next: (consultaExistente) => {
+        this.consultaService.actualizarConsulta(consultaExistente.id, consultaBody).subscribe({
+          next: () => this.completarCita(citaActual),
+          error: (err) => {
+            this.guardando.set(false);
+            console.error(err);
+          },
+        });
+      },
+      error: () => {
+        this.consultaService.guardarConsulta(consultaBody).subscribe({
+          next: () => this.completarCita(citaActual),
+          error: (err) => {
+            this.guardando.set(false);
+            console.error(err);
+          },
+        });
+      },
+    });
   }
-
-  const citaActual = this.cita();
-  const historia = this.historiaClinica();
-
-  if (!citaActual || !historia) {
-    alert('Faltan datos de la cita o historia clínica.');
-    return;
-  }
-
-  this.guardando.set(true);
-
-  const idCita = citaActual.id ?? citaActual.idCita ?? citaActual.id_cita;
-
-  const consultaBody = {
-    historiaClinicaId: historia.id ?? historia.idHistoriaClinica,
-    pacienteId: citaActual.pacienteId,
-    medicoId: citaActual.medicoId,
-    citaId: idCita,
-    clinicaId: citaActual.clinicaId,
-
-    anamnesis: this.form.value.anamnesis,
-    examenFisico: this.form.value.examenFisico,
-    diagnostico: this.form.value.diagnostico,
-    tratamiento: this.form.value.tratamiento,
-    observaciones: this.form.value.observaciones,
-
-    presionArterial: this.form.value.presionArterial,
-    temperatura: Number(this.form.value.temperatura),
-    frecuenciaCardiaca: Number(this.form.value.frecuenciaCardiaca),
-    frecuenciaRespiratoria: Number(this.form.value.frecuenciaRespiratoria),
-    peso: Number(this.form.value.peso),
-    talla: Number(this.form.value.talla),
-  };
-
-  this.consultaService.obtenerPorCita(idCita).subscribe({
-    next: (consultaExistente) => {
-      this.consultaService.actualizarConsulta(consultaExistente.id, consultaBody).subscribe({
-        next: () => this.completarCita(citaActual),
-        error: (err) => {
-          this.guardando.set(false);
-          console.error(err);
-        },
-      });
-    },
-    error: () => {
-      this.consultaService.guardarConsulta(consultaBody).subscribe({
-        next: () => this.completarCita(citaActual),
-        error: (err) => {
-          this.guardando.set(false);
-          console.error(err);
-        },
-      });
-    },
-  });
-}
   completarCita(citaActual: any): void {
     const citaActualizada = {
       ...citaActual,
