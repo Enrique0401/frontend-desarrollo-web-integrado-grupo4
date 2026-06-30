@@ -1,8 +1,8 @@
 <div class="dashboard-empresarial">
-  <header class="header-dash">
+  <header class="dashboard-header">
     <div>
-      <h2>Dashboard de Citas</h2>
-      <p>Resumen operativo de las citas del dia y del historial general.</p>
+      <h2>Dashboard de Recepción</h2>
+      <p>Resumen operativo de citas, cobros y flujo diario de pacientes.</p>
     </div>
 
     <button type="button" class="btn-refresh" (click)="cargarEstadisticas()" [disabled]="cargando">
@@ -15,120 +15,146 @@
   </div>
 
   <div *ngIf="cargando" class="estado-carga">
-    Cargando estadisticas...
+    Cargando estadísticas de recepción...
   </div>
 
   <ng-container *ngIf="!cargando">
-    <section class="summary-grid">
-      <article class="summary-card principal">
-        <span>Citas de hoy</span>
-        <strong>{{ estadisticasHoy.total }}</strong>
-        <small>Programadas para la fecha actual</small>
-      </article>
-
-      <article class="summary-card">
-        <span>Historico total</span>
-        <strong>{{ estadisticasHistoricas.total }}</strong>
-        <small>Desde el inicio del sistema</small>
-      </article>
-
-      <article class="summary-card ok">
-        <span>Atendidas</span>
-        <strong>{{ estadisticasHistoricas.atendidas }}</strong>
-        <small>Atendidas, finalizadas o completadas</small>
-      </article>
-
-      <article class="summary-card danger">
-        <span>Canceladas</span>
-        <strong>{{ estadisticasHistoricas.canceladas }}</strong>
-        <small>Canceladas o no asistidas</small>
-      </article>
-    </section>
-
-    <h3 class="section-title">Estado de citas</h3>
-
-    <section class="kpi-grid">
-      <article class="kpi-card naranja">
-        <div class="kpi-icon">
-          <i class="pi pi-clock"></i>
+    <section class="metrics-grid">
+      <article class="metric-card">
+        <div class="metric-icon">
+          <span class="pi pi-calendar"></span>
         </div>
-        <div class="kpi-info">
-          <span>Por atender hoy</span>
+        <div>
+          <p>Citas de hoy</p>
+          <h3>{{ estadisticasHoy.total }}</h3>
+        </div>
+      </article>
+
+      <article class="metric-card warning">
+        <div class="metric-icon">
+          <span class="pi pi-clock"></span>
+        </div>
+        <div>
+          <p>Por atender</p>
           <h3>{{ estadisticasHoy.porAtender }}</h3>
         </div>
       </article>
 
-      <article class="kpi-card azul">
-        <div class="kpi-icon">
-          <i class="pi pi-heart"></i>
+      <article class="metric-card info">
+        <div class="metric-icon">
+          <span class="pi pi-users"></span>
         </div>
-        <div class="kpi-info">
-          <span>En atencion hoy</span>
+        <div>
+          <p>En atención</p>
           <h3>{{ estadisticasHoy.enAtencion }}</h3>
         </div>
       </article>
 
-      <article class="kpi-card verde">
-        <div class="kpi-icon">
-          <i class="pi pi-check-circle"></i>
+      <article class="metric-card success">
+        <div class="metric-icon">
+          <span class="pi pi-check-circle"></span>
         </div>
-        <div class="kpi-info">
-          <span>Atendidas hoy</span>
+        <div>
+          <p>Atendidas hoy</p>
           <h3>{{ estadisticasHoy.atendidas }}</h3>
         </div>
       </article>
 
-      <article class="kpi-card rojo">
-        <div class="kpi-icon">
-          <i class="pi pi-times-circle"></i>
+      <article class="metric-card purple">
+        <div class="metric-icon">
+          <span class="pi pi-wallet"></span>
         </div>
-        <div class="kpi-info">
-          <span>Canceladas hoy</span>
-          <h3>{{ estadisticasHoy.canceladas }}</h3>
+        <div>
+          <p>Pendientes de cobro</p>
+          <h3>{{ pendientesCobro }}</h3>
+        </div>
+      </article>
+
+      <article class="metric-card money">
+        <div class="metric-icon">
+          <span class="pi pi-money-bill"></span>
+        </div>
+        <div>
+          <p>Ingresos de hoy</p>
+          <h3>S/ {{ ingresosHoy | number:'1.2-2' }}</h3>
         </div>
       </article>
     </section>
 
-    <!-- <section class="graficos-container">
-      <article class="grafico-card widget-dona">
-        <div class="card-header">
+    <section class="chart-card principal-chart">
+      <div class="chart-header">
+        <div>
+          <h3>Resumen de Recepción</h3>
+          <p>Citas del día, atención activa y pendientes de facturación.</p>
+        </div>
+
+        <span class="chart-badge">Datos en tiempo real</span>
+      </div>
+
+      <div class="chart-wrapper">
+        <canvas #chartGeneralCanvas></canvas>
+      </div>
+    </section>
+
+    <section class="dashboard-content">
+      <article class="card chart-card">
+        <div class="chart-header compact">
           <div>
-            <h4>Distribucion diaria</h4>
-            <p>Citas registradas para hoy</p>
-          </div>
-          <span class="badge-hoy">Hoy</span>
-        </div>
-
-        <div class="canvas-wrapper">
-          <canvas #chartHoyCanvas></canvas>
-        </div>
-      </article>
-
-      <article class="grafico-card widget-barras">
-        <div class="card-header">
-          <div>
-            <h4>Resumen historico</h4>
-            <p>Acumulado desde el inicio del sistema</p>
-          </div>
-        </div>
-
-        <div class="canvas-wrapper">
-          <canvas #chartHistoricoCanvas></canvas>
-        </div>
-      </article>
-
-      <article class="grafico-card widget-linea">
-        <div class="card-header">
-          <div>
-            <h4>Evolucion mensual</h4>
-            <p>Atendidas vs canceladas por mes</p>
+            <h3>Estado Histórico de Citas</h3>
+            <p>Distribución general desde el inicio del sistema.</p>
           </div>
         </div>
 
-        <div class="canvas-wrapper">
-          <canvas #chartMensualCanvas></canvas>
+        <div class="chart-wrapper medium">
+          <canvas #chartEstadosCanvas></canvas>
         </div>
       </article>
-    </section> -->
+
+      <article class="card">
+        <h3>Control de Caja</h3>
+
+        <div class="status-row">
+          <span>Facturas pagadas</span>
+          <strong>{{ facturasPagadas }}</strong>
+        </div>
+
+        <div class="progress">
+          <div
+            class="bar active"
+            [style.width.%]="(facturasPagadas + facturasPendientes) ? (facturasPagadas * 100 / (facturasPagadas + facturasPendientes)) : 0">
+          </div>
+        </div>
+
+        <div class="status-row">
+          <span>Facturas pendientes</span>
+          <strong>{{ facturasPendientes }}</strong>
+        </div>
+
+        <div class="progress">
+          <div
+            class="bar warning"
+            [style.width.%]="(facturasPagadas + facturasPendientes) ? (facturasPendientes * 100 / (facturasPagadas + facturasPendientes)) : 0">
+          </div>
+        </div>
+
+        <div class="caja-total">
+          <span>Total cobrado histórico</span>
+          <strong>S/ {{ ingresosTotales | number:'1.2-2' }}</strong>
+        </div>
+      </article>
+    </section>
+
+    <section class="card chart-card mensual-card">
+      <div class="chart-header">
+        <div>
+          <h3>Evolución Mensual</h3>
+          <p>Comparación de citas atendidas, canceladas y facturas pagadas.</p>
+        </div>
+      </div>
+
+      <div class="chart-wrapper large">
+        <canvas #chartMensualCanvas></canvas>
+      </div>
+    </section>
   </ng-container>
 </div>
