@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 interface DetalleItem {
@@ -20,7 +21,10 @@ interface DetalleItem {
 })
 export class CobrosFacturacion implements OnInit {
   private http = inject(HttpClient);
+  private route = inject(ActivatedRoute);
+
   private urlBase = 'https://backend-desarrollo-web-integrado-grupo4.onrender.com/api';
+  private citaIdDesdeRuta: number | null = null;
 
   pestanaActiva: 'citas' | 'historial' = 'citas';
   citasDisponibles: any[] = [];
@@ -28,12 +32,12 @@ export class CobrosFacturacion implements OnInit {
   pacientes: any[] = [];
   facturas: any[] = [];
   facturasFiltradas: any[] = [];
-  cargando: boolean = true;
-  mostrarFormulario: boolean = false;
-  successMensaje: string = '';
-  errorMensaje: string = '';
-  filtroBuscador: string = '';
-  filtroHistorial: string = '';
+  cargando = true;
+  mostrarFormulario = false;
+  successMensaje = '';
+  errorMensaje = '';
+  filtroBuscador = '';
+  filtroHistorial = '';
 
   nuevaFactura = {
     citaId: '',
@@ -47,13 +51,19 @@ export class CobrosFacturacion implements OnInit {
   };
 
   ngOnInit() {
+    const citaIdParam = this.route.snapshot.queryParamMap.get('citaId');
+    this.citaIdDesdeRuta = citaIdParam ? Number(citaIdParam) : null;
     this.cargarDatos();
   }
 
   private obtenerHeaders(): HttpHeaders {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     let headers = new HttpHeaders();
-    if (token) headers = headers.set('Authorization', `Bearer ${token}`);
+
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
     return headers;
   }
 
@@ -67,19 +77,29 @@ export class CobrosFacturacion implements OnInit {
       facturas: this.http.get<any[]>(`${this.urlBase}/facturas`, { headers })
     }).subscribe({
       next: (res) => {
-        this.pacientes = res.pacientes;
-        this.facturas = res.facturas;
+        const citas = this.obtenerArray(res.citas);
+        this.pacientes = this.obtenerArray(res.pacientes);
+        this.facturas = this.obtenerArray(res.facturas);
 
-        // SOLUCIÓN AL DOBLE PAGO: Excluir citas que ya tengan una factura asociada en el sistema
-        this.citasDisponibles = res.citas.filter(c =>
-          c.estado !== 'CANCELADA' &&
-          c.estado !== 'NO_ASISTIO' &&
-          !this.facturas.some(f => f.citaId === c.id || f.citaId === c.idCita)
-        );
+        this.citasDisponibles = citas.filter((cita) => {
+          const idCita = this.obtenerCitaId(cita);
+          const estado = (cita.estado || '').toUpperCase();
+
+          const yaTieneFactura = this.facturas.some((factura) =>
+            Number(factura.citaId ?? factura.cita?.id) === idCita
+          );
+
+          return estado !== 'CANCELADA' &&
+            estado !== 'NO_ASISTIO' &&
+            estado !== 'FINALIZADA' &&
+            !yaTieneFactura;
+        });
 
         this.citasFiltradas = [...this.citasDisponibles];
         this.facturasFiltradas = [...this.facturas];
         this.cargando = false;
+
+        this.abrirFacturaDesdeGestionCitas();
       },
       error: (err) => {
         console.error('Error de sincronización:', err);
@@ -89,45 +109,130 @@ export class CobrosFacturacion implements OnInit {
     });
   }
 
+  private obtenerArray(respuesta: any): any[] {
+    if (Array.isArray(respuesta)) return respuesta;
+    if (respuesta && Array.isArray(respuesta.content)) return respuesta.content;
+    if (respuesta && Array.isArray(respuesta.data)) return respuesta.data;
+    return [];
+  }
+
+  private abrirFacturaDesdeGestionCitas() {
+    if (!this.citaIdDesdeRuta) return;
+
+    const idCita = this.citaIdDesdeRuta;
+
+    const facturaExistente = this.facturas.find((factura) =>
+      Number(factura.citaId ?? factura.cita?.id) === idCita
+    );
+
+    if (facturaExistente) {
+      this.pestanaActiva = 'historial';
+      this.mostrarFormulario = false;
+      this.filtroHistorial = facturaExistente.numeroFactura || String(idCita);
+      this.ejecutarFiltroHistorial();
+      this.mostrarAlerta('Esta cita ya tiene una factura registrada. Se abrió el historial.', false);
+      this.citaIdDesdeRuta = null;
+      return;
+    }
+
+    const cita = this.citasDisponibles.find((c) => this.obtenerCitaId(c) === idCita);
+
+    if (!cita) {
+      this.pestanaActiva = 'citas';
+      this.mostrarFormulario = false;
+      this.mostrarAlerta('No se encontró una cita pendiente por facturar con ese ID.', false);
+      this.citaIdDesdeRuta = null;
+      return;
+    }
+
+    this.pestanaActiva = 'citas';
+    this.filtroBuscador = '';
+    this.citasFiltradas = [cita];
+    this.abrirFormularioPago(idCita);
+    this.citaIdDesdeRuta = null;
+  }
+
   ejecutarFiltroCitas() {
     const termino = this.filtroBuscador.toLowerCase().trim();
+
     if (!termino) {
       this.citasFiltradas = [...this.citasDisponibles];
       return;
     }
-    this.citasFiltradas = this.citasDisponibles.filter(c => {
-      const pacId = c.pacienteId || c.paciente?.id;
-      const pac = this.pacientes.find(p => p.id === Number(pacId));
-      const nombre = pac ? `${pac.nombre || pac.usuario?.nombre || ''} ${pac.apellido || pac.usuario?.apellido || ''}`.toLowerCase() : '';
-      const dni = pac ? (pac.numeroDocumento || pac.usuario?.numeroDocumento || '').toString() : '';
-      return nombre.includes(termino) || dni.includes(termino) || c.id?.toString().includes(termino);
+
+    this.citasFiltradas = this.citasDisponibles.filter((cita) => {
+      const pacId = cita.pacienteId || cita.paciente?.id;
+      const paciente = this.pacientes.find((p) => Number(p.id) === Number(pacId));
+
+      const nombre = paciente
+        ? `${paciente.nombre || paciente.usuario?.nombre || ''} ${paciente.apellido || paciente.usuario?.apellido || ''}`.toLowerCase()
+        : '';
+
+      const dni = paciente
+        ? (paciente.numeroDocumento || paciente.usuario?.numeroDocumento || '').toString()
+        : '';
+
+      return nombre.includes(termino) ||
+        dni.includes(termino) ||
+        this.obtenerCitaId(cita).toString().includes(termino);
     });
   }
 
   ejecutarFiltroHistorial() {
     const termino = this.filtroHistorial.toLowerCase().trim();
+
     if (!termino) {
       this.facturasFiltradas = [...this.facturas];
       return;
     }
-    this.facturasFiltradas = this.facturas.filter(f => {
-      const nombrePac = this.getNombrePaciente(f.pacienteId).toLowerCase();
-      const numFactura = (f.numeroFactura || '').toLowerCase();
-      return nombrePac.includes(termino) || numFactura.includes(termino) || f.estado.toLowerCase().includes(termino);
+
+    this.facturasFiltradas = this.facturas.filter((factura) => {
+      const nombrePac = this.getNombrePaciente(factura.pacienteId).toLowerCase();
+      const numFactura = (factura.numeroFactura || '').toLowerCase();
+      const estado = (factura.estado || '').toLowerCase();
+      const citaId = String(factura.citaId || '');
+
+      return nombrePac.includes(termino) ||
+        numFactura.includes(termino) ||
+        estado.includes(termino) ||
+        citaId.includes(termino);
     });
   }
 
   abrirFormularioPago(citaId: any) {
-    this.nuevaFactura.citaId = citaId;
-    const cita = this.citasDisponibles.find(c => c.id === Number(citaId));
-    this.nuevaFactura.pacienteId = cita ? (cita.pacienteId || cita.paciente?.id) : '';
+    const idCita = Number(citaId);
 
-    // Inicializar con un detalle por defecto editable
-    this.nuevaFactura.detalles = [
-      { descripcion: 'Atención Médica General', cantidad: 1, precioUnitario: 50.00, total: 50.00 }
-    ];
-    this.nuevaFactura.estado = 'PENDIENTE';
-    this.nuevaFactura.metodoPago = 'EFECTIVO';
+    const cita = this.citasDisponibles.find((c) => this.obtenerCitaId(c) === idCita);
+
+    if (!cita) {
+      this.mostrarAlerta('No se puede iniciar cobro: la cita no está pendiente por facturar.', false);
+      return;
+    }
+
+    const pacienteId = Number(cita.pacienteId || cita.paciente?.id);
+
+    if (!pacienteId) {
+      this.mostrarAlerta('No se encontró el paciente asociado a esta cita.', false);
+      return;
+    }
+
+    this.nuevaFactura = {
+      citaId: String(idCita),
+      pacienteId: String(pacienteId),
+      metodoPago: 'EFECTIVO',
+      estado: 'PENDIENTE',
+      subtotal: 0,
+      impuesto: 0,
+      total: 0,
+      detalles: [
+        {
+          descripcion: cita.motivo || cita.motivoConsulta || 'Atención Médica General',
+          cantidad: 1,
+          precioUnitario: 50.00,
+          total: 50.00
+        }
+      ]
+    };
 
     this.calcularTotales();
     this.mostrarFormulario = true;
@@ -156,9 +261,8 @@ export class CobrosFacturacion implements OnInit {
   calcularTotales() {
     let totalFinalAcumulado = 0;
 
-    this.nuevaFactura.detalles.forEach(item => {
-      // El total de cada ítem ya incluye el IGV dictado por ti
-      item.total = Number((item.cantidad * item.precioUnitario).toFixed(2));
+    this.nuevaFactura.detalles.forEach((item) => {
+      item.total = Number((Number(item.cantidad) * Number(item.precioUnitario)).toFixed(2));
       totalFinalAcumulado += item.total;
     });
 
@@ -169,14 +273,43 @@ export class CobrosFacturacion implements OnInit {
 
   getNombrePaciente(id: any): string {
     if (!id) return 'Desconocido';
-    const p = this.pacientes.find(x => x.id === Number(id));
-    return p ? `${p.nombre || p.usuario?.nombre || ''} ${p.apellido || p.usuario?.apellido || ''}` : `Paciente #${id}`;
+
+    const paciente = this.pacientes.find((p) => Number(p.id) === Number(id));
+
+    return paciente
+      ? `${paciente.nombre || paciente.usuario?.nombre || ''} ${paciente.apellido || paciente.usuario?.apellido || ''}`.trim()
+      : `Paciente #${id}`;
   }
 
   registrarCobro() {
     this.calcularTotales();
 
-    if (this.nuevaFactura.detalles.some(d => !d.descripcion || d.precioUnitario <= 0)) {
+    const idCita = Number(this.nuevaFactura.citaId);
+    const cita = this.citasDisponibles.find((c) => this.obtenerCitaId(c) === idCita);
+
+    if (!cita) {
+      this.mostrarAlerta('No se puede registrar la factura porque la cita ya no está disponible.', false);
+      return;
+    }
+
+    const pacienteIdCita = Number(cita.pacienteId || cita.paciente?.id);
+
+    if (pacienteIdCita !== Number(this.nuevaFactura.pacienteId)) {
+      this.mostrarAlerta('La cita seleccionada no corresponde al paciente de esta factura.', false);
+      return;
+    }
+
+    const yaTieneFactura = this.facturas.some((factura) =>
+      Number(factura.citaId ?? factura.cita?.id) === idCita
+    );
+
+    if (yaTieneFactura) {
+      this.mostrarAlerta('Esta cita ya tiene una factura registrada.', false);
+      this.cargarDatos();
+      return;
+    }
+
+    if (this.nuevaFactura.detalles.some((d) => !d.descripcion || Number(d.precioUnitario) <= 0 || Number(d.cantidad) <= 0)) {
       this.mostrarAlerta('Todos los campos del detalle deben ser válidos y mayores a 0.', false);
       return;
     }
@@ -187,9 +320,9 @@ export class CobrosFacturacion implements OnInit {
     const fechaJava = hoy.toISOString().slice(0, 19);
 
     const payloadFactura = {
-      citaId: Number(this.nuevaFactura.citaId),
+      citaId: idCita,
       pacienteId: Number(this.nuevaFactura.pacienteId),
-      clinicaId: 1,
+      clinicaId: Number(cita.clinicaId || cita.clinica?.id || this.obtenerClinicaIdDesdeToken()),
       subtotal: this.nuevaFactura.subtotal,
       impuesto: this.nuevaFactura.impuesto,
       total: this.nuevaFactura.total,
@@ -203,13 +336,14 @@ export class CobrosFacturacion implements OnInit {
     };
 
     const headers = this.obtenerHeaders();
+
     this.http.post(`${this.urlBase}/facturas`, payloadFactura, { headers }).subscribe({
       next: () => {
-        this.mostrarAlerta(`¡Factura guardada correctamente como ${this.nuevaFactura.estado}!`, true);
+        this.mostrarAlerta(`Factura guardada correctamente como ${this.nuevaFactura.estado}.`, true);
         this.mostrarFormulario = false;
 
         if (this.nuevaFactura.estado === 'PAGADA') {
-          this.marcarCitaComoPagada(Number(this.nuevaFactura.citaId));
+          this.marcarCitaComoPagada(idCita);
         } else {
           this.cargarDatos();
         }
@@ -221,7 +355,6 @@ export class CobrosFacturacion implements OnInit {
     });
   }
 
-  // MODIFICACIÓN DE ESTADO DESDE EL HISTORIAL (Cambiar de PENDIENTE a PAGADA)
   marcarComoPagadaDesdeHistorial(factura: any) {
     const headers = this.obtenerHeaders();
     const hoy = new Date();
@@ -234,10 +367,10 @@ export class CobrosFacturacion implements OnInit {
       fechaActualizacion: hoy.toISOString().slice(0, 19)
     };
 
-    // Aquí estaba el doble /api/api arruinando todo
     this.http.put(`${this.urlBase}/facturas/${factura.id}`, facturaActualizada, { headers }).subscribe({
       next: () => {
         this.mostrarAlerta(`Factura ${factura.numeroFactura} marcada como PAGADA.`, true);
+
         if (factura.citaId) {
           this.marcarCitaComoPagada(factura.citaId);
         } else {
@@ -262,8 +395,36 @@ export class CobrosFacturacion implements OnInit {
       }
     });
   }
+
   mostrarAlerta(msg: string, esExito: boolean) {
-    esExito ? this.successMensaje = msg : this.errorMensaje = msg;
-    setTimeout(() => { this.successMensaje = ''; this.errorMensaje = ''; }, 4000);
+    if (esExito) {
+      this.successMensaje = msg;
+      this.errorMensaje = '';
+    } else {
+      this.errorMensaje = msg;
+      this.successMensaje = '';
+    }
+
+    setTimeout(() => {
+      this.successMensaje = '';
+      this.errorMensaje = '';
+    }, 4000);
+  }
+
+  private obtenerCitaId(cita: any): number {
+    return Number(cita.id || cita.idCita);
+  }
+
+  private obtenerClinicaIdDesdeToken(): number | null {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const clinicaId = Number(payload.clinicaId);
+      return Number.isFinite(clinicaId) ? clinicaId : null;
+    } catch {
+      return null;
+    }
   }
 }
