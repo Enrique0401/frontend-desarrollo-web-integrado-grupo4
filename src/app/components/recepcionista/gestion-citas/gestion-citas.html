@@ -92,9 +92,7 @@
                 </select>
 
                 @if (mensajeDisponibilidad) {
-                <small class="text-info-disponibilidad">
-                    {{ mensajeDisponibilidad }}
-                </small>
+                <small class="text-info-disponibilidad">{{ mensajeDisponibilidad }}</small>
                 }
             </div>
 
@@ -102,7 +100,6 @@
                 <div class="horarios-header">
                     <div>
                         <h4>Agenda del médico</h4>
-
                         @if (nuevaCita.medicoId) {
                         <p>Horarios y disponibilidad del médico seleccionado.</p>
                         } @else {
@@ -151,8 +148,7 @@
                                         <td>{{ traducirDiaSemana(horario.diaSemana || horario.dia_semana) }}</td>
                                         <td>{{ horario.horaInicio || horario.hora_inicio }}</td>
                                         <td>{{ horario.horaFin || horario.hora_fin }}</td>
-                                        <td>{{ horario.duracionTurnoMinutos || horario.duracion_turno_minutos || '-' }}
-                                            min</td>
+                                        <td>{{ horario.duracionTurnoMinutos || horario.duracion_turno_minutos || '-' }} min</td>
                                     </tr>
                                     } @empty {
                                     <tr>
@@ -228,9 +224,7 @@
                 </div>
 
                 @if (mensajeHorariosMedico) {
-                <div class="horarios-estado advertencia">
-                    {{ mensajeHorariosMedico }}
-                </div>
+                <div class="horarios-estado advertencia">{{ mensajeHorariosMedico }}</div>
                 }
                 }
             </div>
@@ -277,6 +271,42 @@
     }
 
     <div class="table-card">
+        <div class="filtros-citas">
+            <div class="filtro-info">
+                <h4>Listado de citas</h4>
+                <p>{{ etiquetaFiltroCitas }} · Mostrando {{ citas.length }} de {{ todasLasCitas.length }}</p>
+            </div>
+
+            <div class="filtro-actions">
+                <button type="button" class="btn-filtro" [class.activo]="!fechaFiltroCitas"
+                    (click)="mostrarTodasLasCitas()">
+                    Todas
+                </button>
+
+                <button type="button" class="btn-filtro" (click)="filtrarCitasHoy()">
+                    Hoy
+                </button>
+
+                <button type="button" class="btn-filtro" (click)="filtrarCitasManana()">
+                    Mañana
+                </button>
+
+                <button type="button" class="btn-filtro" (click)="filtrarCitasEnDias(7, 'Citas en una semana')">
+                    En 1 semana
+                </button>
+
+                <button type="button" class="btn-filtro" (click)="filtrarCitasEnDias(30, 'Citas en un mes')">
+                    En 1 mes
+                </button>
+
+                <label class="date-filter">
+                    <i class="pi pi-calendar"></i>
+                    <input type="date" [(ngModel)]="fechaFiltroCitas" name="fechaFiltroCitas"
+                        (change)="aplicarFiltroFechaCitasDesdeInput()">
+                </label>
+            </div>
+        </div>
+
         @if (cargando) {
         <div class="spinner-box">
             <i class="pi pi-spin pi-spinner"></i>
@@ -373,7 +403,7 @@
                     <tr>
                         <td colspan="6" class="table-empty">
                             <i class="pi pi-calendar-times"></i>
-                            <p>No existen citas médicas configuradas.</p>
+                            <p>No existen citas médicas para el filtro seleccionado.</p>
                         </td>
                     </tr>
                     }
