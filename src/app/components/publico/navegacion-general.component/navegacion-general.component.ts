@@ -9,6 +9,4 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   templateUrl: './navegacion-general.component.html',
   styleUrl: './navegacion-general.component.scss',
 })
-export class NavegacionGeneralComponent {
-
-}
+export class NavegacionGeneralComponent {}

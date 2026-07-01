@@ -1,9 +1,11 @@
-$primary: #3b82f6;
-$primary-hover: #2563eb;
-$secondary: #1a202c;
-$surface: #ffffff;
-$text-muted: #64748b;
-$border: #e2e8f0;
+$primary: #1FA29F;
+$primary-hover: #1a8c89;
+$secondary: #2c3e50;
+$surface: #eef2f7;
+$text-muted: #7f8c8d;
+$border: rgba(255, 255, 255, 0.5);
+$shadow-dark: rgba(163, 177, 198, 0.5);
+$shadow-light: rgba(255, 255, 255, 0.85);
 
 .dashboard-header {
   margin-bottom: 2rem;
@@ -13,98 +15,116 @@ $border: #e2e8f0;
     font-size: 1.85rem;
     font-weight: 800;
     margin-bottom: 0.4rem;
+    letter-spacing: -0.5px;
   }
 
   p {
     color: $text-muted;
     margin: 0;
+    font-weight: 600;
   }
 }
 
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .metric-card,
 .card {
   background: $surface;
-  border: 1px solid rgba($border, 0.7);
-  border-radius: 18px;
+  border: 1px solid $border;
+  border-radius: 22px;
   padding: 1.5rem;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.035);
+  box-shadow: 8px 8px 18px $shadow-dark, -8px -8px 18px $shadow-light;
+  transition: all 0.3s ease;
 }
 
 .metric-card {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 10px 10px 22px $shadow-dark, -10px -10px 22px $shadow-light;
+  }
 
   .metric-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background: rgba($primary, 0.12);
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: $surface;
     color: $primary;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.4rem;
+    box-shadow: inset 3px 3px 6px $shadow-dark, inset -3px -3px 6px $shadow-light;
+    border: 1px solid rgba(255, 255, 255, 0.4);
   }
 
   p {
     margin: 0;
     color: $text-muted;
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
   h3 {
     margin: 0.25rem 0 0;
     color: $secondary;
-    font-size: 2rem;
+    font-size: 2.1rem;
     font-weight: 800;
+    letter-spacing: -1px;
   }
 
   &.success .metric-icon {
-    background: #dcfce7;
-    color: #166534;
+    color: #27ae60;
   }
 
   &.warning .metric-icon {
-    background: #fef3c7;
-    color: #92400e;
+    color: #f39c12;
   }
 }
 
 .chart-grid {
   display: grid;
   grid-template-columns: 1.4fr 0.8fr;
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .chart-header {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 
   h3 {
     margin: 0;
     color: $secondary;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: 800;
+    letter-spacing: -0.2px;
   }
 
   p {
     margin: 0.35rem 0 0;
     color: $text-muted;
     font-size: 0.9rem;
+    font-weight: 600;
   }
 }
 
 .chart-wrapper {
   height: 330px;
+  padding: 1rem;
+  background: rgba(163, 177, 198, 0.08);
+  border-radius: 20px;
+  box-shadow: inset 3px 3px 6px $shadow-dark, inset -3px -3px 6px $shadow-light;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 
   &.small {
     height: 300px;
@@ -114,21 +134,22 @@ $border: #e2e8f0;
 .dashboard-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .card h3 {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: $secondary;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.2px;
 }
 
 .worker-list {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1rem;
 }
 
 .worker-item {
@@ -136,66 +157,85 @@ $border: #e2e8f0;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-
-  padding: 1rem;
+  padding: 1.1rem;
   border: 1px solid $border;
-  border-radius: 14px;
-  background: #f8fafc;
+  border-radius: 16px;
+  background: $surface;
+  box-shadow: 4px 4px 10px rgba(163, 177, 198, 0.3), -4px -4px 10px $shadow-light;
+  transition: all 0.25s ease;
+
+  &:hover {
+    transform: translateX(3px);
+    box-shadow: inset 2px 2px 5px $shadow-dark, inset -2px -2px 5px $shadow-light;
+  }
 
   strong {
     display: block;
     color: $secondary;
-    font-size: 0.95rem;
+    font-size: 0.98rem;
+    font-weight: 800;
   }
 
   span {
     color: $text-muted;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
+    font-weight: 600;
   }
 }
 
 .badge-status,
 .badge-role {
-  padding: 0.4rem 0.75rem;
+  padding: 0.45rem 0.9rem;
   border-radius: 20px;
   font-size: 0.72rem;
   font-weight: 800;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .badge-status {
   &.active {
-    background: #dcfce7;
-    color: #166534;
+    background: rgba(46, 204, 113, 0.15);
+    color: #27ae60;
+    box-shadow: inset 1px 1px 3px rgba(#27ae60, 0.2);
   }
 
   &.inactive {
-    background: #fee2e2;
-    color: #991b1b;
+    background: rgba(231, 76, 60, 0.15);
+    color: #c0392b;
+    box-shadow: inset 1px 1px 3px rgba(#c0392b, 0.2);
   }
 }
 
 .badge-role {
   background: rgba($primary, 0.12);
-  color: $primary-hover;
+  color: darken($primary, 10%);
+  box-shadow: inset 1px 1px 3px rgba($primary, 0.2);
 }
 
 .specialties-card {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .specialty-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.85rem;
+  gap: 1rem;
 }
 
 .specialty-item {
-  background: #f8fafc;
+  background: $surface;
   border: 1px solid $border;
-  border-radius: 14px;
-  padding: 1rem;
+  border-radius: 16px;
+  padding: 1.1rem;
   display: flex;
   justify-content: space-between;
+  box-shadow: 4px 4px 10px rgba(163, 177, 198, 0.3), -4px -4px 10px $shadow-light;
+  transition: all 0.25s ease;
+
+  &:hover {
+    box-shadow: inset 2px 2px 5px $shadow-dark, inset -2px -2px 5px $shadow-light;
+  }
 
   span {
     color: $secondary;
@@ -203,12 +243,17 @@ $border: #e2e8f0;
   }
 
   strong {
-    color: $primary-hover;
+    color: darken($primary, 10%);
+    font-weight: 800;
   }
 }
 
 .empty-text {
   color: $text-muted;
+  font-weight: 600;
+  font-style: italic;
+  padding: 1rem;
+  text-align: center;
 }
 
 @media (max-width: 992px) {
@@ -217,5 +262,9 @@ $border: #e2e8f0;
   .dashboard-content,
   .specialty-list {
     grid-template-columns: 1fr;
+  }
+
+  .chart-wrapper {
+    height: 300px;
   }
 }

@@ -1,6 +1,4 @@
 <div class="conocenos-layout">
-    <app-navegacion-general></app-navegacion-general>
-
     <main class="contenido-principal">
         
         <section class="hero-section">
@@ -62,8 +60,57 @@
                 </div>
             </div>
         </section>
+
+        <section class="stats-section">
+            <div class="container stats-grid">
+                @for (stat of estadisticas; track stat.label) {
+                    <div class="stat-card">
+                        <strong>{{ stat.valor }}</strong>
+                        <span>{{ stat.label }}</span>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="equipo-section bg-light">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">Nuestro equipo</span>
+                    <h2>Profesionales comprometidos contigo</h2>
+                    <p class="subtitle">Un equipo multidisciplinario de médicos, enfermeras y personal administrativo trabajando juntos por tu bienestar.</p>
+                </div>
+
+                <div class="equipo-grid">
+                    @for (miembro of equipo; track miembro.nombre) {
+                        <div class="equipo-card">
+                            <div class="equipo-avatar">
+                                <i [class]="miembro.icono"></i>
+                            </div>
+                            <h4>{{ miembro.nombre }}</h4>
+                            <span class="cargo">{{ miembro.cargo }}</span>
+                            <p>{{ miembro.descripcion }}</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="timeline-section container">
+            <h2 class="text-center">Nuestra Trayectoria</h2>
+            <p class="text-center subtitle">Hitos que marcan nuestro camino hacia la excelencia en salud.</p>
+
+            <div class="timeline">
+                @for (hito of hitos; track hito.anio) {
+                    <div class="timeline-item">
+                        <div class="timeline-year">{{ hito.anio }}</div>
+                        <div class="timeline-content">
+                            <h4>{{ hito.titulo }}</h4>
+                            <p>{{ hito.descripcion }}</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
         
     </main>
-
-    <app-flecha></app-flecha>
 </div>

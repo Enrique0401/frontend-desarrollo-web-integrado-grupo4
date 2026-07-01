@@ -48,7 +48,13 @@
                     <div class="icon-wrap"><i class="pi pi-user"></i></div>
                     <div class="info-text">
                         <strong>Médico Tratante</strong>
-                        <span>Dr(a). {{ cita.medico?.nombre || 'Por asignar' }} {{ cita.medico?.apellido || '' }}</span>
+                        <span>
+                            Dr(a). {{ cita.medicoNombre || 'Por asignar' }} {{ cita.medicoApellido || '' }}
+                        </span>
+
+                        @if (cita.medicoEspecialidad) {
+                        <small>{{ cita.medicoEspecialidad }}</small>
+                        }
                     </div>
                 </div>
 

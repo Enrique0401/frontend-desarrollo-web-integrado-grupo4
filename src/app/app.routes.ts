@@ -17,9 +17,39 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./components/publico/panel-general.component/panel-general.component').then(
-        (m) => m.PanelGeneralComponent,
+      import('./components/publico/layout-publico/layout-publico').then(
+        (m) => m.LayoutPublicoComponent,
       ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./components/publico/panel-general.component/panel-general.component').then(
+            (m) => m.PanelGeneralComponent,
+          ),
+      },
+      {
+        path: 'personal-medico',
+        loadComponent: () =>
+          import('./components/publico/medicos.component/medicos.component').then(
+            (m) => m.MedicosComponent,
+          ),
+      },
+      {
+        path: 'conocenos',
+        loadComponent: () =>
+          import('./components/publico/conocenos.component/conocenos.component').then(
+            (m) => m.ConocenosComponent,
+          ),
+      },
+      {
+        path: 'contacto',
+        loadComponent: () =>
+          import('./components/publico/contacto.component/contacto.component').then(
+            (m) => m.ContactoComponent,
+          ),
+      },
+    ],
   },
   {
     path: 'iniciar-sesion',
@@ -33,27 +63,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./components/loguin/registro.component/registro.component').then(
         (m) => m.RegistroComponent,
-      ),
-  },
-  {
-    path: 'personal-medico',
-    loadComponent: () =>
-      import('./components/publico/medicos.component/medicos.component').then(
-        (m) => m.MedicosComponent,
-      ),
-  },
-  {
-    path: 'conocenos',
-    loadComponent: () =>
-      import('./components/publico/conocenos.component/conocenos.component').then(
-        (m) => m.ConocenosComponent,
-      ),
-  },
-  {
-    path: 'contacto',
-    loadComponent: () =>
-      import('./components/publico/contacto.component/contacto.component').then(
-        (m) => m.ContactoComponent,
       ),
   },
 

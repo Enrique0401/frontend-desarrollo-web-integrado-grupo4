@@ -27,12 +27,14 @@
 
     @if (!cargando && recetas.length > 0) {
     <div class="recetas-grid">
-
         @for (receta of recetas; track receta.id) {
         <div class="receta-card">
 
             <div class="receta-header">
-                <span class="receta-id"><i class="pi pi-file"></i> Receta N° #{{ receta.id }}</span>
+                <span class="receta-id">
+                    <i class="pi pi-file"></i> Receta médica
+                </span>
+
                 <div class="fecha-emision">
                     <strong>Fecha de Emisión:</strong>
                     <span>{{ formatearFecha(receta.fechaEmision) }}</span>
@@ -45,8 +47,8 @@
                         <i class="pi pi-paperclip icon-blue"></i>
                         <div class="text-group">
                             <strong>Consulta Relacionada</strong>
-                            <span>ID #{{ receta.consulta?.id }} - {{ receta.consulta?.motivoConsulta || 'Atención
-                                Médica' }}</span>
+                            <span>{{ obtenerConsultaVista(receta) }} - {{ obtenerMotivoConsulta(receta) }}</span>
+                            <span>{{ obtenerCitaVista(receta) }}</span>
                         </div>
                     </div>
 
@@ -54,13 +56,15 @@
                         <i class="pi pi-user-md icon-blue"></i>
                         <div class="text-group">
                             <strong>Médico Prescriptor</strong>
-                            <span>Dr(a). {{ receta.medico?.nombre }} {{ receta.medico?.apellido }}</span>
+                            <span>{{ obtenerNombreMedico(receta) }}</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="medicamentos-seccion">
-                    <strong class="seccion-titulo"><i class="pi pi-database"></i> Medicamentos Recetados</strong>
+                    <strong class="seccion-titulo">
+                        <i class="pi pi-database"></i> Medicamentos Recetados
+                    </strong>
 
                     <div class="table-responsive">
                         <table class="medicamentos-tabla">
@@ -73,15 +77,22 @@
                                     <th>Vía Adm.</th>
                                 </tr>
                             </thead>
+
                             <tbody>
-                                @for (med of receta.detalles; track med.id) {
+                                @for (med of receta.detalles; track med.id || $index) {
                                 <tr>
-                                    <td class="txt-comercial">{{ med.medicamento?.nombreComercial || 'Medicamento No
-                                        Encontrado' }}</td>
-                                    <td>{{ med.medicamento?.nombreGenerico }}</td>
-                                    <td>{{ med.medicamento?.concentracion }}</td>
-                                    <td>{{ med.medicamento?.presentacion }}</td>
-                                    <td><span class="via-tag">{{ med.medicamento?.viaAdministracion }}</span></td>
+                                    <td class="txt-comercial">
+                                        {{ med.medicamento?.nombreComercial || med.nombreComercial || 'Medicamento no
+                                        encontrado' }}
+                                    </td>
+                                    <td>{{ med.medicamento?.nombreGenerico || med.nombreGenerico || '-' }}</td>
+                                    <td>{{ med.medicamento?.concentracion || med.concentracion || '-' }}</td>
+                                    <td>{{ med.medicamento?.presentacion || med.presentacion || '-' }}</td>
+                                    <td>
+                                        <span class="via-tag">
+                                            {{ med.medicamento?.viaAdministracion || med.viaAdministracion || '-' }}
+                                        </span>
+                                    </td>
                                 </tr>
 
                                 <tr class="row-dosis">
@@ -89,9 +100,14 @@
                                         <small>
                                             <i class="pi pi-check-circle"
                                                 style="color: #26b8b5; font-size: 0.8rem; margin-right: 0.3rem;"></i>
-                                            <strong>Dosis:</strong> {{ med.dosis }} &nbsp;&nbsp;|&nbsp;&nbsp;
-                                            <strong>Frecuencia:</strong> {{ med.frecuencia }} &nbsp;&nbsp;|&nbsp;&nbsp;
-                                            <strong>Duración:</strong> {{ med.duracion }}
+
+                                            <strong>Dosis:</strong> {{ med.dosis || 'No indicada' }}
+                                            &nbsp;&nbsp;|&nbsp;&nbsp;
+
+                                            <strong>Frecuencia:</strong> {{ formatearFrecuencia(med.frecuencia) }}
+                                            &nbsp;&nbsp;|&nbsp;&nbsp;
+
+                                            <strong>Duración:</strong> {{ formatearDuracion(med.duracion) }}
                                         </small>
                                     </td>
                                 </tr>
@@ -106,10 +122,12 @@
                         <i class="pi pi-info-circle"></i>
                         <strong>Indicaciones del Paciente:</strong>
                     </div>
-                    <p>{{ receta.indicaciones || receta.indicacionesGenerales || 'Tomar los medicamentos según los
-                        horarios establecidos en la consulta.' }}</p>
-                </div>
 
+                    <p>
+                        {{ receta.indicaciones || receta.indicacionesGenerales || 'Tomar los medicamentos según los
+                        horarios establecidos en la consulta.' }}
+                    </p>
+                </div>
             </div>
         </div>
         }
