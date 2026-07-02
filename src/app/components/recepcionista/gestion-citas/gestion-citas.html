@@ -4,7 +4,7 @@
 <div class="gestion-container">
     <div class="action-bar">
         <div class="search-box">
-            <h3><i class="pi pi-calendar-plus text-primary"></i> Control de Agenda Médica</h3>
+            <h3><i class="pi pi-calendar-plus text-primary"></i> Control de Agenda Medica</h3>
         </div>
 
         <button type="button" class="btn-primary" (click)="mostrarFormulario = !mostrarFormulario">
@@ -16,7 +16,7 @@
     @if (mostrarFormulario) {
     <div class="form-card">
         <div class="form-header">
-            <h4>Formulario de Asignación de Citas</h4>
+            <h4>Formulario de Asignacion de Citas</h4>
         </div>
 
         <form (ngSubmit)="registrarCita()" class="grid-form">
@@ -26,7 +26,7 @@
                 <div class="input-with-icon">
                     <i class="pi pi-search"></i>
                     <input type="text" [(ngModel)]="filtroPaciente" name="filtroPaciente" (input)="filtrarPacientes()"
-                        placeholder="Escriba aquí el DNI o nombre para buscar..." autocomplete="off"
+                        placeholder="Escriba aqui el DNI o nombre para buscar..." autocomplete="off"
                         class="input-filtro">
                 </div>
 
@@ -41,8 +41,21 @@
                 </select>
 
                 @if (pacientesFiltrados.length === 0) {
-                <small class="text-error">No se encontró ningún paciente con esos datos.</small>
+                <small class="text-error">No se encontro ningun paciente con esos datos.</small>
                 }
+            </div>
+
+            <div class="form-group">
+                <label>Sede / Clinica <span class="required">*</span></label>
+                <select [(ngModel)]="nuevaCita.clinicaId" name="clinicaId" required (change)="onSedeChange()">
+                    <option value="" disabled selected>Elija una sede...</option>
+
+                    @for (c of clinicas; track c.id || c.idClinica) {
+                    <option [value]="c.id || c.idClinica">
+                        {{ c.nombre }} - {{ c.direccion }}
+                    </option>
+                    }
+                </select>
             </div>
 
             <div class="form-group">
@@ -57,20 +70,7 @@
             </div>
 
             <div class="form-group">
-                <label>Consultorio <span class="required">*</span></label>
-                <select [(ngModel)]="nuevaCita.consultorioId" name="consultorioId" required
-                    (change)="onConsultorioChange()">
-                    <option value="" disabled selected>Elija un consultorio...</option>
-                    @for (c of consultorios; track c.id) {
-                    <option [value]="c.id">
-                        {{ c.nombre || c.numero || c.codigo || ('Consultorio #' + c.id) }}
-                    </option>
-                    }
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Duración <span class="required">*</span></label>
+                <label>Duracion <span class="required">*</span></label>
                 <select [(ngModel)]="nuevaCita.duracionMinutos" name="duracionMinutos" required
                     (change)="onHoraChange()">
                     @for (duracion of duracionesCita; track duracion) {
@@ -79,11 +79,29 @@
                 </select>
             </div>
 
+            <div class="form-group style-picker-container">
+                <label>Fecha de la Cita <span class="required">*</span></label>
+                <div class="picker-input-wrapper">
+                    <i class="pi pi-calendar picker-icon text-primary"></i>
+                    <input type="date" [(ngModel)]="fechaSeleccionada" name="fechaSeleccionada" required
+                        [min]="fechaMinima" (change)="onFechaChange()">
+                </div>
+            </div>
+
+            <div class="form-group style-picker-container">
+                <label>Hora de la Cita <span class="required">*</span></label>
+                <div class="picker-input-wrapper">
+                    <i class="pi pi-clock picker-icon text-orange"></i>
+                    <input type="time" [(ngModel)]="horaSeleccionada" name="horaSeleccionada" required
+                        [min]="horaMinima" (change)="onHoraChange()">
+                </div>
+            </div>
+
             <div class="form-group">
-                <label>Médico disponible <span class="required">*</span></label>
+                <label>Medico disponible <span class="required">*</span></label>
                 <select [(ngModel)]="nuevaCita.medicoId" name="medicoId" required
                     [disabled]="medicosDisponibles.length === 0" (change)="onMedicoChange()">
-                    <option value="" disabled selected>Elija un médico disponible...</option>
+                    <option value="" disabled selected>Elija un medico disponible...</option>
                     @for (m of medicosDisponibles; track m.id) {
                     <option [value]="m.id">
                         Dr(a). {{ m.nombre || m.usuario?.nombre }} {{ m.apellido || m.usuario?.apellido }}
@@ -99,11 +117,11 @@
             <div class="horarios-medico-panel full-width">
                 <div class="horarios-header">
                     <div>
-                        <h4>Agenda del médico</h4>
+                        <h4>Agenda del medico</h4>
                         @if (nuevaCita.medicoId) {
-                        <p>Horarios y disponibilidad del médico seleccionado.</p>
+                        <p>Horarios y disponibilidad del medico seleccionado.</p>
                         } @else {
-                        <p>Selecciona un médico para visualizar su agenda.</p>
+                        <p>Selecciona un medico para visualizar su agenda.</p>
                         }
                     </div>
                 </div>
@@ -111,8 +129,8 @@
                 @if (!nuevaCita.medicoId) {
                 <div class="agenda-empty">
                     <i class="pi pi-calendar-clock"></i>
-                    <strong>No hay médico seleccionado</strong>
-                    <span>La agenda se cargará automáticamente al elegir un médico.</span>
+                    <strong>No hay medico seleccionado</strong>
+                    <span>La agenda se cargara automaticamente al elegir un medico.</span>
                 </div>
                 }
 
@@ -120,7 +138,7 @@
                 <div class="agenda-empty">
                     <i class="pi pi-spin pi-spinner"></i>
                     <strong>Cargando horarios</strong>
-                    <span>Consultando la agenda del médico seleccionado...</span>
+                    <span>Consultando la agenda del medico seleccionado...</span>
                 </div>
                 }
 
@@ -136,7 +154,7 @@
                             <table class="tabla-horarios compacta">
                                 <thead>
                                     <tr>
-                                        <th>Día</th>
+                                        <th>Dia</th>
                                         <th>Inicio</th>
                                         <th>Fin</th>
                                         <th>Turno</th>
@@ -148,7 +166,8 @@
                                         <td>{{ traducirDiaSemana(horario.diaSemana || horario.dia_semana) }}</td>
                                         <td>{{ horario.horaInicio || horario.hora_inicio }}</td>
                                         <td>{{ horario.horaFin || horario.hora_fin }}</td>
-                                        <td>{{ horario.duracionTurnoMinutos || horario.duracion_turno_minutos || '-' }} min</td>
+                                        <td>{{ horario.duracionTurnoMinutos || horario.duracion_turno_minutos || '-' }}
+                                            min</td>
                                     </tr>
                                     } @empty {
                                     <tr>
@@ -229,24 +248,6 @@
                 }
             </div>
 
-            <div class="form-group style-picker-container">
-                <label>Fecha de la Cita <span class="required">*</span></label>
-                <div class="picker-input-wrapper">
-                    <i class="pi pi-calendar picker-icon text-primary"></i>
-                    <input type="date" [(ngModel)]="fechaSeleccionada" name="fechaSeleccionada" required
-                        [min]="fechaMinima" (change)="onFechaChange()">
-                </div>
-            </div>
-
-            <div class="form-group style-picker-container">
-                <label>Hora de la Cita <span class="required">*</span></label>
-                <div class="picker-input-wrapper">
-                    <i class="pi pi-clock picker-icon text-orange"></i>
-                    <input type="time" [(ngModel)]="horaSeleccionada" name="horaSeleccionada" required
-                        [min]="horaMinima">
-                </div>
-            </div>
-
             <div class="form-group">
                 <label>Estado Inicial</label>
                 <select [(ngModel)]="nuevaCita.estado" name="estado">
@@ -256,9 +257,9 @@
             </div>
 
             <div class="form-group full-width">
-                <label>Motivo de la Consulta Médica</label>
+                <label>Motivo de la Consulta Medica</label>
                 <textarea [(ngModel)]="nuevaCita.motivoConsulta" name="motivoConsulta"
-                    placeholder="Describa brevemente los síntomas..."></textarea>
+                    placeholder="Describa brevemente los sintomas..."></textarea>
             </div>
 
             <div class="form-actions full-width">
@@ -288,7 +289,7 @@
                 </button>
 
                 <button type="button" class="btn-filtro" (click)="filtrarCitasManana()">
-                    Mañana
+                    Manana
                 </button>
 
                 <button type="button" class="btn-filtro" (click)="filtrarCitasEnDias(7, 'Citas en una semana')">
@@ -319,7 +320,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Paciente</th>
-                        <th>Médico Especialista</th>
+                        <th>Medico Especialista</th>
                         <th>Fecha y Hora</th>
                         <th>Estado</th>
                         <th>Acciones de Control</th>
@@ -368,7 +369,7 @@
                                 @if (cita.estado === 'EN_ATENCION') {
                                 <button type="button" class="btn-action success"
                                     (click)="cambiarEstadoCita(cita.idCita || cita.id, 'ATENDIDA')"
-                                    title="Finalizar Atención Médica">
+                                    title="Finalizar Atencion Medica">
                                     <i class="pi pi-check-circle"></i>
                                 </button>
                                 }
@@ -388,10 +389,12 @@
                                 </button>
                                 }
 
-                                <!-- <button type="button" class="btn-action void"
+                                <!-- Si quieres volver a mostrar eliminar, descomenta este boton.
+                                <button type="button" class="btn-action void"
                                     (click)="eliminarCita(cita.idCita || cita.id)" title="Eliminar">
                                     <i class="pi pi-trash"></i>
-                                </button> -->
+                                </button>
+                                -->
                             </div>
 
                             <div *ngIf="cita.estado === 'FINALIZADA'" class="estado-finalizado">
@@ -403,7 +406,7 @@
                     <tr>
                         <td colspan="6" class="table-empty">
                             <i class="pi pi-calendar-times"></i>
-                            <p>No existen citas médicas para el filtro seleccionado.</p>
+                            <p>No existen citas medicas para el filtro seleccionado.</p>
                         </td>
                     </tr>
                     }

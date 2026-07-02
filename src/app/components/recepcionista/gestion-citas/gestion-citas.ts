@@ -22,7 +22,7 @@ export class GestionCitas implements OnInit {
   pacientes: any[] = [];
   pacientesFiltrados: any[] = [];
   especialidades: any[] = [];
-  consultorios: any[] = [];
+  clinicas: any[] = [];
   horarios: any[] = [];
 
   medicosBaseEspecialidad: any[] = [];
@@ -53,7 +53,7 @@ export class GestionCitas implements OnInit {
     pacienteId: '',
     especialidadId: '',
     medicoId: '',
-    consultorioId: '',
+    clinicaId: '',
     duracionMinutos: 30,
     fechaHora: '',
     motivoConsulta: '',
@@ -73,7 +73,11 @@ export class GestionCitas implements OnInit {
   private obtenerHeaders(): HttpHeaders {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     let headers = new HttpHeaders();
-    if (token) headers = headers.set('Authorization', `Bearer ${token}`);
+
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
     return headers;
   }
 
@@ -96,21 +100,15 @@ export class GestionCitas implements OnInit {
 
     this.clinicaId = this.obtenerClinicaIdDesdeToken();
 
-    if (!this.clinicaId) {
-      this.mostrarAlerta('No se pudo detectar la clínica del usuario.', false);
-      this.cargando = false;
-      return;
-    }
-
     forkJoin({
       citas: this.http.get<any[]>(`${this.urlBase}/citas`, { headers }),
       medicos: this.http.get<any[]>(`${this.urlBase}/medicos`, { headers }),
       pacientes: this.http.get<any[]>(`${this.urlBase}/pacientes`, { headers }),
       especialidades: this.http.get<any[]>(`${this.urlBase}/especialidades/activas`, { headers }),
-      consultorios: this.http.get<any[]>(`${this.urlBase}/consultorios`, { headers }),
+      clinicas: this.http.get<any[]>(`${this.urlBase}/clinicas`, { headers }),
       horarios: this.http.get<any[]>(`${this.urlBase}/horarios`, { headers })
     }).subscribe({
-      next: ({ citas, medicos, pacientes, especialidades, consultorios, horarios }) => {
+      next: ({ citas, medicos, pacientes, especialidades, clinicas, horarios }) => {
         this.todasLasCitas = this.obtenerArray(citas).sort(
           (a, b) =>
             new Date(b.fechaHora || b.fechaCita || b.fecha || 0).getTime() -
@@ -121,12 +119,12 @@ export class GestionCitas implements OnInit {
         this.pacientes = this.obtenerArray(pacientes);
         this.pacientesFiltrados = [...this.pacientes];
         this.especialidades = this.obtenerArray(especialidades);
+        this.clinicas = this.obtenerArray(clinicas);
         this.horarios = this.obtenerArray(horarios);
 
-        this.consultorios = this.obtenerArray(consultorios).filter((c) => {
-          const clinicaConsultorioId = Number(c.clinicaId ?? c.clinica?.id ?? c.idClinica);
-          return !clinicaConsultorioId || clinicaConsultorioId === this.clinicaId;
-        });
+        if (this.clinicaId) {
+          this.nuevaCita.clinicaId = String(this.clinicaId);
+        }
 
         this.aplicarFiltroFechaCitas();
         this.generarSlotsMedicoSeleccionado();
@@ -135,7 +133,7 @@ export class GestionCitas implements OnInit {
       },
       error: (error) => {
         console.error(error);
-        this.mostrarAlerta('Ocurrió un error al sincronizar con el servidor médico.', false);
+        this.mostrarAlerta('Ocurrio un error al sincronizar con el servidor medico.', false);
         this.cargando = false;
       }
     });
@@ -161,7 +159,7 @@ export class GestionCitas implements OnInit {
   filtrarCitasManana() {
     const fecha = new Date();
     fecha.setDate(fecha.getDate() + 1);
-    this.asignarFiltroPorFecha(fecha, 'Citas de mañana');
+    this.asignarFiltroPorFecha(fecha, 'Citas de manana');
   }
 
   filtrarCitasEnDias(dias: number, etiqueta: string) {
@@ -265,6 +263,18 @@ export class GestionCitas implements OnInit {
     }
   }
 
+  onSedeChange() {
+    this.nuevaCita.medicoId = '';
+    this.medicosBaseEspecialidad = [];
+    this.medicosDisponibles = [];
+    this.mensajeDisponibilidad = '';
+    this.limpiarAgendaMedico();
+
+    if (this.nuevaCita.especialidadId) {
+      this.onEspecialidadChange();
+    }
+  }
+
   onEspecialidadChange() {
     this.nuevaCita.medicoId = '';
     this.medicosBaseEspecialidad = [];
@@ -272,12 +282,19 @@ export class GestionCitas implements OnInit {
     this.mensajeDisponibilidad = '';
     this.limpiarAgendaMedico();
 
-    if (!this.clinicaId || !this.nuevaCita.especialidadId) return;
+    const sedeId = Number(this.nuevaCita.clinicaId);
+
+    if (!sedeId) {
+      this.mensajeDisponibilidad = 'Selecciona una sede para filtrar medicos.';
+      return;
+    }
+
+    if (!this.nuevaCita.especialidadId) return;
 
     const headers = this.obtenerHeaders();
 
     this.http.get<any[]>(
-      `${this.urlBase}/medicos/activos/especialidad-clinica?clinicaId=${this.clinicaId}&especialidadId=${this.nuevaCita.especialidadId}`,
+      `${this.urlBase}/medicos/activos/especialidad-clinica?clinicaId=${sedeId}&especialidadId=${this.nuevaCita.especialidadId}`,
       { headers }
     ).subscribe({
       next: (medicos) => {
@@ -286,7 +303,7 @@ export class GestionCitas implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.mostrarAlerta('No se pudieron cargar los médicos de la especialidad.', false);
+        this.mostrarAlerta('No se pudieron cargar los medicos de la sede y especialidad.', false);
       }
     });
   }
@@ -302,18 +319,21 @@ export class GestionCitas implements OnInit {
     this.generarSlotsMedicoSeleccionado();
   }
 
-  onConsultorioChange() {
-    this.actualizarMedicosDisponibles();
-    this.generarSlotsMedicoSeleccionado();
-  }
-
   onMedicoChange() {
     this.cargarHorariosMedicoSeleccionado();
   }
 
   actualizarMedicosDisponibles() {
     const medicoActual = this.nuevaCita.medicoId;
+    const sedeId = Number(this.nuevaCita.clinicaId);
+
     this.mensajeDisponibilidad = '';
+
+    if (!sedeId) {
+      this.medicosDisponibles = [];
+      this.mensajeDisponibilidad = 'Selecciona una sede para filtrar medicos.';
+      return;
+    }
 
     if (!this.nuevaCita.especialidadId) {
       this.medicosDisponibles = [];
@@ -334,7 +354,7 @@ export class GestionCitas implements OnInit {
 
     if (this.medicosBaseEspecialidad.length === 0) {
       this.medicosDisponibles = [];
-      this.mensajeDisponibilidad = 'No hay médicos activos para esa especialidad.';
+      this.mensajeDisponibilidad = 'No hay medicos activos para esa sede y especialidad.';
       return;
     }
 
@@ -353,7 +373,8 @@ export class GestionCitas implements OnInit {
 
           return {
             medico,
-            disponible: this.medicoAtiendeEnHorarios(horarios, diaSemana, false) &&
+            disponible:
+              this.medicoAtiendeEnHorarios(horarios, diaSemana, false) &&
               !this.medicoTieneCitaCruzada(medicoId)
           };
         })
@@ -374,13 +395,13 @@ export class GestionCitas implements OnInit {
         }
 
         this.mensajeDisponibilidad = this.medicosDisponibles.length === 0
-          ? 'No hay médicos disponibles para esa especialidad, fecha y hora.'
+          ? 'No hay medicos disponibles para esa sede, especialidad, fecha y hora.'
           : '';
       },
       error: (err) => {
         console.error(err);
         this.medicosDisponibles = [];
-        this.mensajeDisponibilidad = 'No se pudo validar la disponibilidad de los médicos.';
+        this.mensajeDisponibilidad = 'No se pudo validar la disponibilidad de los medicos.';
       }
     });
   }
@@ -413,7 +434,7 @@ export class GestionCitas implements OnInit {
     ).pipe(
       map((respuesta) => this.obtenerArray(respuesta)),
       catchError((err) => {
-        console.error('Error cargando horario del médico:', medicoId, diaSemana, err);
+        console.error('Error cargando horario del medico:', medicoId, diaSemana, err);
         return of([]);
       })
     );
@@ -443,9 +464,18 @@ export class GestionCitas implements OnInit {
   private medicoAtiendeEnHorarios(horarios: any[], diaSemana: string, actualizarMensaje: boolean): boolean {
     if (!this.fechaSeleccionada || !this.horaSeleccionada) return false;
 
+    const sedeId = Number(this.nuevaCita.clinicaId);
+
+    if (!sedeId) {
+      if (actualizarMensaje) {
+        this.mensajeDisponibilidad = 'Selecciona una sede para validar el horario del medico.';
+      }
+      return false;
+    }
+
     if (horarios.length === 0) {
       if (actualizarMensaje) {
-        this.mensajeDisponibilidad = `El médico no tiene horario activo para ${diaSemana}.`;
+        this.mensajeDisponibilidad = `El medico no tiene horario activo para ${diaSemana}.`;
       }
       return false;
     }
@@ -458,7 +488,7 @@ export class GestionCitas implements OnInit {
 
       const horarioClinicaId = Number(h.clinicaId ?? h.clinica_id ?? h.clinica?.id ?? h.idClinica);
 
-      if (horarioClinicaId && this.clinicaId && horarioClinicaId !== this.clinicaId) {
+      if (horarioClinicaId && horarioClinicaId !== sedeId) {
         return false;
       }
 
@@ -467,7 +497,7 @@ export class GestionCitas implements OnInit {
 
     if (horariosValidos.length === 0) {
       if (actualizarMensaje) {
-        this.mensajeDisponibilidad = 'El médico tiene horario registrado, pero no está activo o no pertenece a esta clínica.';
+        this.mensajeDisponibilidad = 'El medico tiene horario registrado, pero no pertenece a la sede seleccionada o no esta activo.';
       }
       return false;
     }
@@ -486,7 +516,7 @@ export class GestionCitas implements OnInit {
         .map((h) => `${h.horaInicio ?? h.hora_inicio} - ${h.horaFin ?? h.hora_fin}`)
         .join(', ');
 
-      this.mensajeDisponibilidad = `El médico atiende ${diaSemana}, pero no en esa hora. Horario: ${resumenHorarios}.`;
+      this.mensajeDisponibilidad = `El medico atiende ${diaSemana}, pero no en esa hora. Horario: ${resumenHorarios}.`;
     }
 
     return disponible;
@@ -494,6 +524,7 @@ export class GestionCitas implements OnInit {
 
   cargarHorariosMedicoSeleccionado() {
     const medicoId = Number(this.nuevaCita.medicoId);
+    const sedeId = Number(this.nuevaCita.clinicaId);
 
     this.horariosMedicoSeleccionado = [];
     this.slotsMedicoSeleccionado = [];
@@ -513,8 +544,8 @@ export class GestionCitas implements OnInit {
         this.horariosMedicoSeleccionado = horarios
           .filter((h) => this.horarioEstaActivo(h))
           .filter((h) => {
-            const clinicaHorarioId = Number(h.clinicaId ?? h.clinica?.id ?? h.idClinica);
-            return !clinicaHorarioId || !this.clinicaId || clinicaHorarioId === this.clinicaId;
+            const clinicaHorarioId = Number(h.clinicaId ?? h.clinica_id ?? h.clinica?.id ?? h.idClinica);
+            return !clinicaHorarioId || !sedeId || clinicaHorarioId === sedeId;
           })
           .sort((a, b) => {
             const diaA = this.ordenDiaSemana(a.diaSemana ?? a.dia_semana);
@@ -529,15 +560,15 @@ export class GestionCitas implements OnInit {
           });
 
         if (this.horariosMedicoSeleccionado.length === 0) {
-          this.mensajeHorariosMedico = 'Este médico no tiene horarios registrados.';
+          this.mensajeHorariosMedico = 'Este medico no tiene horarios registrados para la sede seleccionada.';
         }
 
         this.generarSlotsMedicoSeleccionado();
         this.cargandoHorariosMedico = false;
       },
       error: (err) => {
-        console.error('Error al cargar horarios del médico:', err);
-        this.mensajeHorariosMedico = 'No se pudieron cargar los horarios del médico.';
+        console.error('Error al cargar horarios del medico:', err);
+        this.mensajeHorariosMedico = 'No se pudieron cargar los horarios del medico.';
         this.cargandoHorariosMedico = false;
       }
     });
@@ -582,9 +613,9 @@ export class GestionCitas implements OnInit {
     });
 
     if (horariosDelDia.length === 0) {
-      this.mensajeHorariosMedico = `El médico seleccionado no atiende el día ${diaSeleccionado}.`;
+      this.mensajeHorariosMedico = `El medico seleccionado no atiende el dia ${diaSeleccionado}.`;
     } else if (this.slotsMedicoSeleccionado.length === 0) {
-      this.mensajeHorariosMedico = 'No hay bloques disponibles para la duración seleccionada.';
+      this.mensajeHorariosMedico = 'No hay bloques disponibles para la duracion seleccionada.';
     } else {
       this.mensajeHorariosMedico = '';
     }
@@ -644,38 +675,12 @@ export class GestionCitas implements OnInit {
     });
   }
 
-  private consultorioTieneCitaCruzada(): boolean {
-    const inicioNueva = new Date(`${this.fechaSeleccionada}T${this.horaSeleccionada}:00`);
-    const finNueva = new Date(
-      inicioNueva.getTime() + Number(this.nuevaCita.duracionMinutos) * 60_000
-    );
-
-    return this.todasLasCitas.some((cita) => {
-      const estado = (cita.estado || '').toUpperCase();
-
-      if (estado === 'CANCELADA' || estado === 'NO_ASISTIO') return false;
-
-      const consultorioCitaId = Number(cita.consultorioId ?? cita.consultorio?.id ?? cita.idConsultorio);
-
-      if (consultorioCitaId !== Number(this.nuevaCita.consultorioId)) return false;
-
-      const inicioExistente = new Date(cita.fechaHora || cita.fechaCita || cita.fecha);
-      if (Number.isNaN(inicioExistente.getTime())) return false;
-
-      const finExistente = cita.fechaFin
-        ? new Date(cita.fechaFin)
-        : new Date(inicioExistente.getTime() + Number(this.nuevaCita.duracionMinutos) * 60_000);
-
-      return inicioNueva < finExistente && finNueva > inicioExistente;
-    });
-  }
-
   registrarCita() {
     if (
       !this.nuevaCita.pacienteId ||
       !this.nuevaCita.especialidadId ||
       !this.nuevaCita.medicoId ||
-      !this.nuevaCita.consultorioId ||
+      !this.nuevaCita.clinicaId ||
       !this.fechaSeleccionada ||
       !this.horaSeleccionada
     ) {
@@ -696,15 +701,10 @@ export class GestionCitas implements OnInit {
       next: (medicoDisponible) => {
         if (!medicoDisponible) {
           this.mostrarAlerta(
-            this.mensajeDisponibilidad || 'El médico seleccionado no está disponible en ese horario.',
+            this.mensajeDisponibilidad || 'El medico seleccionado no esta disponible en ese horario.',
             false
           );
           this.actualizarMedicosDisponibles();
-          return;
-        }
-
-        if (this.consultorioTieneCitaCruzada()) {
-          this.mostrarAlerta('El consultorio seleccionado ya está ocupado en ese horario.', false);
           return;
         }
 
@@ -712,7 +712,7 @@ export class GestionCitas implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.mostrarAlerta('No se pudo validar el horario del médico.', false);
+        this.mostrarAlerta('No se pudo validar el horario del medico.', false);
       }
     });
   }
@@ -726,11 +726,11 @@ export class GestionCitas implements OnInit {
     const payloadCita = {
       pacienteId: Number(this.nuevaCita.pacienteId),
       medicoId: Number(this.nuevaCita.medicoId),
-      clinicaId: this.clinicaId,
-      consultorioId: Number(this.nuevaCita.consultorioId),
+      clinicaId: Number(this.nuevaCita.clinicaId),
+      consultorioId: null,
       fechaHora: this.formatearFechaHoraBackend(dateInicio),
       fechaFin: this.formatearFechaHoraBackend(dateFin),
-      motivo: this.nuevaCita.motivoConsulta || 'Consulta médica',
+      motivo: this.nuevaCita.motivoConsulta || 'Consulta medica',
       notas: '',
       estado: this.nuevaCita.estado
     };
@@ -739,7 +739,7 @@ export class GestionCitas implements OnInit {
 
     this.http.post(`${this.urlBase}/citas`, payloadCita, { headers }).subscribe({
       next: () => {
-        this.mostrarAlerta('Cita médica agendada correctamente.', true);
+        this.mostrarAlerta('Cita medica agendada correctamente.', true);
         this.mostrarFormulario = false;
         this.resetFormulario();
         this.cargarDatosEstructurales();
@@ -780,7 +780,7 @@ export class GestionCitas implements OnInit {
       ? `#${idCita} - ${this.getNombrePaciente(cita.pacienteId)}`
       : `#${idCita}`;
 
-    if (!confirm(`¿Estás seguro de eliminar la cita ${detalle}? Esta acción intentará borrarla de la base de datos.`)) {
+    if (!confirm(`Estas seguro de eliminar la cita ${detalle}? Esta accion intentara borrarla de la base de datos.`)) {
       return;
     }
 
@@ -814,7 +814,7 @@ export class GestionCitas implements OnInit {
   mostrarAlerta(msg: string, esExito: boolean) {
     this.messageService.add({
       severity: esExito ? 'success' : 'error',
-      summary: esExito ? 'Operación exitosa' : 'Error',
+      summary: esExito ? 'Operacion exitosa' : 'Error',
       detail: msg,
       life: 5000,
       closable: true
@@ -826,7 +826,7 @@ export class GestionCitas implements OnInit {
       pacienteId: '',
       especialidadId: '',
       medicoId: '',
-      consultorioId: '',
+      clinicaId: this.clinicaId ? String(this.clinicaId) : '',
       duracionMinutos: 30,
       fechaHora: '',
       motivoConsulta: '',
@@ -879,10 +879,10 @@ export class GestionCitas implements OnInit {
     const dias: Record<string, string> = {
       MONDAY: 'Lunes',
       TUESDAY: 'Martes',
-      WEDNESDAY: 'Miércoles',
+      WEDNESDAY: 'Miercoles',
       THURSDAY: 'Jueves',
       FRIDAY: 'Viernes',
-      SATURDAY: 'Sábado',
+      SATURDAY: 'Sabado',
       SUNDAY: 'Domingo'
     };
 
