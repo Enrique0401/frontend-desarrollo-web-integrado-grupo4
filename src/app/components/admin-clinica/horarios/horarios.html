@@ -93,7 +93,13 @@
           <tr>
             <td>
               <div class="info-cell">
-                <strong>{{ nombreMedico(horario.medicoId) }}</strong>
+                <strong>
+                  {{
+                    horario.medicoNombre && horario.medicoApellido
+                      ? horario.medicoNombre + ' ' + horario.medicoApellido
+                      : nombreMedico(horario.medicoId)
+                  }}
+                </strong>
                 <span>
                   <i class="pi pi-user me-1"></i>
                   Médico de la clínica
@@ -271,7 +277,6 @@
       </form>
     </div>
   </div>
-  
 }
 @if (mostrarModalEliminar()) {
   <div class="modal-backdrop-custom">
@@ -284,9 +289,16 @@
 
       <p>
         ¿Seguro que deseas eliminar el horario de
-        <strong>{{ nombreMedico(horarioParaEliminar()?.medicoId) }}</strong>
+        <strong>
+          {{
+            horarioParaEliminar()?.medicoNombre && horarioParaEliminar()?.medicoApellido
+              ? horarioParaEliminar()?.medicoNombre + ' ' + horarioParaEliminar()?.medicoApellido
+              : nombreMedico(horarioParaEliminar()?.medicoId)
+          }}
+        </strong>
         del día
-        <strong>{{ nombreDia(horarioParaEliminar()?.diaSemana) }}</strong>?
+        <strong>{{ nombreDia(horarioParaEliminar()?.diaSemana) }}</strong
+        >?
       </p>
 
       <div class="delete-detail">

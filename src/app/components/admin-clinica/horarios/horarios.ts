@@ -11,7 +11,7 @@ import { MedicoService } from '../../../services/medico/medico';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './horarios.html',
-  styleUrl: './horarios.scss'
+  styleUrl: './horarios.scss',
 })
 export class Horarios implements OnInit {
   mostrarModal = signal(false);
@@ -35,13 +35,13 @@ export class Horarios implements OnInit {
     horaInicio: ['', [Validators.required]],
     horaFin: ['', [Validators.required]],
     duracionTurnoMinutos: [30, [Validators.required, Validators.min(10)]],
-    activo: [true]
+    activo: [true],
   });
 
   constructor(
     private horarioService: HorarioService,
     private usuarioService: UsuarioService,
-    private medicoService: MedicoService
+    private medicoService: MedicoService,
   ) {}
 
   ngOnInit(): void {
@@ -80,34 +80,34 @@ export class Horarios implements OnInit {
 
         this.cargarDatos(usuario.clinicaId);
       },
-      error: (err) => console.error('Error al cargar usuario:', err)
+      error: (err) => console.error('Error al cargar usuario:', err),
     });
   }
 
   cargarDatos(clinicaId: number): void {
-  this.medicoService.obtenerPorClinica(clinicaId).subscribe({
-    next: (medicos) => {
-      console.log('MEDICOS:', medicos); // <-- Agrega esta línea
+    this.medicoService.obtenerPorClinica(clinicaId).subscribe({
+      next: (medicos) => {
+        console.log('MEDICOS:', medicos); // <-- Agrega esta línea
 
-      this.medicos.set(medicos);
-      this.cargarHorarios(clinicaId);
-    },
-    error: (err) => console.error('Error al cargar médicos:', err)
-  });
-}
+        this.medicos.set(medicos);
+        this.cargarHorarios(clinicaId);
+      },
+      error: (err) => console.error('Error al cargar médicos:', err),
+    });
+  }
 
   cargarHorarios(clinicaId: number): void {
     this.horarioService.obtenerHorarios().subscribe({
       next: (datos) => {
-        const idsMedicosClinica = this.medicos().map(m => m.id ?? m.idMedico);
+        const idsMedicosClinica = this.medicos().map((m) => m.id ?? m.idMedico);
 
-        const horariosClinica = datos.filter(h =>
-          h.clinicaId === clinicaId || idsMedicosClinica.includes(h.medicoId)
+        const horariosClinica = datos.filter(
+          (h) => h.clinicaId === clinicaId || idsMedicosClinica.includes(h.medicoId),
         );
 
         this.horarios.set(horariosClinica);
       },
-      error: (err) => console.error('Error al cargar horarios:', err)
+      error: (err) => console.error('Error al cargar horarios:', err),
     });
   }
 
@@ -115,15 +115,11 @@ export class Horarios implements OnInit {
     const texto = this.terminoBusqueda().toLowerCase().trim();
     const dia = this.filtroDia();
 
-    return this.horarios().filter(h => {
-      const medico = this.nombreMedico(h.medicoId).toLowerCase();
+    return this.horarios().filter((h) => {
+      const medico = this.nombreMedico(h.medicoId, h).toLowerCase();
+      const coincideTexto = medico.includes(texto) || h.diaSemana?.toLowerCase().includes(texto);
 
-      const coincideTexto =
-        medico.includes(texto) ||
-        h.diaSemana?.toLowerCase().includes(texto);
-
-      const coincideDia =
-        dia === 'TODOS' || h.diaSemana === dia;
+      const coincideDia = dia === 'TODOS' || h.diaSemana === dia;
 
       return coincideTexto && coincideDia;
     });
@@ -131,21 +127,21 @@ export class Horarios implements OnInit {
 
   totalHorarios = computed(() => this.horarios().length);
 
-  horariosActivos = computed(() =>
-    this.horarios().filter(h => h.activo === true).length
-  );
+  horariosActivos = computed(() => this.horarios().filter((h) => h.activo === true).length);
 
-  horariosInactivos = computed(() =>
-    this.horarios().filter(h => h.activo === false).length
-  );
+  horariosInactivos = computed(() => this.horarios().filter((h) => h.activo === false).length);
 
   totalMedicosConHorario = computed(() => {
-    const ids = new Set(this.horarios().map(h => h.medicoId));
+    const ids = new Set(this.horarios().map((h) => h.medicoId));
     return ids.size;
   });
 
-  nombreMedico(medicoId: number): string {
-    const medico = this.medicos().find(m => (m.id ?? m.idMedico) === medicoId);
+  nombreMedico(medicoId: number, horario?: any): string {
+    if (horario?.medicoNombre || horario?.medicoApellido) {
+      return `${horario.medicoNombre ?? ''} ${horario.medicoApellido ?? ''}`.trim();
+    }
+
+    const medico = this.medicos().find((m) => (m.id ?? m.idMedico) === medicoId);
 
     if (!medico) return `Médico ID ${medicoId}`;
 
@@ -168,7 +164,7 @@ export class Horarios implements OnInit {
       THURSDAY: 'Jueves',
       FRIDAY: 'Viernes',
       SATURDAY: 'Sábado',
-      SUNDAY: 'Domingo'
+      SUNDAY: 'Domingo',
     };
 
     return dias[dia] ?? dia;
@@ -193,7 +189,7 @@ export class Horarios implements OnInit {
       horaInicio: '',
       horaFin: '',
       duracionTurnoMinutos: 30,
-      activo: true
+      activo: true,
     });
 
     this.mostrarModal.set(true);
@@ -213,7 +209,7 @@ export class Horarios implements OnInit {
       horaInicio: horario.horaInicio,
       horaFin: horario.horaFin,
       duracionTurnoMinutos: horario.duracionTurnoMinutos,
-      activo: horario.activo
+      activo: horario.activo,
     });
 
     this.mostrarModal.set(true);
@@ -240,7 +236,7 @@ export class Horarios implements OnInit {
       horaInicio: this.form.value.horaInicio,
       horaFin: this.form.value.horaFin,
       duracionTurnoMinutos: this.form.value.duracionTurnoMinutos,
-      activo: this.form.value.activo
+      activo: this.form.value.activo,
     };
 
     const peticion = this.horarioEditandoId()
@@ -256,7 +252,7 @@ export class Horarios implements OnInit {
       error: (err) => {
         console.error('Error al guardar horario:', err);
         alert('No se pudo guardar el horario.');
-      }
+      },
     });
   }
 
@@ -265,7 +261,7 @@ export class Horarios implements OnInit {
 
     const body = {
       ...horario,
-      activo: !horario.activo
+      activo: !horario.activo,
     };
 
     this.horarioService.actualizarHorario(horario.id, body).subscribe({
@@ -274,7 +270,7 @@ export class Horarios implements OnInit {
           this.cargarDatos(usuario.clinicaId);
         }
       },
-      error: (err) => console.error('Error al cambiar estado:', err)
+      error: (err) => console.error('Error al cambiar estado:', err),
     });
   }
 
@@ -305,7 +301,7 @@ export class Horarios implements OnInit {
       error: (err) => {
         console.error('Error al eliminar horario:', err);
         alert('No se pudo eliminar el horario.');
-      }
+      },
     });
   }
 
