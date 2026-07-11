@@ -61,6 +61,6 @@ export class MisArchivosClinicos implements OnInit {
     if (t.includes('jpg') || t.includes('png') || t.includes('jpeg')) return 'pi-image';
     if (t.includes('doc') || t.includes('word')) return 'pi-file-word';
     if (t.includes('xls') || t.includes('excel')) return 'pi-file-excel';
-    return 'pi-file'; // Ícono por defecto
+    return 'pi-file'; 
   }
 }
