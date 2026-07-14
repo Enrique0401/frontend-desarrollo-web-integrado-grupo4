@@ -52,7 +52,7 @@ export class IniciarSesionComponent {
 
     this.authService.login(credenciales).subscribe({
       next: (respuesta: AuthResponse) => {
-        console.log('Conexion exitosa a la BD! Token:', respuesta.token);
+        //console.log('Conexion exitosa a la BD! Token:', respuesta.token);
         console.log('El rol detectado es:', respuesta.rol);
 
         this.cargando.set(false);
