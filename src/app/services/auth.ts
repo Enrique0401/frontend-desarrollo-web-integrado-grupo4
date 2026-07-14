@@ -1,34 +1,25 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../environments/environment';
-import { Observable } from 'rxjs';
+import { HttpInterceptorFn } from '@angular/common/http';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class AuthService {
-  private apiUrl = environment.apiUrl; 
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const esRutaAuth =
+    req.url.includes('/api/auth/login') ||
+    req.url.includes('/api/auth/register');
 
-  constructor(private http: HttpClient) { }
-
-  login(credenciales: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/login`, credenciales);
+  if (esRutaAuth) {
+    return next(req);
   }
 
-  registrar(datos: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/register`, datos);
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    return next(req);
   }
 
-  // MÉTODO NUEVO: Para obtener los datos del usuario logueado usando su token
-  getPerfil(): Observable<any> {
-    const token = localStorage.getItem('token');
-    
-    // Configuramos los headers con el token JWT
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
+  const requestConToken = req.clone({
+    setHeaders: {
+      Authorization: `Bearer ${token}`
+    }
+  });
 
-    // Llamamos al endpoint /me que configuramos en tu AuthController
-    return this.http.get(`${this.apiUrl}/auth/me`, { headers });
-  }
-}
+  return next(requestConToken);
+};
