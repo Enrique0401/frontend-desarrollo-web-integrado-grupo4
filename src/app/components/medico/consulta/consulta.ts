@@ -232,6 +232,7 @@ export class Consulta implements OnInit {
 
     this.consultaService.obtenerPorCita(idCita).subscribe({
       next: (consultaExistente) => {
+        console.log("CONSULTA ENVIADA:", consultaBody);
         this.consultaService.actualizarConsulta(consultaExistente.id, consultaBody).subscribe({
           next: (consultaActualizada) => this.guardarRecetaYCompletar(consultaActualizada, citaActual),
           error: (err) => {
