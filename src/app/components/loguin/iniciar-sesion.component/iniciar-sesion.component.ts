@@ -82,40 +82,18 @@ export class IniciarSesionComponent {
   }
 
   private redirigirPorRol(rol: string): void {
-    const rolNormalizado = (rol || '').toUpperCase();
+    const rolNormalizado = (rol || '').toUpperCase().replace('ROLE_', '');
 
-    switch (rolNormalizado) {
-      case 'SUPER_ADMIN':
-        this.router.navigate(['/panel/super-admin']);
-        break;
+    const rutasPorRol: Record<string, string> = {
+      SUPER_ADMIN: '/panel/super-admin/dashboard',
+      ADMIN_CLINICA: '/panel/admin-clinica/dashboard',
+      RECEPCIONISTA: '/panel/recepcion/panel-principal',
+      MEDICO: '/panel/medico/dashboard',
+      ENFERMERA: '/panel/enfermeria/sala-espera',
+      PACIENTE: '/panel/paciente/datos-paciente',
+      PERSONAL_ADMINISTRATIVO: '/panel/recepcion/panel-principal'
+    };
 
-      case 'ADMIN_CLINICA':
-        this.router.navigate(['/panel/admin-clinica']);
-        break;
-
-      case 'RECEPCIONISTA':
-        this.router.navigate(['/panel/recepcion/panel-principal']);
-        break;
-
-      case 'ENFERMERA':
-        this.router.navigate(['/panel/enfermeria/sala-espera']);
-        break;
-
-      case 'MEDICO':
-        this.router.navigate(['/panel/medico/consulta']);
-        break;
-
-      case 'PACIENTE':
-        this.router.navigate(['/panel/paciente/datos-paciente']);
-        break;
-
-      case 'PERSONAL_ADMINISTRATIVO':
-        this.router.navigate(['/panel/personal-administrativo']);
-        break;
-
-      default:
-        this.router.navigate(['/']);
-        break;
-    }
+    this.router.navigateByUrl(rutasPorRol[rolNormalizado] || '/');
   }
 }
